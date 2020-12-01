@@ -8,6 +8,9 @@
 ## It therefore still needs to be polished off.
 ## It's main functionality (transmitting data over the IPFS Network have been properly tested, though)
 
+## Configure IPFS to enable all this:
+## ipfs config --json Experimental.Libp2pStreamMounting true
+
 ## TODO:
 ##      terminate Listeners (currently not working due to TCP sockets)
 ##      handle interrupted communication
