@@ -11,6 +11,7 @@
 ## TODO:
 ##      terminate Listeners (currently not working due to TCP sockets)
 ##      handle interrupted communication
+##      get rid of the delay periods in Transmission. Why are they necessary in TCP? I didn't need them in the UDP Version
 
 import socket
 import threading
@@ -47,12 +48,12 @@ def TransmitData(data, peerID, listener_name, buffer_size = def_buffer_size):
     Transmits the input data (a bytearray of any length) to the computer with the specified network address.
 
     Usage:
-        transmitter = Send("data to transmit".encode("utf-8"), "127.0.0.1", 8888, 2048)    # transmits "data to transmit" to the computer 127.0.0.1:8888 at a buffersize of 1024 bytes
+        transmitter = Send("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2", 2048)    # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
 
     Parameters:
         bytearray data: the data to be transmitted to the receiver
-        string peerID: the IP address of [the recipient computer to send the data to]
-        int port: the port on the recipient computer to send the data to (on which the TransmissionListener is listening for transmission requests)
+        string peerID: the IPFS peer ID of [the recipient computer to send the data to]
+        string listener_name: the name of the IPFS-Data-Transmission-Listener instance running on the recipient computer to send the data to (allows distinguishing multiple IPFS-Data-Transmission-Listeners running on the same computer for different applications)
         int buffer_size: the size in bytes of the buffers (data packets which the trnsmitteddata is divided up into) (default 1024 bytes)
 
     Returns:
@@ -71,16 +72,15 @@ def ListenForTransmissions(listener_name, eventhandler):
             print("Received data from  " + sender_peerID)
             print(data.decode("utf-8"))
 
-        listener = ReceiveTransmissions(OnReceive, 0) # 0 means the port should be automatically assigned by the operating system, the chosen port being returned as a field of the returned Listener object
-        listener_port = listener.port   # retireving the automatically assigned port
+        # listening with a Listener-Name of "applicationNo2"
+        listener = ReceiveTransmissions("applicationNo2", OnReceive)
 
         # When we no longer want to receive any transmissions:
         listener.Terminate()
 
     Parameters:
-        bytearray data: the data to be transmitted to the receiver
-        string peerID: the IP address of [the recipient computer to send the data to]
-        int port (optional, auto-assigned by OS if not specified): the port on the recipient computer to send the data to (on which the TransmissionListener is listening for transmission requests)
+        string listener_name: the name of this TransmissionListener (chosen by user, allows distinguishing multiple IPFS-Data-Transmission-Listeners running on the same computer for different applications)
+        function(bytearray data, string peerID) eventhandler: the function that should be called when a transmission of data is received
     """
     # This function itself is called to process the transmission request buffer sent by the transmission sender.
     def ReceiveTransmissionRequests(data, addr):
