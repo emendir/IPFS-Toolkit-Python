@@ -7,3 +7,4 @@ with open("/home/elborth/Desktop/00.jpg", "rb") as conff:
     data = conff.read()
 
 IPFS_DataTransmission.TransmitData(data, "12D3KooWQzQAs2tCuY6P9V3qaKKars17JpaLkvEaHi5RBsUXVj94", "test application")
+print("SENT")
