@@ -38,7 +38,7 @@ IPFS_API.Start()
 # -------------- Settings ---------------------------------------------------------------------------------------------------
 print_log = True # whether or not to print debug in output terminal
 
-delay_1 = 0.05
+delay_1 = 0.03
 delay_2 = 0.05
 
 def_buffer_size = 1024  # the communication buffer size
@@ -63,7 +63,11 @@ def TransmitData(data, peerID, listener_name, buffer_size = def_buffer_size):
     Returns:
         Transmitter transmitter: the object that contains all the machinery used to transmit the data to the receiver, from which the transmission status will in the future be able to get called from
     """
-    return Transmitter(data, peerID, listener_name, buffer_size)
+    if IPFS_API.FindPeer(peerID):
+        return Transmitter(data, peerID, listener_name, buffer_size)
+    else:
+        if print_log:
+            print("Could not find the specified peer on the IPFS network.")
 
 # Sets itself up to receive data transmissions, transmitted by the sender using the TransmitData function.
 # Returns the Listener object so that receiving the data transmissions can be stopped by calling listener.Terminate().
@@ -289,11 +293,10 @@ class Listener(threading.Thread):
             print("Closed listener.")
 
     def StatusMonitor(self):
-
         while(True):
             if self.terminate:
                 break
-            time.sleep(self.monitoring_interval/3)
+            time.sleep(self.monitoring_interval)
             if(datetime.utcnow() - self.last_time_recv).total_seconds() > self.monitoring_interval:
                 self.status_eventhandler((datetime.utcnow() - self.last_time_recv).total_seconds())
 
