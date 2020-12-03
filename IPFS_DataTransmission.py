@@ -21,6 +21,7 @@ import threading
 from threading import Thread
 import _thread
 import multiprocessing
+from datetime import datetime
 import time
 import traceback
 from datetime import datetime
@@ -38,7 +39,7 @@ IPFS_API.Start()
 print_log = True # whether or not to print debug in output terminal
 
 delay_1 = 0.05
-delay_2 = 0.5
+delay_2 = 0.05
 
 def_buffer_size = 1024  # the communication buffer size
 free_sending_ports = [(x, False) for x in range(20001, 20500)]
@@ -209,8 +210,8 @@ def CloseSendingConnection(peerID, protocol):
 def CloseListeningConnection(protocol, port):
     IPFS_API.ClosePortForwarding(protocol="/x/"+protocol, targetaddress = f"/ip4/127.0.0.1/tcp/{port}")
 
-def ListenToBuffers(eventhandler, port = 0, buffer_size = def_buffer_size):
-    return Listener(eventhandler, port, buffer_size)
+def ListenToBuffers(eventhandler, port = 0, buffer_size = def_buffer_size, monitoring_interval = 5, status_eventhandler = None):
+    return Listener(eventhandler, port, buffer_size, monitoring_interval, status_eventhandler)
 
 
 class Listener(threading.Thread):
@@ -239,7 +240,8 @@ class Listener(threading.Thread):
     buffer_size = def_buffer_size
     terminate = False
     sock = None
-    def __init__(self, eventhandler, port = 0, buffer_size = def_buffer_size):
+    last_time_recv = datetime.utcnow()
+    def __init__(self, eventhandler, port = 0, buffer_size = def_buffer_size, monitoring_interval = 5, status_eventhandler = None):
         threading.Thread.__init__(self)
         self.port = port
 
@@ -251,7 +253,11 @@ class Listener(threading.Thread):
         self.sock.bind(("127.0.0.1", self.port))
         self.port = self.sock.getsockname()[1]   # in case it had been 0 (requesting automatic port assiggnent)
 
-
+        if status_eventhandler != None:
+            self.status_eventhandler = status_eventhandler
+            self.monitoring_interval = monitoring_interval
+            self.last_time_recv = datetime.utcnow()
+            self.status_monitor_thread = _thread.start_new_thread(self.StatusMonitor, ())
 
         self.start()
 
@@ -268,6 +274,7 @@ class Listener(threading.Thread):
 
         while True:
             data = conn.recv(self.buffer_size)
+            self.last_time_recv = datetime.utcnow()
             if(self.terminate == True):
                 break
             if not data: break
@@ -280,6 +287,15 @@ class Listener(threading.Thread):
         CloseListeningConnection(str(self.port), self.port)
         if print_log:
             print("Closed listener.")
+
+    def StatusMonitor(self):
+
+        while(True):
+            if self.terminate:
+                break
+            time.sleep(self.monitoring_interval/3)
+            if(datetime.utcnow() - self.last_time_recv).total_seconds() > self.monitoring_interval:
+                self.status_eventhandler((datetime.utcnow() - self.last_time_recv).total_seconds())
 
 
     # thread =  multiprocessing.Process(target = ListenIndefinately, args= ())
@@ -296,6 +312,7 @@ class Listener(threading.Thread):
 
 class Listener2(threading.Thread):
     """
+    Listener for TransmissionRequests
     Listens on the specified port, forwarding all data buffers received to the provided eventhandler.
 
     Usage:
@@ -427,7 +444,7 @@ class Transmitter:
 
 
 
-        self.listener = ListenToBuffers(self.TransmissionReplyListener)
+        self.listener = ListenToBuffers(self.TransmissionReplyListener, status_eventhandler = self.NoCommunication)
         if print_log:
             print(self.listener.port)
         self.our_port = self.listener.port
@@ -436,30 +453,30 @@ class Transmitter:
         # self.listener, self.our_port = ListenToBuffers(0, self.TransmissionReplyListener)
 
         # sending transmission request, telling the receiver our code for the transmission, our listening port on which they should send confirmation buffers, and the buffer size to use
+        self.SendTransmissionRequest()
+
+
+    def SendTransmissionRequest(self):
+        # sending transmission request, telling the receiver our code for the transmission, our listening port on which they should send confirmation buffers, and the buffer size to use
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(peerID)
-        port = CreateSendingConnection(peerID, listener_name)
-        print(port)
+        port = CreateSendingConnection(self.peerID, self.listener_name)
         sock.connect(("127.0.0.1", port))
         sock.send(AddIntegrityByteToBuffer(IPFS_API.MyID().encode() + bytearray([255]) + ToB255No0s(self.our_port) + bytearray([0]) + ToB255No0s(self.buffer_size)))
         sock.close()
         if print_log:
             print("Sent transmission request.")
 
-
-
-    def sendbuffer(self, buffer, port):
+    def sendbuffer(self, buffer):
         # Adding an integrity byte that equals the sum of all the bytes in the buffer modulus 256
         # to be able to detect data corruption:
-        sum = 0
-        for byte in buffer:
-            sum+= byte
-            if sum > 65000:# if the sum is reaching the upper limit of an unsigned 16-bit integer
-                sum = sum%256   # reduce the sum to its modulus256 so that the calculation above doesn't take too much processing power in later iterations of this for loop
-        buffer = bytearray([sum%256]) + buffer  # adding the integrity byte to the start of the buffer
-
-        SendBuffer(buffer, self.peerID, port)
-
+        try:
+            self.transmission_socket.send(AddIntegrityByteToBuffer(buffer))
+            return True
+        except:
+            if print_log:
+                print("Communication to receiver broken down.")
+            self.FinishedTransmission(False)
+            return False
 
 
 
@@ -479,17 +496,18 @@ class Transmitter:
             position += (self.buffer_size - len(buffer_metadata) - 1)
 
             buffer = buffer_metadata + buffer_content
-            self.transmission_socket.send(AddIntegrityByteToBuffer(buffer))
+            if not self.sendbuffer(buffer):
+                return   # aborting transmission if communication breaks down
             self.sent_buffers.append((buffer_No, buffer))    # adding the buffer to the list of sent buffers, just in case we have to resend it
             buffer_No += 1
             time.sleep(delay_1)
 
         time.sleep(delay_2)
-        endbuffer = AddIntegrityByteToBuffer("finished transmission".encode("utf-8"))
-        print(endbuffer)
-        self.transmission_socket.send(endbuffer)
-        if print_log:
-            print("sent all data to transmit")
+        # sending last buffer saying transmission is finished
+        if self.sendbuffer("finished transmission".encode("utf-8")):    # if sending the buffer succeeds
+            self.sent_buffers.append((buffer_No, "finished transmission".encode("utf-8")))    # adding the buffer to the list of sent buffers, just in case we have to resend it
+            if print_log:
+                print("sent all data to transmit")
 
 
 
@@ -553,7 +571,7 @@ class Transmitter:
                 # if there are older unconfirmed buffers, resend those
                 if(False and index > 0):
                     for i in range(index):
-                        self.transmission_socket.send(AddIntegrityByteToBuffer(self.sent_buffers[i][1]))
+                        self.sendbuffer(self.sent_buffers[i][1])
                         if print_log:
                             print("Resent buffer", self.sent_buffers[i][0])
             else:
@@ -562,7 +580,7 @@ class Transmitter:
         elif(data == "resend".encode("utf-8")):
             for buffer in self.sent_buffers:
                 if buffer[0] == buffer_No:
-                    self.transmission_socket.send(AddIntegrityByteToBuffer(buffer[1]))
+                    self.sendbuffer(buffer[1])
                     if print_log:
 
                         print("Resent buffer", buffer[0])
@@ -597,15 +615,33 @@ class Transmitter:
         else:
             self.WaitToStartTransmission(data)
 
+    resend_timeout_sec = 5
+    close_timeout_sec = 15
+    def NoCommunication(self, time_since_last):
+        print("NO COMMUNICATION " + str(time_since_last))
+        if(time_since_last > self.close_timeout_sec):
+            print("Aborting data transmission due to no response from receiver.")
+            self.FinishedTransmission(False)
+        elif(time_since_last > self.resend_timeout_sec):
+            if self.transmission_started:
+                print("Resending all stored buffers due to no response from receiver.")
+                for buffer in self.sent_buffers:
+                    self.sendbuffer(buffer[1])
+            else:
+                print("Resending transmission request.")
+                self.SendTransmissionRequest()
 
-    def FinishedTransmission(self):
+    def FinishedTransmission(self, succeeded = True):
         self.listener.Terminate()
         self.transmission_socket.close()
         CloseListeningConnection(str(self.our_port), self.our_port)
         CloseSendingConnection(self.peerID, self.listener_name)
         CloseSendingConnection(self.peerID, str(self.their_port))
         if print_log:
-            print("Finished transmission.")
+            if succeeded:
+                print("Finished transmission.")
+            else:
+                print("Transmission failed.")
 
 
 
@@ -657,7 +693,7 @@ class TransmissionListener:
 
 
         # setting up listener for receiving and processing the transmission self.buffers
-        self.listener_thread = ListenToBuffers(self.ProcessTransmissionBuffer, 0, self.buffer_size)
+        self.listener_thread = ListenToBuffers(self.ProcessTransmissionBuffer, 0, self.buffer_size, status_eventhandler = self.NoCommunication)
         self.trsm_lis_port = self.listener_thread.port
         CreateListeningConnection(str(self.trsm_lis_port), self.trsm_lis_port)
         if print_log:
@@ -677,7 +713,12 @@ class TransmissionListener:
 
     # function for easily replying to sender using the self.port and self.buffer_size they specified
     def sendbuffer(self, buffer):
-        self.trsm_replier.send(AddIntegrityByteToBuffer(buffer))
+        try:
+            self.trsm_replier.send(AddIntegrityByteToBuffer(buffer))
+        except:
+            if print_log:
+                print("Communication to transmitter has broken down")
+            self.FinishedTransmission(False)
 
     # Processes the buffers received over the transmission
     def ProcessTransmissionBuffer(self, data, peerID):
@@ -742,23 +783,39 @@ class TransmissionListener:
                 self.FinishedTransmission()
             return
 
-    def FinishedTransmission(self):
-        if print_log:
-            print("Transmission finished.")
-        self.sendbuffer("finished transmission".encode("utf-8"))
+    resend_timeout_sec = 5
+    close_timeout_sec = 15
+    def NoCommunication(self, time_since_last):
+        print("NO COMMUNICATION " + str(time_since_last))
+        if(time_since_last > self.close_timeout_sec):
+            print("Aborting data transmission due to no response from receiver.")
+            self.FinishedTransmission(False)
+        elif(time_since_last > self.resend_timeout_sec):
+            print("Resending transmission confirmation.")
+            self.sendbuffer(ToB255No0s(self.trsm_lis_port) + bytearray([0]) + "start transmission".encode("utf-8"))
 
+    def FinishedTransmission(self, succeeded = True):
+        if succeeded:
+            if print_log:
+                print("Transmission finished.")
+            self.sendbuffer("finished transmission".encode("utf-8"))
+            data = bytearray()
+            for buffer in self.buffers:
+                data = data + buffer
+            _thread.start_new_thread(self.eventhandler,(data, self.peerID))
+        else:
+            if print_log:
+                print("Transmission failed.")
         CloseListeningConnection(str(self.trsm_lis_port), self.trsm_lis_port)
         CloseSendingConnection(self.peerID, str(self.sender_port))
 
 
-        data = bytearray()
-        for buffer in self.buffers:
-            data = data + buffer
+
 
         self.listener_thread.Terminate()
         self.trsm_replier.close()
 
-        _thread.start_new_thread(self.eventhandler,(data, self.peerID))
+
 
 
 
