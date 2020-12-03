@@ -13,8 +13,8 @@
 
 ## TODO:
 ##      terminate Listeners (currently not working due to TCP sockets)
-##      handle interrupted communication
 ##      get rid of the delay periods in Transmission. Why are they necessary in TCP? I didn't need them in the UDP Version
+##      Option to have TransmitData() block the thread until it finishes, returning success
 
 import socket
 import threading
