@@ -3,6 +3,7 @@
 ## To use it you must have IPFS running on your computer.
 ## This wrapper uses a custom updated version of the ipfshttpclient.
 
+
 import sys
 from subprocess import Popen, PIPE
 import subprocess
@@ -71,6 +72,18 @@ def PublishFile(path):
     output = ipfs.add(path)
     return str(output).split("\'")[7] # extracting the file ID from the process' output
 
+def UploadFile(filename:str):
+    """
+    Upload a file to IPFS. Does not work for directories.
+    """
+    return ipfs.add(filename).get("Hash")
+
+def Upload(path:str):
+    """
+    Upload a file or a directory to IPFS.
+    Returns the Hash of the uploaded file.
+    """
+    return ipfs.add(path, recursive=true).get("Hash")
 # Downloads the file with the specified ID and saves it with the specified path
 def DownloadFile(ID, path):
     data = ipfs.cat(ID)
@@ -78,6 +91,16 @@ def DownloadFile(ID, path):
     file.write(data)
     file.close()
 
+def CreateIPNS_Record(name:str):
+    return ipfs.key.gen(key_name=name, type="rsa")
+def UpdateIPNS_RecordFromHash(name:str, id:str):
+    ipfs.name.publish(ipfs_path=id, key=name)
+def UpdateIPNS_Record(name:str, path):
+    id = UploadFile(path)
+    UpdateIPNS_RecordFromHash(name, id)
+def DownloadIPNS_Record(name, path):
+    ipfs_path = ipfs.name.resolve(name=name).get("Path")
+    DownloadFile(ipfs_path, path)
 
 # Returns a list of the multiaddresses of all connected peers
 def ListPeerMaddresses():
@@ -104,15 +127,17 @@ def MyID():
     return ipfs.id().get("ID")
 
 
-def ListenOnPort(protocol, port):
+def ListenOnPortTCP(protocol, port):
     ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
+def ListenOnPort(protocol, port):
+    ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/udp/" + str(port))
 
-
-def ForwardFromPortToPeer(protocol, port, peerID):
+def ForwardFromPortToPeer(protocol:str, port, peerID):
     ipfs.p2p.forward("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port), "/p2p/" + peerID)
 
 def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
     ipfs.p2p.close(all, protocol, listenaddress, targetaddress)
+
 
 
 if autostart:

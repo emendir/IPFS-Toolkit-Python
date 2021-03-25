@@ -3,12 +3,15 @@ import IPFS_DataTransmission
 
 # Eventhandler to handle received data
 def OnReceive(data, PeerID):
+    print("Received data transmission!")
+
     try:
         print(data.decode("utf-8"))
     except:
-        print(f"Received non-text data from {PeerID}, saved it as a file.")
-        with open("test_r", "wb") as conff:
-            conff.write(data)
+        print("Received file")
+        f = open("received", "wb")
+        f.write(data)
+        f.close()
 
 
 # starting to listen for incoming data transmissions
