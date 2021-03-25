@@ -30,4 +30,5 @@ else:  # pragma: http-backend=requests
 	except ImportError:  # pragma: no cover
 		from . import http_httpx as _backend
 
+
 ClientSync = _backend.ClientSync

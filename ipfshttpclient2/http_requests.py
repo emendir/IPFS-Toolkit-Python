@@ -15,7 +15,7 @@ from . import encoding
 from . import exceptions
 from .http_common import (
 	ClientSyncBase, multiaddr_to_url_data,
-	
+
 	addr_t, auth_t, cookies_t, headers_t, params_t, reqdata_sync_t, timeout_t,
 	Closable,
 )
@@ -37,16 +37,16 @@ def map_args_to_requests(
 		timeout: timeout_t = None
 ) -> ty.Dict[str, ty.Any]:
 	kwargs = {}  # type: ty.Dict[str, ty.Any]
-	
+
 	if auth is not None:
 		kwargs["auth"] = auth
-	
+
 	if cookies is not None:
 		kwargs["cookies"] = cookies
-	
+
 	if headers is not None:
 		kwargs["headers"] = headers
-	
+
 	if timeout is not None:
 		if isinstance(timeout, tuple):
 			timeout_ = (
@@ -56,7 +56,7 @@ def map_args_to_requests(
 		else:
 			timeout_ = timeout if timeout < math.inf else None
 		kwargs["timeout"] = timeout_
-	
+
 	if params is not None:
 		kwargs["params"] = {}
 		for name, value in params:
@@ -66,7 +66,7 @@ def map_args_to_requests(
 				kwargs["params"][name] = [kwargs["params"][name], value]
 			else:
 				kwargs["params"][name].append(value)
-	
+
 	return kwargs
 
 
@@ -76,7 +76,7 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 	#_default_timeout: timeout_t
 	#_request_proxies: ty.Optional[ty.Dict[str, str]]
 	#_session_props: ty.Dict[str, ty.Any]
-	
+
 	def _init(self, addr: addr_t, base: str, *,  # type: ignore[no-any-unimported]
 	          auth: auth_t,
 	          cookies: cookies_t,
@@ -84,7 +84,6 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 	          params: params_t,
 	          timeout: timeout_t) -> None:
 		self._base_url, uds_path, family, host_numeric = multiaddr_to_url_data(addr, base)
-		
 		self._session_props = map_args_to_requests(
 			auth=auth,
 			cookies=cookies,
@@ -94,7 +93,7 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 		self._default_timeout = timeout
 		if PATCH_REQUESTS:  # pragma: no branch (always enabled in production)
 			self._session_props["family"] = family
-		
+
 		# Ensure that no proxy lookups are done for the UDS pseudo-hostname
 		#
 		# I'm well aware of the `.proxies` attribute of the session object: As it turns out,
@@ -105,7 +104,7 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 			self._request_proxies = {
 				"no_proxy": urllib.parse.quote(uds_path, safe=""),
 			}
-	
+
 	def _make_session(self) -> requests.Session:  # type: ignore[name-defined]
 		session = requests.Session()  # type: ignore[attr-defined]
 		try:
@@ -117,7 +116,7 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 		except:  # pragma: no cover
 			session.close()
 			raise
-	
+
 	def _do_raise_for_status(self, response: requests.Request) -> None:  # type: ignore[name-defined]
 		try:
 			response.raise_for_status()
@@ -141,7 +140,7 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 				raise exceptions.ErrorResponse(msg, error) from error
 			else:
 				raise exceptions.StatusError(error) from error
-	
+
 	def _request(
 			self, method: str, path: str, params: ty.Sequence[ty.Tuple[str, str]], *,
 			auth: auth_t,
@@ -153,13 +152,13 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 		# Ensure path is relative so that it is resolved relative to the base
 		while path.startswith("/"):
 			path = path[1:]
-		
+
 		url = urllib.parse.urljoin(self._base_url, path)
-		
+
 		try:
 			# Determine session object to use
 			closables, session = self._access_session()
-			
+
 			# Do HTTP request (synchronously) and map exceptions
 			try:
 				res = session.request(
@@ -186,16 +185,16 @@ class ClientSync(ClientSyncBase[requests.Session]):  # type: ignore[name-defined
 				# this behaviour manually if we detect it.
 				if isinstance(error.args[0], urllib3.exceptions.ProtocolError):
 					raise exceptions.ProtocolError(error.args[0]) from error.args[0]
-				
+
 				raise exceptions.ConnectionError(error) from error
 			# Looks like the following error doesn't happen anymore with modern requests?
 			except http.client.HTTPException as error:  # pragma: no cover
 				raise exceptions.ProtocolError(error) from error
-			
+
 			# Raise exception for response status
 			# (optionally incorporating the response message, if available)
 			self._do_raise_for_status(res)
-			
+
 			return closables, res.iter_content(chunk_size=chunk_size)
 		except:
 			for closable in closables:
