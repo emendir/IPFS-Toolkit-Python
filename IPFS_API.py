@@ -85,11 +85,16 @@ def Upload(path:str):
     """
     return ipfs.add(path, recursive=true).get("Hash")
 # Downloads the file with the specified ID and saves it with the specified path
-def DownloadFile(ID, path):
+def DownloadFile(ID, path = ""):
     data = ipfs.cat(ID)
-    file = open(path, "wb")
-    file.write(data)
-    file.close()
+    if path != "":
+        file = open(path, "wb")
+        file.write(data)
+        file.close()
+    return data
+
+def CatFile(ID):
+    return ipfs.cat(ID)
 
 def CreateIPNS_Record(name:str):
     return ipfs.key.gen(key_name=name, type="rsa")
@@ -98,9 +103,13 @@ def UpdateIPNS_RecordFromHash(name:str, id:str):
 def UpdateIPNS_Record(name:str, path):
     id = UploadFile(path)
     UpdateIPNS_RecordFromHash(name, id)
-def DownloadIPNS_Record(name, path):
+def DownloadIPNS_Record(name, path=""):
     ipfs_path = ipfs.name.resolve(name=name).get("Path")
-    DownloadFile(ipfs_path, path)
+    return DownloadFile(ipfs_path, path)
+
+def CatIPNS_Record(name):
+    ipfs_path = ipfs.name.resolve(name=name).get("Path")
+    return CatFile(ipfs_path)
 
 # Returns a list of the multiaddresses of all connected peers
 def ListPeerMaddresses():

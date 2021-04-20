@@ -17,6 +17,7 @@
 # check if delay periods in Transmission are still necessary now that listener sockets are UDP
 # Have TransmitData return success when called wth await_finish=true
 # Error handling for conversations and FileTransmission
+# Close conversations
 
 import socket
 import threading
@@ -36,8 +37,8 @@ IPFS_API.Start()
 
 # -------------- Settings ---------------------------------------------------------------------------------------------------
 print_log = False  # whether or not to print debug in output terminal
-print_log_connections = True
-print_log_transmissions = True
+print_log_connections = False
+print_log_transmissions = False
 print_log_conversations = False
 print_log_files = True
 
@@ -190,18 +191,103 @@ def ListenForTransmissions(listener_name, eventhandler):
 
 
 def StartConversation(conversation_name, peerID, others_req_listener, eventhandler):
+    """Starts a conversation object with which peers can send data transmissions to each other.
+    Code execution continues before the other peer joins the conversation.
+    Sends a conversation request to the other peer's conversation request listener which the other peer must accept (joining the conversation) in order to start the conversation.
+    Usage:
+        def OnReceive(conversation, data):
+            print(data.decode("utf-8"))
+
+        conversation = StartConversation("test", "QmHash", "conv listener", OnReceive)
+        time.sleep(5)   # giving time for the connection to set up
+        conversation.Say("Hello there!".encode())
+
+        # the other peer must have a conversation listener named "conv listener" running, e.g. via:
+        ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+
+    Parameters:
+        1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
+        2. peerID: the IPFS peer ID of the node to communicate with
+        3. others_req_listener: the name of the ther peer's conversation listener object
+    """
     conv = Conversation()
     conv.Start(conversation_name, peerID, others_req_listener, eventhandler)
     return conv
+
 def StartConversationAwait(conversation_name, peerID, others_req_listener, eventhandler):
+    """Starts a conversation object with which peers can send data transmissions to each other.
+    Waits (Blocks the calling thread) until the target peer has joined the conversation.
+    Sends a conversation request to the other peer's conversation request listener which the other peer must accept (joining the conversation) in order to start the conversation.
+
+    Usage:
+        def OnReceive(conversation, data):
+            print(data.decode("utf-8"))
+
+        conversation = StartConversation("test", "QmHash", "conv listener", OnReceive)
+        conversation.Say("Hello there!".encode())
+
+        # the other peer must have a conversation listener named "conv listener" running, e.g. via:
+        ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+
+    Parameters:
+        1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
+        2. peerID: the IPFS peer ID of the node to communicate with
+        3. others_req_listener: the name of the ther peer's conversation listener object
+    """
     conv = Conversation()
     conv.StartAwait(conversation_name, peerID, others_req_listener, eventhandler)
     return conv
 
+def ListenForConversations(conv_name, eventhandler):
+    def Handler(conv_name, peerID, others_conv_listener):
+        conv = Conversation()
+        conv.Join(conv_name, peerID, others_conv_listener, eventhandler)
+
+    return ConversationListener(conv_name, Handler)
+
+
 class Conversation:
+    """
+    Communication object which allows peers to easily transmit data to eacch other.
+    Usage example:
+        def OnReceive(conversation, data):
+            print(data.decode("utf-8"))
+
+        conversation = Conversation()
+        conversation.StartAwait("test", "QmHash", "conv listener", OnReceive)
+        conversation.Say("Hello there!".encode())
+
+        # the other peer must have a conversation listener named "conv listener" running, e.g. via:
+        ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+
+    Methods:
+        Start: start a conversation with another peer, continuing code execution without waiting for the other peer to join.
+        StartAwait: start a conversation with another peer, waiting (blocking the calling thread) until the other peer to join.
+            # Note: Start and StartAwait send a conversation request to the other peer's conversation request listener which the other peer must accept (joining the conversation) in order to start the conversation.
+        Join: join a conversation which another peer started. Used by a conversation listener. See ListenForConversations for usage.
+    """
     conversation_started = False
 
     def Start(self, conversation_name, peerID, others_req_listener, eventhandler):
+        """Starts a conversation object with which peers can send data transmissions to each other.
+        Code execution continues before the other peer joins the conversation
+        Usage:
+            def OnReceive(conversation, data):
+                print(data.decode("utf-8"))
+
+            conversation = Conversation()
+            conversation.Start("test", "QmHash", "conv listener", OnReceive)
+            time.sleep(5)   # giving time for the connection to set up
+            conversation.Say("Hello there!".encode())
+
+            # the other peer must have a conversation listener named "conv listener" running, e.g. via:
+            ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+
+        Parameters:
+            1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
+            2. peerID: the IPFS peer ID of the node to communicate with
+            3. others_req_listener: the name of the ther peer's conversation listener object
+        """
         if(print_log_conversations):
             print(conversation_name + ": Starting conversation")
 
@@ -221,13 +307,32 @@ class Conversation:
         TransmitData(data, peerID, others_req_listener)
 
     def StartAwait(self, conversation_name, peerID, others_req_listener, eventhandler):
+        """Starts a conversation object with which peers can send data transmissions to each other.
+        Waits (Blocks the calling thread) until the target peer has joined the conversation.
+        Usage:
+            def OnReceive(conversation, data):
+                print(data.decode("utf-8"))
+
+            conversation = Conversation()
+            conversation.StartAwait("test", "QmHash", "conv listener", OnReceive)
+            conversation.Say("Hello there!".encode())
+
+            # the other peer must have a conversation listener named "conv listener" running, e.g. via:
+            ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+
+        Parameters:
+            1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
+            2. peerID: the IPFS peer ID of the node to communicate with
+            3. others_req_listener: the name of the ther peer's conversation listener object
+        """
         self.Start(conversation_name, peerID,
                    others_req_listener, eventhandler)
         while not self.conversation_started:
             time.sleep(0.1)
-            # print("waiting")
+
 
     def Join(self, conversation_name, peerID, others_conv_listener, eventhandler):
+        """Joins a conversation which another peer started. Used by a conversation listener. See ListenForConversations for usage."""
         if print_log_conversations:
             print(conversation_name + ": Joining conversation " + others_conv_listener)
         self.hear_eventhandler = eventhandler
@@ -240,6 +345,9 @@ class Conversation:
         self.conversation_started = True
 
     def Hear(self, data, peerID, arg3=""):
+        """
+        Receives data from the conversation and forwards it to the user's eventhandler
+        """
         if arg3=="":
             self.hear_eventhandler(self, data)
         else:
@@ -247,6 +355,18 @@ class Conversation:
 
 
     def Say(self, data, buffer_size=def_buffer_size, await_finish=False):
+        """Transmits data of any length to the other peer.
+        Usage:
+            def OnReceive(conversation, data):
+                print(data.decode("utf-8"))
+
+            conversation = Conversation()
+            conversation.StartAwait("test", "QmHash", "conv listener", OnReceive)
+            conversation.Say("Hello there!".encode())
+
+            # the other peer must have a conversation listener named "conv listener" running, e.g. via:
+            ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+        """
         if not self.conversation_started:
             if print_log:
                 print("Wanted to say something but conversation was not yet started")
@@ -278,6 +398,7 @@ class ConversationListener:
                 print("starting conversation...")
             conversation_name = info[1].decode('utf-8')
             self.eventhandler(conversation_name, peerID, conversation_name)
+
 
 
 def TransmitFile(filepath, peerID, others_req_listener, metadata=bytearray(), block_size=def_block_size, buffer_size=def_buffer_size):
@@ -360,6 +481,8 @@ class FileTransmissionReceiver:
                 if print_log_files:
                     print("FileReception: " + self.filename +
                           ": ready to receive file")
+                if(self.filesize == 0):
+                    self.Finish()
             except:
                 if print_log:
                     print("Received unreadable data on FileTransmissionListener ")
@@ -374,19 +497,20 @@ class FileTransmissionReceiver:
                       ": received data " + str(self.writtenbytes) + "/" + str(self.filesize))
 
             if self.writtenbytes == self.filesize:
-                self.writer.close()
-                if print_log:
-                    print("FileReception: " + self.filename +
-                          ": Transmission finished.")
-                if signature(self.eventhandler).parameters.get("metadata")!=None:
-                    self.eventhandler(self.conv.peerID, os.path.join(self.dir, self.filename), self.metadata)
-                else:
-                    self.eventhandler(self.conv.peerID, os.path.join(self.dir, self.filename))
+                self.Finish()
             elif self.writtenbytes > self.filesize:
                 self.writer.close()
                 if print_log:
                     print("something weird happened, filesize is larger than expected")
-
+    def Finish(self):
+        self.writer.close()
+        if print_log:
+            print("FileReception: " + self.filename +
+                  ": Transmission finished.")
+        if signature(self.eventhandler).parameters.get("metadata")!=None:
+            self.eventhandler(self.conv.peerID, os.path.join(self.dir, self.filename), self.metadata)
+        else:
+            self.eventhandler(self.conv.peerID, os.path.join(self.dir, self.filename))
 
 def ListenForConversations(conv_name, eventhandler):
     def Handler(conv_name, peerID, others_conv_listener):
