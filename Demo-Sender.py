@@ -2,7 +2,7 @@ import IPFS_DataTransmission
 
 
 data = "Hello IPFS World! New way of networking coming up. Can't wait to use it!".encode("utf-8")
-data = "Hi Ela! This is direct communication between our computers!".encode("utf-8")
+data = "Greetings from real laptoip to virtual macjhine".encode("utf-8")
 
 
 # data = "Hi Markus!".encode("utf-8")
@@ -16,9 +16,20 @@ data = "Hi Ela! This is direct communication between our computers!".encode("utf
 # tablet
 peerID = "12D3KooWDTtukVdcjjiSkGQGUFtPVjYXY7RyJisTW59wFLst93zZ"
 #VM
-peerID = "QmNk3UYD6uYzEyebwjkaQzA3jAFT5q7DcvSJ8uiJCBki7j"
+peerID = "12D3KooWEkcGRPJUYyb3P2pxes6jBpET9wzDrFXxfHX8CTwHq4YB"
 
-IPFS_DataTransmission.TransmitDataAwait(data, peerID, "test application", buffer_size=10000)
+#Lisa
+#peerID="12D3KooWCTTQe1rSy25DvPSbfigJvtAhikq41qfgjAVziH6Vvv2Y"
+
+# Elborth
+peerID = "Qmcbjtfh5RfyFnrPk6uQ5EfhHzPQqPC1Vga7twguXSg2Pm"
+
+peerID = "12D3KooWEkcGRPJUYyb3P2pxes6jBpET9wzDrFXxfHX8CTwHq4YB"
+
+#Llearuin
+peerID = "12D3KooWGKNuAQPyaYTDbeiWFN3S2SSTbxH74XCbJNdf7prG9qPE"
+
+IPFS_DataTransmission.TransmitDataAwait(data, peerID, "test application")
 print("Sent Data!!")
 
 #Phone:
@@ -39,8 +50,6 @@ print("Sent Data!!")
 # Lorenza
 #IPFS_DataTransmission.TransmitData(data, "12D3KooWFZqHWFRKDtEAzQnWdGYXd5dg2N9vPyeHyq7UP92eNxuR", "test application")
 
-# Me
-IPFS_DataTransmission.TransmitData(data, "Qmcbjtfh5RfyFnrPk6uQ5EfhHzPQqPC1Vga7twguXSg2Pm", "test application")
 
 # VM
 #IPFS_DataTransmission.TransmitData(data, "QmNk3UYD6uYzEyebwjkaQzA3jAFT5q7DcvSJ8uiJCBki7j", "test application")

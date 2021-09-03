@@ -22,7 +22,7 @@ PREFER_HTTPX = (os.environ.get("PY_IPFS_HTTP_CLIENT_PREFER_HTTPX", "no").lower()
 if PREFER_HTTPX:  # pragma: http-backend=httpx
 	try:  #PY36+
 		from . import http_httpx as _backend
-	except (ImportError, SyntaxError):  #PY35
+	except:  #PY35
 		from . import http_requests as _backend  # type: ignore[no-redef]
 else:  # pragma: http-backend=requests
 	try:

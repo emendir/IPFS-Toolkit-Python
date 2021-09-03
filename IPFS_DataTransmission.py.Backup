@@ -36,7 +36,7 @@ IPFS_API.Start()
 
 
 # -------------- Settings ---------------------------------------------------------------------------------------------------
-print_log =  False # whether or not to print debug in output terminal
+print_log =  True # whether or not to print debug in output terminal
 print_log_connections = False
 print_log_transmissions = False
 print_log_conversations = True
@@ -303,8 +303,7 @@ class Conversation:
                     print(conversation_name + ": conversation started")
         self.hear_eventhandler = AwaitResponse
         self.peerID = peerID
-        if print_log_conversations:
-            print(conversation_name + ": about to start conversation")
+        print("HERE: About to start conversation")
         self.listener = ListenForTransmissions(conversation_name, self.Hear)
         data = bytearray("I want to start a conversation".encode(
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
@@ -352,11 +351,9 @@ class Conversation:
         """
         Receives data from the conversation and forwards it to the user's eventhandler
         """
-        if len(signature(self.hear_eventhandler).parameters) == 2:    # if the eventhandler has 2 parameters
+        if arg3=="":
             self.hear_eventhandler(self, data)
         else:
-            print([signature(self.hear_eventhandler)])
-            print(len(signature(self.hear_eventhandler).parameters))
             self.hear_eventhandler(self, data, arg3)
 
 
@@ -1388,9 +1385,11 @@ class TransmissionListener:
     def SendBufferToPort(self, buffer):
         try:
             self.trsm_replier.send(AddIntegrityByteToBuffer(buffer))
-        except:
+        except Exception as e:
             if print_log:
                 print("Communication to transmitter has broken down")
+                print("Buffer & socket: ", AddIntegrityByteToBuffer(buffer), self.trsm_replier)
+                print(e)
             if not self.transmission_finished:
                 self.FinishedTransmission(False)
 
