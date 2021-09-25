@@ -408,6 +408,13 @@ class ConversationListener:
 
 
 def TransmitFile(filepath, peerID, others_req_listener, metadata=bytearray(), block_size=def_block_size, buffer_size=def_buffer_size):
+    """Transmits the given file to the specified peer
+    Usage:
+        ft = IPFS.FileTransmitter("text.txt", "QMHash", "filelistener", "testmeadata".encode())
+    Paramaters:
+        string filepath: the path of the file to transmit
+        peerID: the IPFS ID of the computer to send the file to
+    """
     return FileTransmitter(filepath, peerID, others_req_listener, metadata, block_size, buffer_size)
 
 

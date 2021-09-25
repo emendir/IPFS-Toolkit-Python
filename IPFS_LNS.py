@@ -4,6 +4,7 @@ import os.path
 import json
 import ipfshttpclient2 as ipfshttpclient
 from subprocess import Popen, PIPE
+from threading import Thread
 
 ipfs = ipfshttpclient.client.Client()
 ipfs_dir = os.path.join(appdirs.user_data_dir(), "IPFS")
@@ -17,6 +18,7 @@ if not os.path.exists(lns_dir):
 
 class Node:
     known_multiaddrs = list()
+    connection_checker = None
     def __init__(self, id, name = "", known_multiaddrs = list()):
         if name == "":
             self.id, self.name, self.known_multiaddrs = json.loads(id)
@@ -25,21 +27,34 @@ class Node:
             self.name = name
             self.known_multiaddrs = known_multiaddrs
 
-
     def ToSerial(self):
         return json.dumps([self.id, self.name, self.known_multiaddrs])
 
     def RememberMultiaddrs(self):
         multiaddrs = ipfs.dht.findpeer(self.id).get("Responses")[0].get("Addrs")
         edited = False
+
         for addr in multiaddrs:
-            if not addr in self.known_multiaddrs and not "/ip6/::" in addr and not "/ip4/192.168" in addr and not "/ip4/127.0" in addr:
-                self.known_multiaddrs.insert(0, addr)
-                edited = True
+            if not "/ip6/::" in addr and not "/ip4/192.168" in addr and not "/ip4/127.0" in addr:
+                found = False
+                for k_addr in self.known_multiaddrs:
+                    if addr == k_addr[0]:
+                        k_addr[1] += 1
+                        edited = True
+                        found =True
+                        break
+                if not found:
+                    self.known_multiaddrs.insert(0, [addr,1])
+                    edited = True
         if edited:
             SaveContacts()
 
     def TryToConnect(self):
+        """Tries to connect to this IPFS peer using 'ipfs dht findpeer ...'
+        and 'ipfs swarm connect ...' with remembered multiaddresses.
+        Note: Can take a long time time run. You generally want to use
+        CheckConnection() instead of TryToConnect(), that function runs this
+        function if it is not already running"""
         # first trying 'ipfs dht findpeer ...'
         try:
             response = ipfs.dht.findpeer(self.id)
@@ -50,7 +65,7 @@ class Node:
             # second trying 'ipfs swarm connect' with all of this peer's previously used multiaddresses
             for addr in self.known_multiaddrs:
                 #ipfs.swarm.connect(addr + "/ipfs/" + self.id)
-                proc = Popen(['ipfs', 'swarm', 'connect', addr + "/ipfs/" + self.id], stdout=PIPE)
+                proc = Popen(['ipfs', 'swarm', 'connect', addr[0] + "/ipfs/" + self.id], stdout=PIPE)
                 proc.wait()
 
                 if proc.stdout.readline()[-8:-1].decode() == 'success':
@@ -66,6 +81,13 @@ class Node:
                     return False
             except:
                 return False
+
+    def CheckConnection(self):
+        """Starts a new thread to try to connect to this peer,
+        if that thread isn't already running."""
+        if not self.connection_checker or not self.connection_checker.is_alive():
+            self.connection_checker = Thread(target=self.TryToConnect,args=())
+            self.connection_checker.start()
 
 contacts = list()
 
@@ -93,6 +115,7 @@ def LookUpContact(name):
 lookupcontact = LookUpContact
 LookupContact = LookUpContact
 lookupContact = LookUpContact
+
 def AddContact(id, name):
     newcontact = Node(id, name)
     contacts.append(newcontact)
