@@ -176,7 +176,7 @@ def ForwardFromPortToPeer(protocol:str, port, peerID):
 def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
     ipfs.p2p.close(all, protocol, listenaddress, targetaddress)
 
-def TryToConnectToPeer(id, name = ""):
+def CheckPeerConnection(id, name = ""):
     """
     Tries to connect to the specified peer, and stores its multiaddresses in IPFS_LNS.
     Paramaters:
@@ -185,7 +185,7 @@ def TryToConnectToPeer(id, name = ""):
     contact = IPFS_LNS.GetContact(id)
     if not contact:
         contact = IPFS_LNS.AddContact(id, name)
-    return contact.TryToConnect()
+    return contact.CheckConnection()
 
 
 if autostart:

@@ -3,7 +3,7 @@ import os
 
 from .http_common import (
 	StreamDecodeIteratorSync,
-	
+
 	addr_t, auth_t, cookies_t, headers_t, params_t, reqdata_sync_t, timeout_t,
 	workarounds_t,
 )
@@ -12,7 +12,7 @@ from .http_common import (
 __all__ = (
 	"addr_t", "auth_t", "cookies_t", "headers_t", "params_t", "reqdata_sync_t",
 	"timeout_t", "workarounds_t",
-	
+
 	"ClientSync",
 	"StreamDecodeIteratorSync",
 )
