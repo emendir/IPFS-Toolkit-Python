@@ -1,0 +1,259 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+from . import base
+
+from .. import exceptions
+
+
+class Section(base.SectionBase):
+	@base.returns_single_item(base.ResponseBase)
+	def findpeer(self, peer_id: str, *peer_ids: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Queries the DHT for all of the associated multiaddresses
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.dht.findpeer(&quot;QmaxqKpiYNr62uSFBhxJAMmEMkT6dvc3oHkrZN … MTLZ&quot;)
+			[{&#x27;ID&#x27;: &#x27;QmfVGMFrwW6AV6fTWmD6eocaTybffqAvkVLXQEFrYdk6yc&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 6, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;QmTKiUdjbRjeN9yPhNhG1X38YNuBdjeiV9JXYWzCAJ4mj5&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 6, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;QmTGkgHSsULk8p3AKTAqKixxidZQXFyF7mCURcutPqrwjQ&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 6, &#x27;Responses&#x27;: None},
+			 …
+			 {&#x27;ID&#x27;: &#x27;&#x27;, &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 2,
+			  &#x27;Responses&#x27;: [
+				{&#x27;ID&#x27;: &#x27;QmaxqKpiYNr62uSFBhxJAMmEMkT6dvc3oHkrZNpH2VMTLZ&#x27;,
+				 &#x27;Addrs&#x27;: [
+					&#x27;/ip4/10.9.8.1/tcp/4001&#x27;,
+					&#x27;/ip6/::1/tcp/4001&#x27;,
+					&#x27;/ip4/164.132.197.107/tcp/4001&#x27;,
+					&#x27;/ip4/127.0.0.1/tcp/4001&#x27;]}
+			  ]}]
+		
+		Parameters
+		----------
+		peer_id
+			The ID of the peer to search for
+		
+		Returns
+		-------
+			dict
+				List of multiaddrs
+		&quot;&quot;&quot;
+		args = (peer_id,) + peer_ids
+		return self._client.request(&#x27;/dht/findpeer&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_multiple_items(base.ResponseBase)
+	def findprovs(self, cid: base.cid_t, *cids: base.cid_t, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Finds peers in the DHT that can provide a specific value
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.dht.findprovs(&quot;QmNPXDC6wTXVmZ9Uoc8X1oqxRRJr4f1sDuyQu … mpW2&quot;)
+			[{&#x27;ID&#x27;: &#x27;QmaxqKpiYNr62uSFBhxJAMmEMkT6dvc3oHkrZNpH2VMTLZ&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 6, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;QmaK6Aj5WXkfnWGoWq7V8pGUYzcHPZp4jKQ5JtmRvSzQGk&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 6, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;QmdUdLu8dNvr4MVW1iWXxKoQrbG6y1vAVWPdkeGK4xppds&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 6, &#x27;Responses&#x27;: None},
+			 …
+			 {&#x27;ID&#x27;: &#x27;&#x27;, &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 4, &#x27;Responses&#x27;: [
+				{&#x27;ID&#x27;: &#x27;QmVgNoP89mzpgEAAqK8owYoDEyB97Mk … E9Uc&#x27;, &#x27;Addrs&#x27;: None}
+			  ]},
+			 {&#x27;ID&#x27;: &#x27;QmaxqKpiYNr62uSFBhxJAMmEMkT6dvc3oHkrZNpH2VMTLZ&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 1, &#x27;Responses&#x27;: [
+				{&#x27;ID&#x27;: &#x27;QmSHXfsmN3ZduwFDjeqBn1C8b1tcLkxK6yd … waXw&#x27;, &#x27;Addrs&#x27;: [
+					&#x27;/ip4/127.0.0.1/tcp/4001&#x27;,
+					&#x27;/ip4/172.17.0.8/tcp/4001&#x27;,
+					&#x27;/ip6/::1/tcp/4001&#x27;,
+					&#x27;/ip4/52.32.109.74/tcp/1028&#x27;
+				  ]}
+			  ]}]
+		
+		Parameters
+		----------
+		cid
+			The DHT key to find providers for
+		
+		Returns
+		-------
+			dict
+				List of provider Peer IDs
+		&quot;&quot;&quot;
+		args = (str(cid),) + tuple(str(c) for c in cids)
+		return self._client.request(&#x27;/dht/findprovs&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def get(self, key: str, *keys: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Queries the DHT for its best value related to given key
+		
+		There may be several different values for a given key stored in the
+		DHT; in this context *best* means the record that is most desirable.
+		There is no one metric for *best*: it depends entirely on the key type.
+		For IPNS, *best* is the record that is both valid and has the highest
+		sequence number (freshest). Different key types may specify other rules
+		for what they consider to be the *best*.
+		
+		Parameters
+		----------
+		key
+			One or more keys whose values should be looked up
+		
+		Returns
+		-------
+			str
+		&quot;&quot;&quot;
+		args = (key,) + keys
+		res = self._client.request(&#x27;/dht/get&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+		
+		if isinstance(res, dict) and &quot;Extra&quot; in res:
+			return res[&quot;Extra&quot;]
+		else:
+			for r in res:
+				if &quot;Extra&quot; in r and len(r[&quot;Extra&quot;]) &gt; 0:
+					return r[&quot;Extra&quot;]
+		raise exceptions.Error(&quot;empty response from DHT&quot;)
+	
+	
+	#TODO: Implement &#x60;provide(cid)&#x60;
+	
+	
+	@base.returns_multiple_items(base.ResponseBase)
+	def put(self, key: str, value: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Writes a key/value pair to the DHT
+		
+		Given a key of the form &#x60;&#x60;/foo/bar&#x60;&#x60; and a value of any form, this will
+		write that value to the DHT with that key.
+		
+		Keys have two parts: a keytype (foo) and the key name (bar). IPNS uses
+		the &#x60;&#x60;/ipns/&#x60;&#x60; keytype, and expects the key name to be a Peer ID. IPNS
+		entries are formatted with a special strucutre.
+		
+		You may only use keytypes that are supported in your &#x60;&#x60;ipfs&#x60;&#x60; binary:
+		&#x60;&#x60;go-ipfs&#x60;&#x60; currently only supports the &#x60;&#x60;/ipns/&#x60;&#x60; keytype. Unless you
+		have a relatively deep understanding of the key&#x27;s internal structure,
+		you likely want to be using the :meth:&#x60;~ipfshttpclient.Client.name_publish&#x60;
+		instead.
+		
+		Value is arbitrary text.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.dht.put(&quot;QmVgNoP89mzpgEAAqK8owYoDEyB97Mkc … E9Uc&quot;, &quot;test123&quot;)
+			[{&#x27;ID&#x27;: &#x27;QmfLy2aqbhU1RqZnGQyqHSovV8tDufLUaPfN1LNtg5CvDZ&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 5, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;QmZ5qTkNvvZ5eFq9T4dcCEK7kX8L7iysYEpvQmij9vokGE&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 5, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;QmYqa6QHCbe6eKiiW6YoThU5yBy8c3eQzpiuW22SgVWSB8&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 6, &#x27;Responses&#x27;: None},
+			 …
+			 {&#x27;ID&#x27;: &#x27;QmP6TAKVDCziLmx9NV8QGekwtf7ZMuJnmbeHMjcfoZbRMd&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 1, &#x27;Responses&#x27;: []}]
+		
+		Parameters
+		----------
+		key
+			A unique identifier
+		value
+			Abitrary text to associate with the input (2048 bytes or less)
+		
+		Returns
+		-------
+			list
+		&quot;&quot;&quot;
+		args = (key, value)
+		return self._client.request(&#x27;/dht/put&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_multiple_items(base.ResponseBase)
+	def query(self, peer_id: str, *peer_ids: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Finds the closest Peer IDs to a given Peer ID by querying the DHT.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.dht.query(&quot;/ip4/104.131.131.82/tcp/4001/ipfs/QmaCpDM … uvuJ&quot;)
+			[{&#x27;ID&#x27;: &#x27;QmPkFbxAQ7DeKD5VGSh9HQrdS574pyNzDmxJeGrRJxoucF&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 2, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;QmR1MhHVLJSLt9ZthsNNhudb1ny1WdhY4FPW21ZYFWec4f&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 2, &#x27;Responses&#x27;: None},
+			 {&#x27;ID&#x27;: &#x27;Qmcwx1K5aVme45ab6NYWb52K2TFBeABgCLccC7ntUeDsAs&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 2, &#x27;Responses&#x27;: None},
+			 …
+			 {&#x27;ID&#x27;: &#x27;QmYYy8L3YD1nsF4xtt4xmsc14yqvAAnKksjo3F3iZs5jPv&#x27;,
+			  &#x27;Extra&#x27;: &#x27;&#x27;, &#x27;Type&#x27;: 1, &#x27;Responses&#x27;: []}]
+		
+		Parameters
+		----------
+		peer_id
+			The peerID to run the query against
+		
+		Returns
+		-------
+			dict
+				List of peers IDs
+		&quot;&quot;&quot;
+		args = (peer_id,) + peer_ids
+		return self._client.request(&#x27;/dht/query&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

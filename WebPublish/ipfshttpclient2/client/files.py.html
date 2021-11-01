@@ -1,0 +1,531 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+import typing as ty
+
+from . import base
+
+from .. import multipart
+from .. import utils
+
+
+class Section(base.SectionBase):
+	&quot;&quot;&quot;Manage files in IPFS&#x27;s virtual “Mutable File System” (MFS) file storage space&quot;&quot;&quot;
+	
+	@base.returns_no_item
+	def cp(self, source: str, dest: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Creates a copy of a file within the MFS
+		
+		Due to the nature of IPFS this will not actually involve any copying of
+		the file&#x27;s content. Instead, a new link will be added to the directory
+		containing *dest* referencing the CID of *source* – this is very similar
+		to how hard links to read-only files work in classical filesystems.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.ls(&quot;/&quot;)
+			{&#x27;Entries&#x27;: [
+				{&#x27;Size&#x27;: 0, &#x27;Hash&#x27;: &#x27;&#x27;, &#x27;Name&#x27;: &#x27;Software&#x27;, &#x27;Type&#x27;: 0},
+				{&#x27;Size&#x27;: 0, &#x27;Hash&#x27;: &#x27;&#x27;, &#x27;Name&#x27;: &#x27;test&#x27;, &#x27;Type&#x27;: 0}
+			]}
+			&gt;&gt;&gt; client.files.cp(&quot;/test&quot;, &quot;/bla&quot;)
+			&gt;&gt;&gt; client.files.ls(&quot;/&quot;)
+			{&#x27;Entries&#x27;: [
+				{&#x27;Size&#x27;: 0, &#x27;Hash&#x27;: &#x27;&#x27;, &#x27;Name&#x27;: &#x27;Software&#x27;, &#x27;Type&#x27;: 0},
+				{&#x27;Size&#x27;: 0, &#x27;Hash&#x27;: &#x27;&#x27;, &#x27;Name&#x27;: &#x27;bla&#x27;, &#x27;Type&#x27;: 0},
+				{&#x27;Size&#x27;: 0, &#x27;Hash&#x27;: &#x27;&#x27;, &#x27;Name&#x27;: &#x27;test&#x27;, &#x27;Type&#x27;: 0}
+			]}
+		
+		Parameters
+		----------
+		source
+			Filepath within the MFS to copy from
+		dest
+			Destination filepath within the MFS to which the file will be
+			copied/linked to
+		&quot;&quot;&quot;
+		args = (source, dest)
+		return self._client.request(&#x27;/files/cp&#x27;, args, **kwargs)
+
+
+	#TODO: Add &#x60;flush(path=&quot;/&quot;)&#x60;
+
+
+	@base.returns_single_item(base.ResponseBase)
+	def ls(self, path: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Lists contents of a directory in the MFS
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.ls(&quot;/&quot;)
+			{&#x27;Entries&#x27;: [
+				{&#x27;Size&#x27;: 0, &#x27;Hash&#x27;: &#x27;&#x27;, &#x27;Name&#x27;: &#x27;Software&#x27;, &#x27;Type&#x27;: 0}
+			]}
+		
+		Parameters
+		----------
+		path
+			Filepath within the MFS
+		
+		Returns
+		-------
+			dict
+		
+		+---------+------------------------------------------+
+		| Entries | List of files in the given MFS directory |
+		+---------+------------------------------------------+
+		&quot;&quot;&quot;
+		args = (path,)
+		return self._client.request(&#x27;/files/ls&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_no_item
+	def mkdir(self, path: str, parents: bool = False, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Creates a directory within the MFS
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.mkdir(&quot;/test&quot;)
+		
+		Parameters
+		----------
+		path
+			Filepath within the MFS
+		parents
+			Create parent directories as needed and do not raise an exception
+			if the requested directory already exists
+		&quot;&quot;&quot;
+		kwargs.setdefault(&quot;opts&quot;, {})[&quot;parents&quot;] = parents
+		
+		args = (path,)
+		return self._client.request(&#x27;/files/mkdir&#x27;, args, **kwargs)
+	
+	
+	@base.returns_no_item
+	def mv(self, source: str, dest: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Moves files and directories within the MFS
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.mv(&quot;/test/file&quot;, &quot;/bla/file&quot;)
+		
+		Parameters
+		----------
+		source
+			Existing filepath within the MFS
+		dest
+			Destination to which the file will be moved in the MFS
+		&quot;&quot;&quot;
+		args = (source, dest)
+		return self._client.request(&#x27;/files/mv&#x27;, args, **kwargs)
+	
+	
+	def read(self, path: str, offset: int = 0, count: ty.Optional[int] = None,
+	         **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Reads a file stored in the MFS
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.read(&quot;/bla/file&quot;)
+			b&#x27;hi&#x27;
+		
+		Parameters
+		----------
+		path
+			Filepath within the MFS
+		offset
+			Byte offset at which to begin reading at
+		count
+			Maximum number of bytes to read (default is the entire remaining length)
+		
+		Returns
+		-------
+			bytes : MFS file contents
+		&quot;&quot;&quot;
+		opts = {&quot;offset&quot;: offset}
+		if count is not None:
+			opts[&quot;count&quot;] = count
+		kwargs.setdefault(&quot;opts&quot;, {}).update(opts)
+		
+		args = (path,)
+		return self._client.request(&#x27;/files/read&#x27;, args, **kwargs)
+	
+	
+	@base.returns_no_item
+	def rm(self, path: str, recursive: bool = False, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Removes a file from the MFS
+		
+		Note that the file&#x27;s contents will not actually be removed from the IPFS
+		node until the next repository GC run. If it is important to have the
+		file&#x27;s contents erased from the node this may be done manually by calling
+		:meth&#x60;~ipfshttpclient.Client.repo.gc&#x60; at a time of convenience.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.rm(&quot;/bla/file&quot;)
+		
+		Parameters
+		----------
+		path
+			Filepath within the MFS
+		recursive
+			Recursively remove directories?
+		&quot;&quot;&quot;
+		kwargs.setdefault(&quot;opts&quot;, {})[&quot;recursive&quot;] = recursive
+		
+		args = (path,)
+		return self._client.request(&#x27;/files/rm&#x27;, args, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def stat(self, path: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Returns basic &#x60;&#x60;stat&#x60;&#x60; information for an MFS file (including its hash)
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.stat(&quot;/test&quot;)
+			{&#x27;Hash&#x27;: &#x27;QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn&#x27;,
+			 &#x27;Size&#x27;: 0, &#x27;CumulativeSize&#x27;: 4, &#x27;Type&#x27;: &#x27;directory&#x27;, &#x27;Blocks&#x27;: 0}
+		
+		Parameters
+		----------
+		path
+			Filepath within the MFS
+		
+		Returns
+		-------
+			dict : MFS file information
+		&quot;&quot;&quot;
+		args = (path,)
+		return self._client.request(&#x27;/files/stat&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_no_item
+	def write(self, path: str, file: utils.clean_file_t, offset: int = 0,
+	          create: bool = False, truncate: bool = False,
+	          count: ty.Optional[int] = None, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Writes a file into the MFS
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.files.write(&quot;/test/file&quot;, io.BytesIO(b&quot;hi&quot;), create=True)
+		
+		Parameters
+		----------
+		path
+			Filepath within the MFS
+		file
+			IO stream object with data that should be written
+		offset
+			Byte offset at which to begin writing at
+		create
+			Create the file if it does not exist
+		truncate
+			Truncate the file to size zero before writing
+		count
+			Maximum number of bytes to read from the source &#x60;&#x60;file&#x60;&#x60;
+		&quot;&quot;&quot;
+		opts = {&quot;offset&quot;: offset, &quot;create&quot;: create, &quot;truncate&quot;: truncate}
+		if count is not None:
+			opts[&quot;count&quot;] = count
+		kwargs.setdefault(&quot;opts&quot;, {}).update(opts)
+		
+		args = (path,)
+		body, headers = multipart.stream_files(file, chunk_size=self.chunk_size)
+		return self._client.request(&#x27;/files/write&#x27;, args, data=body, headers=headers, **kwargs)
+
+
+class Base(base.ClientBase):
+	files = base.SectionProperty(Section)
+	
+	
+	def add(self, file: utils.clean_file_t, *files: utils.clean_file_t,
+	        recursive: bool = False,
+	        pattern: multipart.match_spec_t[ty.AnyStr] = None,
+	        trickle: bool = False, follow_symlinks: bool = False,
+	        period_special: bool = True, only_hash: bool = False,
+	        wrap_with_directory: bool = False, chunker: ty.Optional[str] = None,
+	        pin: bool = True, raw_leaves: bool = None, nocopy: bool = False,
+	        cid_version: ty.Optional[int] = None,
+	        **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Adds a file, several files or directory of files to IPFS
+		
+		Arguments marked as “directories only” will be ignored unless *file*
+		refers to a directory path or file descriptor. Passing a directory file
+		descriptor is currently restricted to Unix (due to Python standard
+		library limitations on Windows) and will prevent the *nocopy* feature
+		from working.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; with io.open(&#x27;nurseryrhyme.txt&#x27;, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+			... 	numbytes = f.write(&#x27;Mary had a little lamb&#x27;)
+			&gt;&gt;&gt; client.add(&#x27;nurseryrhyme.txt&#x27;)
+			{&#x27;Hash&#x27;: &#x27;QmZfF6C9j4VtoCsTp4KSrhYH47QMd3DNXVZBKaxJdhaPab&#x27;,
+			 &#x27;Name&#x27;: &#x27;nurseryrhyme.txt&#x27;}
+		
+		Directory uploads
+		-----------------
+		
+		By default only regular files and directories immediately below the given
+		directory path/FD are uploaded to the connected IPFS node; to upload an
+		entire directory tree instead, *recursive* can be set to &#x60;&#x60;True&#x60;&#x60;.
+		Symbolic links and special files (pipes, sockets, devices nodes, …) cannot
+		be represented by the UnixFS data structure this call creates and hence
+		are ignored while scanning the target directory, to include the targets
+		of symbolic links in the upload set *follow_symlinks* to &#x60;&#x60;True&#x60;&#x60;.
+		
+		The set of files and directories included in the upload may be restricted
+		by passing any combination of glob matching strings, compiled regular
+		expression objects and custom :class:&#x60;~ipfshttpclient.filescanner.Matcher&#x60;
+		objects. A file or directory will be included if it matches of the
+		patterns provided. For regular expressions please note that as predicting
+		which directories are relevant to the given pattern is impossible to do
+		reliably if *recursive* is set to &#x60;&#x60;True&#x60;&#x60; the entire directory hierarchy
+		will always be scanned and compared to the given expression even if only
+		very few files are actually matched by the expression. To avoid this, pass
+		a custom matching class or use glob-patterns instead (which will only
+		cause a scan of the directories required to match their value).
+		
+		Note that unlike the &#x60;&#x60;ipfs add&#x60;&#x60; CLI interface this implementation will
+		be default include dot-files (“files that are hidden”) – any file or
+		directory whose name starts with a period/dot character – in the upload.
+		For behaviour that is similar to the CLI command set *pattern* to
+		&#x60;&#x60;&quot;**&quot;&#x60;&#x60; – this enables the default glob behaviour of not matching
+		dot-files unless *period_special* is set to &#x60;&#x60;False&#x60;&#x60; or the pattern
+		actually starts with a period.
+		
+		Arguments
+		---------
+		file
+			A filepath, path-object, file descriptor or open file object the
+			file or directory to add
+		recursive
+			Upload files in subdirectories, if *file* refers to a directory?
+		pattern
+			A :mod:&#x60;glob&#x60; pattern,
+			compiled regular expression object or arbitrary matcher used to limit
+			the files and directories included as part of adding a directory
+			(directories only)
+		trickle
+			Use trickle-dag format (optimized for streaming) when generating
+			the dag; see &#x60;the old FAQ &lt;https://github.com/ipfs/faq/issues/218&gt;&#x60;_
+			for more information
+		follow_symlinks
+			Follow symbolic links when recursively scanning directories? (directories only)
+		period_special
+			Treat files and directories with a leading period character (“dot-files”)
+			specially in glob patterns? (directories only)
+			
+			If this is set these files will only be matched by path labels whose
+			initial character is a period, but not by those starting with &#x60;&#x60;?&#x60;&#x60;,
+			&#x60;&#x60;*&#x60;&#x60; or &#x60;&#x60;[&#x60;&#x60;.
+		only_hash
+			Only chunk and hash, but do not write to disk
+		wrap_with_directory
+			Wrap files with a directory object to preserve their filename
+		chunker
+			The chunking algorithm to use
+		pin
+			Pin this object when adding
+		raw_leaves
+			Use raw blocks for leaf nodes. (experimental). (Default: &#x60;&#x60;True&#x60;&#x60;
+			when *nocopy* is True, or &#x60;&#x60;False&#x60;&#x60; otherwise)
+		nocopy
+			Add the file using filestore. Implies raw-leaves. (experimental).
+		cid_version
+			CID version. Default value is provided by IPFS daemon. (experimental)
+		
+		Returns
+		-------
+			Union[dict, list]
+				File name and hash of the added file node, will return a list
+				of one or more items unless only a single file (not directory)
+				was given
+		&quot;&quot;&quot;
+		opts = {
+			&quot;trickle&quot;: trickle,
+			&quot;only-hash&quot;: only_hash,
+			&quot;wrap-with-directory&quot;: wrap_with_directory,
+			&quot;pin&quot;: pin,
+			&quot;raw-leaves&quot;: raw_leaves if raw_leaves is not None else nocopy,
+			&quot;nocopy&quot;: nocopy
+		}  # type: ty.Dict[str, ty.Union[str, bool]]
+		for option_name, option_value in [
+			(&quot;chunker&quot;, chunker),
+			(&quot;cid-version&quot;, cid_version),
+		]:
+			if option_value is not None:
+				opts[option_name] = option_value
+		kwargs.setdefault(&quot;opts&quot;, {}).update(opts)
+		
+		# There may be other cases where nocopy will silently fail to work, but
+		# this is by far the most obvious one
+		if isinstance(file, int) and nocopy:
+			raise ValueError(&quot;Passing file descriptors is incompatible with *nocopy*&quot;)
+		
+		assert not isinstance(file, (tuple, list)), \
+		       &quot;Use &#x60;client.add(name1, name2, …)&#x60; to add several items&quot;
+		multiple = (len(files) &gt; 0)
+		to_send  = ((file,) + files) if multiple else file
+		body, headers, is_dir = multipart.stream_filesystem_node(
+			to_send, chunk_size=self.chunk_size, follow_symlinks=follow_symlinks,
+			period_special=period_special, patterns=pattern, recursive=recursive
+		)
+		
+		resp = self._client.request(&#x27;/add&#x27;, decoder=&#x27;json&#x27;, data=body, headers=headers, **kwargs)
+		if not multiple and not is_dir and not wrap_with_directory:
+			assert len(resp) == 1
+			return base.ResponseBase(resp[0])
+		elif kwargs.get(&quot;stream&quot;, False):
+			return base.ResponseWrapIterator(resp, base.ResponseBase)
+		return [base.ResponseBase(v) for v in resp]
+	
+	
+	@base.returns_no_item
+	def get(self, cid: base.cid_t, target: utils.path_t = &quot;.&quot;,
+	        **kwargs: base.CommonArgs) -&gt; None:
+		&quot;&quot;&quot;Downloads a file, or directory of files from IPFS
+		
+		Parameters
+		----------
+		cid
+			The path to the IPFS object(s) to be outputted
+		target
+			The directory to place the downloaded files in
+			
+			Defaults to the current working directory.
+		&quot;&quot;&quot;
+		args = (str(cid),)
+		return self._client.download(&#x27;/get&#x27;, target, args, **kwargs)
+	
+	
+	def cat(self, cid: base.cid_t, offset: int = 0,
+	        length: ty.Optional[int] = None, **kwargs: base.CommonArgs):
+		r&quot;&quot;&quot;Retrieves the contents of a file identified by hash
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.cat(&#x27;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#x27;)
+			Traceback (most recent call last):
+			  ...
+			ipfsapi.exceptions.Error: this dag node is a directory
+			&gt;&gt;&gt; client.cat(&#x27;QmeKozNssnkJ4NcyRidYgDY2jfRZqVEoRGfipkgath71bX&#x27;)
+			b&#x27;&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n\n&lt;head&gt;\n&lt;title&gt;ipfs example viewer&lt;/…&#x27;
+		
+		Parameters
+		----------
+		cid
+			The name or path of the IPFS object(s) to be retrieved
+		offset
+			Byte offset to begin reading from
+		length
+			Maximum number of bytes to read (defaults to reading the entire file)
+		
+		Returns
+		-------
+			bytes
+				The file&#x27;s contents
+		&quot;&quot;&quot;
+		args = (str(cid),)
+		opts = {}
+		if offset != 0:
+			opts[&#x27;offset&#x27;] = offset
+		if length is not None:
+			opts[&#x27;length&#x27;] = length
+		kwargs.setdefault(&#x27;opts&#x27;, opts)
+		return self._client.request(&#x27;/cat&#x27;, args, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def ls(self, cid: base.cid_t, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Returns a list of objects linked to by the given hash
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.ls(&#x27;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#x27;)
+			{&#x27;Objects&#x27;: [
+				{&#x27;Hash&#x27;: &#x27;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#x27;,
+					&#x27;Links&#x27;: [
+						{&#x27;Hash&#x27;: &#x27;Qmd2xkBfEwEs9oMTk77A6jrsgurpF3ugXSg7dtPNFkcNMV&#x27;,
+						 &#x27;Name&#x27;: &#x27;Makefile&#x27;,          &#x27;Size&#x27;: 174, &#x27;Type&#x27;: 2},
+						…
+						{&#x27;Hash&#x27;: &#x27;QmSY8RfVntt3VdxWppv9w5hWgNrE31uctgTiYwKir8eXJY&#x27;,
+						 &#x27;Name&#x27;: &#x27;published-version&#x27;, &#x27;Size&#x27;: 55,  &#x27;Type&#x27;: 2}
+					]
+				}
+			]}
+		
+		Parameters
+		----------
+		cid
+			The path to the IPFS object(s) to list links from
+		
+		Returns
+		-------
+			dict
+				Directory information and contents
+		&quot;&quot;&quot;
+		args = (str(cid),)
+		return self._client.request(&#x27;/ls&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

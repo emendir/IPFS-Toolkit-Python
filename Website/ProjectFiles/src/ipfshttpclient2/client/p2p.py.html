@@ -1,0 +1,168 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+import typing as ty
+
+from . import base
+
+
+class Section(base.SectionBase):
+    @base.returns_no_item
+    def forward(self, protocol: str, peer_id: str, port: str, **kwargs: base.CommonArgs):
+        &quot;&quot;&quot;Forward connections to libp2p service
+
+        Forward connections made to the specified port to another IPFS node.
+
+        .. code-block:: python
+
+                # forwards connections made to port 8888 to &#x27;QmHash&#x27; as protocol &#x27;/x/testproto&#x27;
+                &gt;&gt;&gt; client.p2p.forward(&#x27;/x/testproto&#x27;, &#x27;QmHash&#x27;, 8888)
+                []
+
+        Parameters
+        ----------
+        protocol
+                specifies the libp2p protocol name to use for libp2p connections and/or handlers. It must be prefixed with &#x27;/x/&#x27;.
+        PeerID
+                Target endpoint
+        port
+                Listening endpoint
+
+        Returns
+        -------
+        list
+                An empty list
+        &quot;&quot;&quot;
+        args = (protocol, peer_id, port)
+        return self._client.request(&#x27;/p2p/forward&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+
+    @base.returns_no_item
+    def listen(self, protocol: str, port: str, **kwargs: base.CommonArgs):
+        &quot;&quot;&quot;Create libp2p service to forward IPFS connections to port
+
+        Creates a libp2p service that forwards IPFS connections to it
+        to the specified port on the local computer.
+
+
+        .. code-block:: python
+
+            # listens for connections of protocol &#x27;/x/testproto&#x27; and forwards them to port 8888
+            &gt;&gt;&gt; client.p2p.listen(&#x27;/x/testproto&#x27;, 8888)
+            []
+
+        Parameters
+        ----------
+        protocol
+                specifies the libp2p handler name. It must be prefixed with &#x27;/x/&#x27;.
+        port
+                Listener port to which to forward incoming connections
+
+
+        Returns
+        -------
+        list
+                An empty list
+        &quot;&quot;&quot;
+        args = (protocol, port)
+        return self._client.request(&#x27;/p2p/listen&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+
+    # @base.returns_single_item(base.ResponseBase)
+    def close(self, all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None, **kwargs: base.CommonArgs):
+        &quot;&quot;&quot;Stop listening for new connections to forward.
+
+        Stops all forwarding and listening libp2p services that match the input arguments.
+
+        .. code-block:: python
+
+            # Close listening and forwarding connections of protocol &#x27;/x/testproto&#x27; and port 8888.
+            &gt;&gt;&gt; client.p2p.close(protocol=&#x27;/x/testproto&#x27;, port=&#x27;8888&#x27;)
+            []
+
+        Parameters
+        ----------
+        protocol
+                specifies the libp2p handler name. It must be prefixed with &#x27;/x/&#x27;.
+        port
+                Listener port to which to forward incoming connections
+
+
+        Returns
+        -------
+                list
+                        An empty list
+        &quot;&quot;&quot;
+
+        opts = {}
+        if all is not None:
+            opts.update({&quot;all&quot;: all})
+        if protocol is not None:
+            opts.update({&quot;protocol&quot;: str(protocol)})
+        if listenaddress is not None:
+            opts.update({&quot;listen-address&quot;: str(listenaddress)})
+        if targetaddress is not None:
+            opts.update({&quot;target-address&quot;: str(targetaddress)})
+
+        kwargs.setdefault(&quot;opts&quot;, {}).update(opts)
+        args = (all,)  # if all is not None else ()
+        return self._client.request(&#x27;/p2p/close&#x27;, decoder=&#x27;json&#x27;, **kwargs)
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

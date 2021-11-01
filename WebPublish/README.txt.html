@@ -1,0 +1,82 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/undefined.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="txt">
+This is a Python module that enables two users to easily transmit data of any length to each other over the IPFS Network.
+
+Folder Contents: --------------------------------
+IPFS_DataTransmission.py: the Python module that enables users to transmit data to each other over the IPFS Network
+- IPFS_API.py: a wrapper for the module ipfshttpclient2 that makes that module easier to use
+- ipfshttpclient2: a modified version of the ipfshttpclient module that includes the ipfs.p2p functions (which are not included in the standard module, as of version 0.6.1)
+- Demo-Sender.py: a simple Python script that sends a message (or optionally a file) to another peer on the IPFS Network
+- Demo-Receiver.py: a simple Python script that receives data transmissions over the IPFS Network
+- Prerequisites.txt: a set of instructions for installing and configuring all the prerequisite software tools needed for using this module (IPFS and Python)
+- HowItWorks.txt: provides a conceptual overview of how this module works, explaining the understanding needed to use the module properly and giving some technical details about how this module uses IPFS
+
+
+How to use the Demo scripts: --------------------
+0. Make sure you have installed and setup all the prerequisites as described in Prerequisites.txt.
+1. Run IPFS with the experimental &quot;Libp2pStreamMounting&quot; feature enabled on two computers.
+2. Run Demo-Receiver.py on the one computer.
+3. Open Demo-Sender.py on the other computer, paste the IPFS ID of the first computer into the so marked field, and run the script.
+4. The first computer will display the sent message in the window of the running Demo-Receiver program.
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

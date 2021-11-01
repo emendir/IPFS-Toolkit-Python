@@ -1,0 +1,90 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+&quot;&quot;&quot;
+This script demonstrates, together with Demo-File-Receiver,
+private peer-to-peer file transmission with the IPFS DataTransmission library.
+
+Run Demo-File-Receiver.py on another computer,
+make sure IPFS is running on both computers first,
+paste the other&#x27;s IPFS ID in the peerID variable below and specify a file to upload,
+and then run this script.
+&quot;&quot;&quot;
+
+import IPFS_DataTransmission
+import IPFS_API
+import os
+
+# replace QmHash with your peer&#x27;s IPFS ID
+peerID = &quot;QmHash&quot;
+
+# insert the path of the file to transmit here
+filepath = &quot;&quot;
+
+# making sure our IPFS node finds the receiver computer on the IP layer of the internet
+IPFS_API.FindPeer(peerID)
+
+# Transmit the file. The object ft can be referenced for example to check transmission progress
+ft = IPFS_DataTransmission.TransmitFile(
+    filepath, peerID, &quot;my_apps_filelistener&quot;, os.path.basename(filepath).encode())
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

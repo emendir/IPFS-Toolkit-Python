@@ -1,0 +1,345 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+&quot;&quot;&quot;Classes for encoding and decoding datastreams into object values&quot;&quot;&quot;
+import abc
+import codecs
+import typing as ty
+import json
+
+from . import exceptions
+from . import utils
+
+
+if ty.TYPE_CHECKING:
+	import typing_extensions as ty_ext
+else:
+	from . import utils as ty_ext
+
+
+T = ty.TypeVar(&quot;T&quot;)
+
+
+def empty_gen() -&gt; ty.Generator[T, None, None]:
+	&quot;&quot;&quot;A generator that yields nothing&quot;&quot;&quot;
+	if False:  # pragma: no branch
+		yield ty.cast(T, None)  # type: ignore[unreachable]
+
+
+class Encoding(ty.Generic[T], metaclass=abc.ABCMeta):
+	&quot;&quot;&quot;Abstract base for a data parser/encoder interface&quot;&quot;&quot;
+	#name: str
+	is_stream = False  # type: bool
+	
+	@abc.abstractmethod
+	def parse_partial(self, raw: bytes) -&gt; ty.Generator[T, ty.Any, ty.Any]:
+		&quot;&quot;&quot;Parses the given data and yields all complete data sets that can
+		be built from this.
+		
+		Raises
+		------
+		~ipfshttpclient.exceptions.DecodingError
+		
+		Parameters
+		----------
+		raw
+			Data to be parsed
+		&quot;&quot;&quot;
+	
+	def parse_finalize(self) -&gt; ty.Generator[T, ty.Any, ty.Any]:
+		&quot;&quot;&quot;Finalizes parsing based on remaining buffered data and yields the
+		remaining data sets
+		
+		Raises
+		------
+		   ~ipfshttpclient.exceptions.DecodingError
+		&quot;&quot;&quot;
+		return empty_gen()
+	
+	@abc.abstractmethod
+	def encode(self, obj: T) -&gt; bytes:
+		&quot;&quot;&quot;Serializes the given Python object to a bytes string
+
+		Raises
+		------
+		~ipfshttpclient.exceptions.EncodingError
+
+		Parameters
+		----------
+		obj
+			Object to be encoded
+		&quot;&quot;&quot;
+
+
+class Dummy(Encoding[bytes]):
+	&quot;&quot;&quot;Dummy parser/encoder that does nothing&quot;&quot;&quot;
+	name = &quot;none&quot;
+	is_stream = True
+	
+	def parse_partial(self, raw: bytes) -&gt; ty.Generator[bytes, ty.Any, ty.Any]:
+		&quot;&quot;&quot;Yields the data passed into this method
+		
+		Parameters
+		----------
+		raw
+			Any kind of data
+		&quot;&quot;&quot;
+		yield raw
+	
+	def encode(self, obj: bytes) -&gt; bytes:
+		&quot;&quot;&quot;Returns the bytes representation of the data passed into this
+		function
+		
+		Parameters
+		----------
+		obj
+			Any Python object
+		&quot;&quot;&quot;
+		return obj
+
+
+class Json(Encoding[utils.json_value_t]):
+	&quot;&quot;&quot;JSON parser/encoder that handles concatenated JSON&quot;&quot;&quot;
+	name = &#x27;json&#x27;
+	
+	def __init__(self) -&gt; None:
+		self._buffer    = []  # type: ty.List[ty.Optional[str]]
+		self._decoder1  = codecs.getincrementaldecoder(&#x27;utf-8&#x27;)()
+		self._decoder2  = json.JSONDecoder()
+		self._lasterror = None  # type: ty.Optional[ValueError]
+	
+	# It works just fine and I don&#x27;t want to rewrite it just because mypy doesn&#x27;t understand…
+	@ty.no_type_check
+	def parse_partial(self, data: bytes) -&gt; ty.Generator[utils.json_value_t, ty.Any, ty.Any]:
+		&quot;&quot;&quot;Incrementally decodes JSON data sets into Python objects.
+		
+		Raises
+		------
+		~ipfshttpclient.exceptions.DecodingError
+		&quot;&quot;&quot;
+		try:
+			# Python requires all JSON data to text strings
+			lines = self._decoder1.decode(data, False).split(&quot;\n&quot;)
+			
+			# Add first input line to last buffer line, if applicable, to
+			# handle cases where the JSON string has been chopped in half
+			# at the network level due to streaming
+			if len(self._buffer) &gt; 0 and self._buffer[-1] is not None:
+				self._buffer[-1] += lines[0]
+				self._buffer.extend(lines[1:])
+			else:
+				self._buffer.extend(lines)
+		except UnicodeDecodeError as error:
+			raise exceptions.DecodingError(&#x27;json&#x27;, error) from error
+		
+		# Process data buffer
+		index = 0
+		try:
+			# Process each line as separate buffer
+			#PERF: This way the &#x60;.lstrip()&#x60; call becomes almost always a NOP
+			#      even if it does return a different string it will only
+			#      have to allocate a new buffer for the currently processed
+			#      line.
+			while index &lt; len(self._buffer):
+				while self._buffer[index]:
+					# Make sure buffer does not start with whitespace
+					#PERF: &#x60;.lstrip()&#x60; does not reallocate if the string does
+					#      not actually start with whitespace.
+					self._buffer[index] = self._buffer[index].lstrip()
+					
+					# Handle case where the remainder of the line contained
+					# only whitespace
+					if not self._buffer[index]:
+						self._buffer[index] = None
+						continue
+					
+					# Try decoding the partial data buffer and return results
+					# from this
+					#
+					# Use &#x60;pragma: no branch&#x60; as the final loop iteration will always
+					# raise if parsing didn&#x27;t work out, rather then falling through
+					# to the &#x60;yield obj&#x60; line.
+					data = self._buffer[index]
+					for index2 in range(index, len(self._buffer)):  # pragma: no branch
+						# If decoding doesn&#x27;t succeed with the currently
+						# selected buffer (very unlikely with our current
+						# class of input data) then retry with appending
+						# any other pending pieces of input data
+						# This will happen with JSON data that contains
+						# arbitrary new-lines: &quot;{1:\n2,\n3:4}&quot;
+						if index2 &gt; index:
+							data += &quot;\n&quot; + self._buffer[index2]
+						
+						try:
+							(obj, offset) = self._decoder2.raw_decode(data)
+						except ValueError:
+							# Treat error as fatal if we have already added
+							# the final buffer to the input
+							if (index2 + 1) == len(self._buffer):
+								raise
+						else:
+							index = index2
+							break
+					
+					# Decoding succeeded – yield result and shorten buffer
+					yield obj
+					if offset &lt; len(self._buffer[index]):
+						self._buffer[index] = self._buffer[index][offset:]
+					else:
+						self._buffer[index] = None
+				index += 1
+		except ValueError as error:
+			# It is unfortunately not possible to reliably detect whether
+			# parsing ended because of an error *within* the JSON string, or
+			# an unexpected *end* of the JSON string.
+			# We therefor have to assume that any error that occurs here
+			# *might* be related to the JSON parser hitting EOF and therefor
+			# have to postpone error reporting until &#x60;parse_finalize&#x60; is
+			# called.
+			self._lasterror = error
+		finally:
+			# Remove all processed buffers
+			del self._buffer[0:index]
+	
+	def parse_finalize(self) -&gt; ty.Generator[utils.json_value_t, ty.Any, ty.Any]:
+		&quot;&quot;&quot;Raises errors for incomplete buffered data that could not be parsed
+		because the end of the input data has been reached.
+		
+		Raises
+		------
+		~ipfshttpclient.exceptions.DecodingError
+		&quot;&quot;&quot;
+		try:
+			try:
+				# Raise exception for remaining bytes in bytes decoder
+				self._decoder1.decode(b&#x27;&#x27;, True)
+			except UnicodeDecodeError as error:
+				raise exceptions.DecodingError(&#x27;json&#x27;, error) from error
+
+			# Late raise errors that looked like they could have been fixed if
+			# the caller had provided more data
+			if self._buffer and self._lasterror:
+				raise exceptions.DecodingError(&#x27;json&#x27;, self._lasterror) from self._lasterror
+		finally:
+			# Reset state
+			self._buffer    = []
+			self._lasterror = None
+			self._decoder1.reset()
+		
+		return empty_gen()
+	
+	def encode(self, obj: utils.json_value_t) -&gt; bytes:
+		&quot;&quot;&quot;Returns &#x60;&#x60;obj&#x60;&#x60; serialized as JSON formatted bytes
+		
+		Raises
+		------
+		~ipfshttpclient.exceptions.EncodingError
+		
+		Parameters
+		----------
+		obj
+			JSON serializable Python object
+		&quot;&quot;&quot;
+		try:
+			result = json.dumps(obj, sort_keys=True, indent=None,
+			                    separators=(&#x27;,&#x27;, &#x27;:&#x27;), ensure_ascii=False)
+			return result.encode(&quot;utf-8&quot;)
+		except (UnicodeEncodeError, TypeError) as error:
+			raise exceptions.EncodingError(&#x27;json&#x27;, error) from error
+
+
+# encodings supported by the IPFS api (default is JSON)
+__encodings = {
+	Dummy.name: Dummy,
+	Json.name: Json,
+}  # type: ty.Dict[str, ty.Type[Encoding[ty.Any]]]
+
+
+@ty.overload
+def get_encoding(name: ty_ext.Literal[&quot;none&quot;]) -&gt; Dummy:
+	...
+
+@ty.overload  # noqa: E302
+def get_encoding(name: ty_ext.Literal[&quot;json&quot;]) -&gt; Json:
+	...
+
+def get_encoding(name: str) -&gt; Encoding[ty.Any]:  # noqa: E302
+	&quot;&quot;&quot;Returns an Encoder object for the given encoding name
+	
+	Raises
+	------
+	~ipfshttpclient.exceptions.EncoderMissingError
+	
+	Parameters
+	----------
+	name
+		Encoding name. Supported options:
+		
+		 * &#x60;&#x60;&quot;none&quot;&#x60;&#x60;
+		 * &#x60;&#x60;&quot;json&quot;&#x60;&#x60;
+	&quot;&quot;&quot;
+	try:
+		return __encodings[name.lower()]()
+	except KeyError:
+		raise exceptions.EncoderMissingError(name) from None
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

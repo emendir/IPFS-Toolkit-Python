@@ -1,0 +1,750 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+import abc
+import socket
+import sys
+import tarfile
+import typing as ty
+import urllib.parse
+
+import multiaddr  # type: ignore[import]
+from multiaddr.protocols import (P_DNS, P_DNS4, P_DNS6,  # type: ignore[import]
+                                 P_HTTP, P_HTTPS, P_IP4, P_IP6, P_TCP, P_UNIX)
+
+from . import encoding
+from . import exceptions
+from . import utils
+
+
+AF_UNIX = getattr(socket, &quot;AF_UNIX&quot;, NotImplemented)
+
+
+if ty.TYPE_CHECKING:
+	import http.cookiejar  # noqa: F401
+	from typing_extensions import Literal, Protocol  # noqa: F401
+else:
+	Protocol = utils.Protocol
+
+
+if sys.version_info &gt;= (3, 8):  #PY38+
+	ty_Literal_json = ty.Literal[&quot;json&quot;]
+	ty_Literal_none = ty.Literal[&quot;none&quot;]
+else:  #PY37-
+	ty_Literal_json = ty_Literal_none = str
+
+
+class Closable(Protocol):
+	def close(self) -&gt; None:
+		...
+
+
+T_co = ty.TypeVar(&quot;T_co&quot;, covariant=True)
+S = ty.TypeVar(&quot;S&quot;, bound=Closable)
+
+
+addr_t = ty.Union[multiaddr.Multiaddr, bytes, str]
+auth_t = ty.Optional[ty.Tuple[ty.Union[str, bytes], ty.Union[str, bytes]]]
+cookies_t = ty.Optional[ty.Union[
+	&quot;http.cookiejar.CookieJar&quot;,
+	ty.Dict[str, str]
+]]
+headers_t = ty.Optional[ty.Union[
+	ty.Dict[str, str],
+	ty.Dict[bytes, bytes],
+	ty.Sequence[ty.Tuple[str, str]],
+	ty.Sequence[ty.Tuple[bytes, bytes]],
+]]
+params_t = ty.Optional[ty.Sequence[ty.Tuple[str, str]]]
+reqdata_sync_t = ty.Optional[ty.Iterator[bytes]]
+timeout_t = ty.Optional[ty.Union[
+	float,
+	ty.Tuple[float, float],
+]]
+workarounds_t = ty.Optional[ty.Set[str]]
+
+
+def _notify_stream_iter_closed() -&gt; None:
+	pass  # Mocked by unit tests to check if the decode iterator is closed at proper times
+
+
+class StreamDecodeIteratorSync(ty.Generic[T_co]):
+	&quot;&quot;&quot;Wrapper around a bytes generator that decodes and yields data as it is
+	received, automatically closing all attached resources when the input stream
+	ceases
+	
+	Parameters
+	----------
+	closables
+		List of objects to &#x60;.close()&#x60; once this iterator has been exhausted or
+		is manually closed
+	response
+		Generator returning the bytes to decode and yield
+		
+		Will be closed in addition to all objects in *closables* when the time comes.
+	parser
+		Decoder (see :class:&#x60;~ipfshttpclient.encoding.Encoding&#x60;) that takes
+		the bytes yielded by *response* and emits decoded Python objects.
+	&quot;&quot;&quot;
+	def __init__(
+			self,
+			closables: ty.List[Closable],
+			response: ty.Generator[bytes, ty.Any, ty.Any],
+			parser: encoding.Encoding[T_co]
+	):
+		self._closables = closables  # type: ty.List[Closable]
+		self._parser = parser  # type: ty.Optional[encoding.Encoding[T_co]]
+		self._response_iter = response  # type: ty.Optional[ty.Generator[bytes, ty.Any, ty.Any]]
+		self._parser_iter = None  # type: ty.Optional[ty.Generator[T_co, ty.Any, ty.Any]]
+
+	def __iter__(self) -&gt; &quot;StreamDecodeIteratorSync[T_co]&quot;:
+		return self
+
+	def __next__(self) -&gt; T_co:
+		while True:
+			# Try reading from current parser iterator
+			parser_iter = self._parser_iter
+			if parser_iter is not None:
+				try:
+					result = next(parser_iter)  # type: T_co
+					
+					# Detect late error messages that occured after some data
+					# has already been sent
+					if isinstance(result, dict) and result.get(&quot;Type&quot;) == &quot;error&quot;:
+						msg = result[&quot;Message&quot;]
+						raise exceptions.PartialErrorResponse(msg)
+					
+					return result
+				except StopIteration:
+					self._parser_iter = parser_iter = None
+					
+					# Forward exception to caller if we do not expect any
+					# further data
+					if self._response_iter is None:
+						self.close()
+						raise
+			
+			# Iterator fuse to prevent crash after EOS/.close()
+			if self._response_iter is None:
+				self.close()
+				raise StopIteration()
+			
+			assert self._parser is not None
+			try:
+				data = next(self._response_iter)  # type: bytes
+				
+				# Create new parser iterator using the newly received data
+				if len(data) &gt; 0:
+					self._parser_iter = self._parser.parse_partial(data)
+			except StopIteration:
+				# No more data to receive – destroy response iterator and
+				# iterate over the final fragments returned by the parser
+				self._response_iter = None
+				self._parser_iter   = self._parser.parse_finalize()
+	
+	def __enter__(self) -&gt; &quot;StreamDecodeIteratorSync[T_co]&quot;:
+		return self
+	
+	def __exit__(self, *a: ty.Any) -&gt; None:
+		self.close()
+	
+	def close(self) -&gt; None:
+		# Clean up any open iterators first
+		if self._response_iter is not None:
+			self._response_iter.close()
+		if self._parser_iter is not None:
+			self._parser_iter.close()
+		self._response_iter = None
+		self._parser_iter   = None
+		
+		# Clean up response object and parser
+		for closable in self._closables:
+			closable.close()
+		self._closables.clear()
+		self._parser = None
+		
+		_notify_stream_iter_closed()
+
+
+@ty.overload
+def stream_decode_full(
+		response: Closable,
+		response_iter: ty.Generator[bytes, ty.Any, ty.Any],
+		parser: encoding.Dummy
+) -&gt; bytes:
+	...
+
+@ty.overload  # noqa: E302
+def stream_decode_full(
+		closables: ty.List[Closable],
+		response: ty.Generator[bytes, ty.Any, ty.Any],
+		parser: encoding.Json
+) -&gt; ty.List[utils.json_dict_t]:
+	...
+
+def stream_decode_full(  # type: ignore[misc]  # noqa: E302
+		closables: ty.List[Closable],
+		response: ty.Generator[bytes, ty.Any, ty.Any],
+		parser: encoding.Encoding[T_co]
+) -&gt; ty.Union[ty.List[T_co], bytes]:
+	with StreamDecodeIteratorSync(closables, response, parser) as response_iter:
+		# Collect all responses
+		result = list(response_iter)  # type: ty.List[T_co]
+		
+		# Return byte streams concatenated into one message, instead of split
+		# at arbitrary boundaries
+		if parser.is_stream:
+			return b&quot;&quot;.join(result)  # type: ignore[arg-type]
+		return result
+
+
+class ReadableStreamWrapper:
+	&quot;&quot;&quot;Bytes iterator wrapper that exposes a fileobj compatible &#x60;.read(n=None)&#x60;
+	and &#x60;.close()&#x60; interface&quot;&quot;&quot;
+	def __init__(self, generator: ty.Generator[bytes, ty.Any, ty.Any]):
+		self._buffer    = bytearray()
+		self._generator = generator
+	
+	def read(self, length: ty.Optional[int] = None) -&gt; bytes:
+		# Handle “take all” mode
+		if length is None:
+			buffer = self._buffer
+			for chunk in self._generator:
+				buffer.extend(chunk)
+			
+			try:
+				return bytes(buffer)
+			finally:
+				buffer.clear()
+		
+		# Handle buffered mode if the current buffer is not empty
+		#
+		# This may return short reads, but we don&#x27;t care as that is valid as long
+		# as at least 1 byte is returned.
+		if len(self._buffer) &gt; 0:
+			try:
+				return bytes(self._buffer[0:length])
+			finally:
+				del self._buffer[0:length]
+		
+		# Handle buffered mode if we need to request new data from the iterator
+		try:
+			chunk = b&quot;&quot;
+			while len(chunk) &lt; 1:
+				chunk = next(self._generator)
+		except StopIteration:
+			return b&quot;&quot;
+		else:
+			try:
+				return bytes(chunk[0:length])
+			finally:
+				self._buffer.extend(chunk[length:])
+	
+	def close(self) -&gt; None:
+		self._generator.close()
+		self._buffer.clear()
+
+
+def multiaddr_to_url_data(addr: addr_t, base: str  # type: ignore[no-any-unimported]
+) -&gt; ty.Tuple[str, ty.Optional[str], socket.AddressFamily, bool]:
+	try:
+		multi_addr = multiaddr.Multiaddr(addr)
+	except multiaddr.exceptions.ParseError as error:
+		raise exceptions.AddressError(addr) from error
+
+	addr_iter = iter(multi_addr.items())
+	
+	# Parse the &#x60;host&#x60;, &#x60;family&#x60;, &#x60;port&#x60; &amp; &#x60;secure&#x60; values from the given
+	# multiaddr, raising on unsupported &#x60;addr&#x60; values
+	try:
+		# Read host value
+		proto, host = next(addr_iter)
+		family = socket.AF_UNSPEC
+		host_numeric = proto.code in (P_IP4, P_IP6)
+		
+		uds_path: ty.Optional[str] = None
+
+		if proto.code in (P_IP4, P_DNS4):
+			family = socket.AF_INET
+		elif proto.code in (P_IP6, P_DNS6):
+			family = socket.AF_INET6
+		elif proto.code == P_UNIX and AF_UNIX is not NotImplemented:
+			family = AF_UNIX
+			uds_path = host
+		elif proto.code != P_DNS:
+			raise exceptions.AddressError(addr)
+		
+		if family == AF_UNIX:
+			assert uds_path is not None
+			netloc = urllib.parse.quote(uds_path, safe=&quot;&quot;)
+		else:
+			# Read port value for IP-based transports
+			proto, port = next(addr_iter)
+			if proto.code != P_TCP:
+				raise exceptions.AddressError(addr)
+			
+			# Pre-format network location URL part based on host+port
+			if &quot;:&quot; in host and not host.startswith(&quot;[&quot;):
+				netloc = &quot;[{0}]:{1}&quot;.format(host, port)
+			else:
+				netloc = &quot;{0}:{1}&quot;.format(host, port)
+		
+		# Read application-level protocol name
+		secure = False
+		try:
+			proto, value = next(addr_iter)
+		except StopIteration:
+			pass
+		else:
+			if proto.code == P_HTTPS:
+				secure = True
+			elif proto.code != P_HTTP:
+				raise exceptions.AddressError(addr)
+		
+		# No further values may follow; this also exhausts the iterator
+		was_final = all(False for _ in addr_iter)
+		if not was_final:
+			raise exceptions.AddressError(addr)
+	except StopIteration:
+		raise exceptions.AddressError(addr) from None
+	
+	if not base.endswith(&quot;/&quot;):
+		base += &quot;/&quot;
+	
+	# Convert the parsed &#x60;addr&#x60; values to a URL base and parameters for the
+	# HTTP library
+	base_url = urllib.parse.SplitResult(
+		scheme   = &quot;http&quot; if not secure else &quot;https&quot;,
+		netloc   = netloc,
+		path     = base,
+		query    = &quot;&quot;,
+		fragment = &quot;&quot;
+	).geturl()
+	
+	return base_url, uds_path, family, host_numeric
+
+
+def map_args_to_params(
+		args: ty.Sequence[str],
+		opts: ty.Mapping[str, str], *,
+		offline: bool = False
+) -&gt; ty.List[ty.Tuple[str, str]]:
+	params = []  # type: ty.List[ty.Tuple[str, str]]
+	
+	if offline:
+		params.append((&#x27;offline&#x27;, &#x27;true&#x27;))
+	
+	params.extend(opts.items())
+	
+	for arg in args:
+		params.append((&#x27;arg&#x27;, arg))
+	
+	return params
+
+
+class ClientSyncBase(ty.Generic[S], metaclass=abc.ABCMeta):
+	&quot;&quot;&quot;An HTTP client for interacting with the IPFS daemon
+	
+	Parameters
+	----------
+	addr
+		The address where the IPFS daemon may be reached
+	base
+		The path prefix for API calls
+	offline
+		Ask daemon to operate in “offline mode” – that is, it should not consult
+		the network when unable to find resources locally, but fail instead
+	workarounds
+		List of daemon workarounds to apply
+	auth
+		HTTP basic authentication &#x60;(username, password)&#x60; tuple to send along with
+		each request to the API daemon
+	cookies
+		HTTP cookies to send along with each request to the API daemon
+	headers
+		Custom HTTP headers to send along with each request to the API daemon
+	timeout
+		The default number of seconds to wait when establishing a connection to
+		the daemon and waiting for returned data before throwing
+		:exc:&#x60;~ipfshttpclient.exceptions.TimeoutError&#x60;; if the value is a tuple
+		its contents will be interpreted as the values for the connection and
+		receiving phases respectively, otherwise the value will apply to both
+		phases; if the value is &#x60;&#x60;None&#x60;&#x60; then all timeouts will be disabled
+	&quot;&quot;&quot;
+	__slots__ = (&quot;_session&quot;, &quot;workarounds&quot;)
+
+	_session: ty.Optional[S]
+	workarounds: ty.Set[str]
+	
+	def __init__(self, addr: addr_t, base: str, *,  # type: ignore[no-any-unimported]
+	             offline: bool = False,
+	             workarounds: workarounds_t = None,
+	             auth: auth_t = None,
+	             cookies: cookies_t = None,
+	             headers: headers_t = None,
+	             timeout: timeout_t = None) -&gt; None:
+		self._session = None
+		self.workarounds = workarounds if workarounds else set()
+		
+		#XXX: Figure out what stream-channels is and if we still need it
+		params = map_args_to_params((), {
+			&quot;stream-channels&quot;: &quot;true&quot;,
+		}, offline=offline)
+		
+		# Initialize child
+		self._init(
+			addr,
+			base,
+			
+			auth=auth,
+			cookies=cookies,
+			headers=headers,
+			params=params,
+			timeout=timeout,
+		)
+	
+	@abc.abstractmethod
+	def _init(self, addr: addr_t, base: str, *,  # type: ignore[no-any-unimported]
+	          auth: auth_t,
+	          cookies: cookies_t,
+	          headers: headers_t,
+	          params: params_t,
+	          timeout: timeout_t) -&gt; None:
+		...
+	
+	@abc.abstractmethod
+	def _make_session(self) -&gt; S:
+		...
+	
+	def _access_session(self) -&gt; ty.Tuple[ty.List[Closable], S]:
+		if self._session is not None:
+			return [], self._session
+		else:
+			session = self._make_session()
+			return [session], session
+	
+	def open_session(self) -&gt; None:
+		&quot;&quot;&quot;Open a persistent backend session that allows reusing HTTP
+		connections between individual HTTP requests.
+		
+		It is an error to call this function if a session is already open.&quot;&quot;&quot;
+		assert self._session is None
+		self._session = self._make_session()
+	
+	def close_session(self) -&gt; None:
+		&quot;&quot;&quot;Close a session opened by
+		:meth:&#x60;~ipfshttpclient.http.HTTPClient.open_session&#x60;.
+		
+		If there is no session currently open (ie: it was already closed), then
+		this method does nothing.&quot;&quot;&quot;
+		if self._session is not None:
+			self._session.close()
+			self._session = None
+	
+	@abc.abstractmethod
+	def _request(
+			self, method: str, path: str, params: ty.Sequence[ty.Tuple[str, str]], *,
+			auth: auth_t,
+			data: reqdata_sync_t,
+			headers: headers_t,
+			timeout: timeout_t,
+			chunk_size: ty.Optional[int]
+	) -&gt; ty.Tuple[ty.List[Closable], ty.Generator[bytes, ty.Any, ty.Any]]:
+		...
+	
+	#XXX: There must be some way to make the following shorter…
+	@ty.overload
+	def request(
+			self, path: str,
+			args: ty.Sequence[str] = [], *,
+			opts: ty.Mapping[str, str] = {},
+			decoder: ty_Literal_none = &quot;none&quot;,
+			stream: utils.Literal_False = False,
+			offline: bool = False,
+			auth: auth_t = None,
+			cookies: cookies_t = None,
+			data: reqdata_sync_t = None,
+			headers: headers_t = None,
+			timeout: timeout_t = None
+	) -&gt; bytes:
+		...
+	
+	@ty.overload
+	def request(
+			self, path: str,
+			args: ty.Sequence[str] = [], *,
+			opts: ty.Mapping[str, str] = {},
+			decoder: ty_Literal_none = &quot;none&quot;,
+			stream: utils.Literal_True,
+			offline: bool = False,
+			auth: auth_t = None,
+			cookies: cookies_t = None,
+			data: reqdata_sync_t = None,
+			headers: headers_t = None,
+			timeout: timeout_t = None
+	) -&gt; StreamDecodeIteratorSync[bytes]:
+		...
+	
+	@ty.overload
+	def request(
+			self, path: str,
+			args: ty.Sequence[str] = [], *,
+			opts: ty.Mapping[str, str] = {},
+			decoder: ty_Literal_json,
+			stream: utils.Literal_False = False,
+			offline: bool = False,
+			auth: auth_t = None,
+			cookies: cookies_t = None,
+			data: reqdata_sync_t = None,
+			headers: headers_t = None,
+			timeout: timeout_t = None
+	) -&gt; ty.List[utils.json_dict_t]:
+		...
+	
+	@ty.overload
+	def request(
+			self, path: str,
+			args: ty.Sequence[str] = [], *,
+			opts: ty.Mapping[str, str] = {},
+			decoder: ty_Literal_json,
+			stream: utils.Literal_True,
+			offline: bool = False,
+			auth: auth_t = None,
+			cookies: cookies_t = None,
+			data: reqdata_sync_t = None,
+			headers: headers_t = None,
+			timeout: timeout_t = None
+	) -&gt; StreamDecodeIteratorSync[utils.json_dict_t]:
+		...
+	
+	
+	def request(
+			self, path: str,
+			args: ty.Sequence[str] = [], *,
+			opts: ty.Mapping[str, str] = {},
+			decoder: ty.Union[ty_Literal_json, ty_Literal_none] = &quot;none&quot;,
+			stream: bool = False,
+			offline: bool = False,
+			auth: auth_t = None,
+			cookies: cookies_t = None,
+			data: reqdata_sync_t = None,
+			headers: headers_t = None,
+			timeout: timeout_t = None
+	) -&gt; ty.Optional[ty.Union[
+		StreamDecodeIteratorSync[bytes],
+		StreamDecodeIteratorSync[utils.json_dict_t],
+		bytes,
+		ty.List[utils.json_dict_t],
+	]]:
+		&quot;&quot;&quot;Sends an HTTP request to the IPFS daemon
+		
+		This function returns the contents of the HTTP response from the IPFS
+		daemon.
+		
+		Raises
+		------
+		~ipfshttpclient.exceptions.ErrorResponse
+		~ipfshttpclient.exceptions.ConnectionError
+		~ipfshttpclient.exceptions.ProtocolError
+		~ipfshttpclient.exceptions.StatusError
+		~ipfshttpclient.exceptions.TimeoutError
+		
+		Parameters
+		----------
+		path
+			The command path relative to the given base
+		decoder
+			The name of the encoder to use to parse the HTTP response
+		stream
+			Whether to return an iterable yielding the received items incrementally
+			instead of receiving and decoding all items up-front before returning
+			them
+		args
+			Positional parameters to be sent along with the HTTP request
+		opts
+			Query string parameters to be sent along with the HTTP request
+		offline
+			Whether to request to daemon to handle this request in “offline-mode”
+		auth
+			Authentication data to send along with this request as
+			&#x60;&#x60;(username, password)&#x60;&#x60; tuple
+		cookies
+			HTTP cookies to send along with each request to the API daemon
+		data
+			Iterable yielding data to stream from the client to the daemon
+		headers
+			Custom HTTP headers to pass send along with the request
+		timeout
+			How many seconds to wait for the server to send data
+			before giving up
+			
+			Set this to :py:&#x60;math.inf&#x60; to disable timeouts entirely.
+		&quot;&quot;&quot;
+		method = &quot;POST&quot;
+		parser = encoding.get_encoding(decoder)
+		
+		closables, res = self._request(
+			method, path, map_args_to_params(args, opts, offline=offline),
+			auth=auth, data=data, headers=headers, timeout=timeout,
+			chunk_size=None,
+		)  # type: ty.Tuple[ty.List[Closable], ty.Generator[bytes, ty.Any, ty.Any]]
+		try:
+			if stream:
+				# Decode each item as it is read
+				return StreamDecodeIteratorSync(closables, res, parser)  # type: ignore[misc]
+			else:
+				# Decode received item immediately
+				return stream_decode_full(closables, res,
+				                          parser)  # type: ignore[arg-type]
+		except:
+			# Extra cleanup code for closables
+			#
+			# At the time of writing, there does not appear to be any way to
+			# trigger this loop in practice, but we keep it for as extra level
+			# of defence in case things slightly change later-on.
+			for closable in closables:  # pragma: no cover
+				closable.close()
+			
+			raise
+	
+	def download(
+			self, path: str, target: utils.path_t = &quot;.&quot;,
+			args: ty.Sequence[str] = [], *,
+			opts: ty.Mapping[str, str] = {},
+			compress: bool = False,
+			offline: bool = False,
+			auth: auth_t = None,
+			cookies: cookies_t = None,
+			data: reqdata_sync_t = None,
+			headers: headers_t = None,
+			timeout: timeout_t = None
+	) -&gt; None:
+		&quot;&quot;&quot;Downloads a directory from the IPFS daemon
+		
+		Downloads a file or files from IPFS into the current working
+		directory, or the directory given by &#x60;&#x60;target&#x60;&#x60;.
+		
+		Raises
+		------
+		~ipfshttpclient.exceptions.ErrorResponse
+		~ipfshttpclient.exceptions.ConnectionError
+		~ipfshttpclient.exceptions.ProtocolError
+		~ipfshttpclient.exceptions.StatusError
+		~ipfshttpclient.exceptions.TimeoutError
+		
+		Parameters
+		----------
+		path
+			The command path relative to the given base
+		target
+			The local path where downloaded files should be stored at
+			
+			Defaults to the current working directory.
+		args
+			Positional parameters to be sent along with the HTTP request
+		opts
+			Query string parameters to be sent along with the HTTP request
+		compress
+			Whether the downloaded file should be GZip compressed by the
+			daemon before being sent to the client
+			
+			This may greatly speed up things if data is sent across slower networks
+			like the internet but is a major bottleneck when communicating with the
+			daemon on &#x60;&#x60;localhost&#x60;&#x60;.
+		offline
+			Whether to request to daemon to handle this request in “offline-mode”
+		auth
+			Authentication data to send along with this request as
+			&#x60;&#x60;(username, password)&#x60;&#x60; tuple
+		cookies
+			HTTP cookies to send along with each request to the API daemon
+		data
+			Iterable yielding data to stream from the client to the daemon
+		headers
+			Custom HTTP headers to pass send along with the request
+		timeout
+			How many seconds to wait for the server to send data
+			before giving up
+			
+			Set this to :py:&#x60;math.inf&#x60; to disable timeouts entirely.
+		&quot;&quot;&quot;
+		opts2: ty.Dict[str, str] = dict(opts.items())
+		opts2[&quot;archive&quot;] = &quot;true&quot;
+		opts2[&quot;compress&quot;] = &quot;true&quot; if compress else &quot;false&quot;
+		
+		closables, res = self._request(
+			&quot;POST&quot;, path, map_args_to_params(args, opts2, offline=offline),
+			auth=auth, data=data, headers=headers, timeout=timeout,
+			chunk_size=tarfile.RECORDSIZE,
+		)
+		try:
+			# try to stream download as a tar file stream
+			mode = &#x27;r|gz&#x27; if compress else &#x27;r|&#x27;
+			
+			fileobj = ReadableStreamWrapper(res)  # type: ty.IO[bytes]  # type: ignore[assignment]
+			with tarfile.open(fileobj=fileobj, mode=mode) as tf:
+				tf.extractall(path=target)
+		finally:
+			for closable in closables:
+				closable.close()
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

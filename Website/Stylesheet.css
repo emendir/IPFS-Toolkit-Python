@@ -1,0 +1,43 @@
+body {
+  overflow: hidden;
+}
+.leftborders {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.rightborders {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.CodeScript {
+  position: absolute;
+  top: 250;
+  left: 250;
+  width: 600;
+  height: 800;
+}
+.Title {
+  position: absolute;
+  top: 190;
+  left: 0;
+  color: #fff;
+  font-size: 50;
+}
+.ProjName
+{
+  position: absolute;
+  top: 50;
+  left: 50;
+  color: #ff5;
+  font-size: 50;
+
+}
+.FolderSidebar{
+  position: absolute;
+  left: 0;
+  color: #fff;
+  font-size: 50;
+}
