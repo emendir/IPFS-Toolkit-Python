@@ -1,0 +1,96 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+&quot;&quot;&quot;
+This script demonstrates, together with Demo-Conversation-Starter,
+the usage of the IPFS_DataTransmission.Conversation class.
+
+Run this script, run Demo-Conversation-Sender.py on another computer
+after reading the instructions in that script,
+and of course make sure IPFS is running on both computers first.
+&quot;&quot;&quot;
+
+import time
+import IPFS_DataTransmission
+
+
+def NewConvHandler(conversation_name, peerID):
+    &quot;&quot;&quot;Eventhandler for when we join a new conversation.&quot;&quot;&quot;
+    print(&quot;Joining a new conversation:&quot;, conversation_name)
+
+    def OnMessageReceived(conversation, message):
+        &quot;&quot;&quot;Eventhandler for when the other peer says something in the conversation.&quot;&quot;&quot;
+        print(f&quot;Received message on {conversation.conversation_name}:&quot;, message.decode(
+            &quot;utf-8&quot;))
+        conversation.Say(&quot;Hi back&quot;.encode(&quot;utf-8&quot;))
+    conv = IPFS_DataTransmission.Conversation()
+    conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived)
+
+
+conv_lis = IPFS_DataTransmission.ListenForConversations(
+    &quot;general_listener&quot;, NewConvHandler)
+
+# endless loop to stop program from terminating
+while True:
+    time.sleep(1)
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+&quot;&quot;&quot;A module to handle generic operations.
+&quot;&quot;&quot;
+import mimetypes
+import os
+import sys
+import typing as ty
+from functools import wraps
+
+if ty.TYPE_CHECKING:
+	import typing_extensions as ty_ext
+else:
+	ty_ext = ty
+
+AnyStr = ty.TypeVar(&#x27;AnyStr&#x27;, bytes, str)
+T = ty.TypeVar(&quot;T&quot;)
+
+if sys.version_info &gt;= (3, 8):  #PY38+
+	Literal = ty_ext.Literal
+	Protocol = ty_ext.Protocol
+	
+	Literal_True = ty.Literal[True]
+	Literal_False = ty.Literal[False]
+else:  #PY37-
+	class Literal(ty.Generic[T]):
+		...
+	
+	class Protocol:
+		...
+	
+	Literal_True = Literal_False = bool
+
+# &#x60;os.PathLike&#x60; only has a type param while type checking
+if ty.TYPE_CHECKING:
+	PathLike = os.PathLike
+	PathLike_str = os.PathLike[str]
+	PathLike_bytes = os.PathLike[bytes]
+else:
+	class PathLike(Protocol, ty.Generic[AnyStr]):
+		def __fspath__(self) -&gt; AnyStr:
+			...
+
+	PathLike_str = PathLike_bytes = os.PathLike
+
+path_str_t = ty.Union[str, PathLike_str]
+path_bytes_t = ty.Union[bytes, PathLike_bytes]
+path_t = ty.Union[path_str_t, path_bytes_t]
+AnyPath = ty.TypeVar(&quot;AnyPath&quot;, str, PathLike_str, bytes, PathLike_bytes)
+
+path_types = (str, bytes, os.PathLike,)
+path_obj_types = (os.PathLike,)
+
+
+# work around GH/mypy/mypy#731: no recursive structural types yet
+json_primitive_t = ty.Union[bool, float, int, str]
+
+
+# noqa: N802
+class json_list_t(ty.List[&quot;json_value_t&quot;]):
+	pass
+
+
+# noqa: N802
+class json_dict_t(ty.Dict[str, &quot;json_value_t&quot;]):
+	pass
+
+
+json_value_t = ty.Union[
+	json_primitive_t,
+	json_list_t,
+	json_dict_t
+]
+
+
+def maybe_fsencode(val: str, ref: AnyStr) -&gt; AnyStr:
+	&quot;&quot;&quot;Encodes the string *val* using the system filesystem encoding if *ref*
+	is of type :any:&#x60;bytes&#x60;&quot;&quot;&quot;
+
+	if isinstance(ref, bytes):
+		return os.fsencode(val)
+	else:
+		return val
+
+
+def guess_mimetype(filename: str) -&gt; str:
+	&quot;&quot;&quot;Guesses the mimetype of a file based on the given &#x60;&#x60;filename&#x60;&#x60;.
+	
+	.. code-block:: python
+	
+		&gt;&gt;&gt; guess_mimetype(&#x27;example.txt&#x27;)
+		&#x27;text/plain&#x27;
+		&gt;&gt;&gt; guess_mimetype(&#x27;/foo/bar/example&#x27;)
+		&#x27;application/octet-stream&#x27;
+	
+	Parameters
+	----------
+	filename
+		The file name or path for which the mimetype is to be guessed
+	&quot;&quot;&quot;
+	fn = os.path.basename(filename)
+	return mimetypes.guess_type(fn)[0] or &#x27;application/octet-stream&#x27;
+
+
+clean_file_t = ty.Union[path_t, ty.IO[bytes], int]
+
+
+def clean_file(file: clean_file_t) -&gt; ty.Tuple[ty.IO[bytes], bool]:
+	&quot;&quot;&quot;Returns a tuple containing a file-like object and a close indicator
+	
+	This ensures the given file is opened and keeps track of files that should
+	be closed after use (files that were not open prior to this function call).
+	
+	Raises
+	------
+	OSError
+		Accessing the given file path failed
+	
+	Parameters
+	----------
+	file
+		A filepath or file-like object that may or may not need to be
+		opened
+	&quot;&quot;&quot;
+	if isinstance(file, int):
+		return os.fdopen(file, &#x27;rb&#x27;, closefd=False), True
+	elif not hasattr(file, &#x27;read&#x27;):
+		file = ty.cast(path_t, file)  # Cannot be ty.IO[bytes] without &#x60;.read()&#x60;
+		return open(file, &#x27;rb&#x27;), True
+	else:
+		file = ty.cast(ty.IO[bytes], file)  # Must be ty.IO[bytes]
+		return file, False
+
+
+def clean_files(files: ty.Union[clean_file_t, ty.Iterable[clean_file_t]]) \
+    -&gt; ty.Generator[ty.Tuple[ty.IO[bytes], bool], ty.Any, ty.Any]:
+	&quot;&quot;&quot;Generates tuples with a file-like object and a close indicator
+	
+	This is a generator of tuples, where the first element is the file object
+	and the second element is a boolean which is True if this module opened the
+	file (and thus should close it).
+	
+	Raises
+	------
+	OSError
+		Accessing the given file path failed
+	
+	Parameters
+	----------
+	files
+		Collection or single instance of a filepath and file-like object
+	&quot;&quot;&quot;
+	if not isinstance(files, path_types) and not hasattr(files, &quot;read&quot;):
+		for f in ty.cast(ty.Iterable[clean_file_t], files):
+			yield clean_file(f)
+	else:
+		yield clean_file(ty.cast(clean_file_t, files))
+
+
+F = ty.TypeVar(&quot;F&quot;, bound=ty.Callable[..., ty.Dict[str, ty.Any]])
+
+
+class return_field(ty.Generic[T]):
+	&quot;&quot;&quot;Decorator that returns the given field of a json response.
+	
+	Parameters
+	----------
+	field
+		The response field to be returned for all invocations
+	&quot;&quot;&quot;
+	__slots__ = (&quot;field&quot;,)
+
+	field: str
+	
+	def __init__(self, field: str) -&gt; None:
+		self.field = field
+	
+	def __call__(self, cmd: F) -&gt; ty.Callable[..., T]:
+		&quot;&quot;&quot;Wraps a command so that only a specified field is returned.
+		
+		Parameters
+		----------
+		cmd
+			A command that is intended to be wrapped
+		&quot;&quot;&quot;
+		@wraps(cmd)
+		def wrapper(*args: ty.Any, **kwargs: ty.Any) -&gt; T:
+			&quot;&quot;&quot;Returns the specified field as returned by the wrapped function
+			
+			Parameters
+			----------
+			args
+				Positional parameters to pass to the wrapped callable
+			kwargs
+				Named parameter to pass to the wrapped callable
+			&quot;&quot;&quot;
+			res = cmd(*args, **kwargs)  # type: ty.Dict[str, T]
+			return res[self.field]
+		return wrapper
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

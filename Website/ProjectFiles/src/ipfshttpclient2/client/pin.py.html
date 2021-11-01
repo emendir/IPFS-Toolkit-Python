@@ -1,0 +1,308 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+from . import base
+
+
+class Section(base.SectionBase):
+	@base.returns_single_item(base.ResponseBase)
+	def add(self, path: base.cid_t, *paths: base.cid_t, recursive: bool = True,
+	        **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Pins objects to the node&#x27;s local repository
+		
+		Stores an IPFS object(s) from a given path in the local repository.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.pin.add(&quot;QmfZY61ukoQuCX8e5Pt7v8pRfhkyxwZKZMTodAtmvyGZ5d&quot;)
+			{&#x27;Pins&#x27;: [&#x27;QmfZY61ukoQuCX8e5Pt7v8pRfhkyxwZKZMTodAtmvyGZ5d&#x27;]}
+		
+		Parameters
+		----------
+		path
+			Path to object(s) to be pinned
+		recursive
+			Recursively unpin the object linked to by the specified object(s)
+		
+		Returns
+		-------
+			dict
+		
+		+------+-----------------------------------------------------------+
+		| Pins | List of IPFS objects that have been pinned by this action |
+		+------+-----------------------------------------------------------+
+		&quot;&quot;&quot;
+		kwargs.setdefault(&quot;opts&quot;, {})[&quot;recursive&quot;] = recursive
+		
+		args = (str(path), *(str(p) for p in paths))
+		return self._client.request(&#x27;/pin/add&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def ls(self, *paths: base.cid_t, type: str = &quot;all&quot;, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Lists objects pinned in the local repository
+		
+		By default, all pinned objects are returned, but the &#x60;&#x60;type&#x60;&#x60; flag or
+		arguments can restrict that to a specific pin type or to some specific
+		objects respectively. In particular the &#x60;&#x60;type=&quot;recursive&quot;&#x60;&#x60; argument will
+		only list objects added &#x60;&#x60;.pin.add(…)&#x60;&#x60; (or similar) and will greatly
+		speed processing as obtaining this list does *not* require a complete
+		repository metadata scan.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.pin.ls()
+			{&#x27;Keys&#x27;: {
+				&#x27;QmNNPMA1eGUbKxeph6yqV8ZmRkdVat … YMuz&#x27;: {&#x27;Type&#x27;: &#x27;recursive&#x27;},
+				&#x27;QmNPZUCeSN5458Uwny8mXSWubjjr6J … kP5e&#x27;: {&#x27;Type&#x27;: &#x27;recursive&#x27;},
+				&#x27;QmNg5zWpRMxzRAVg7FTQ3tUxVbKj8E … gHPz&#x27;: {&#x27;Type&#x27;: &#x27;indirect&#x27;},
+				…
+				&#x27;QmNiuVapnYCrLjxyweHeuk6Xdqfvts … wCCe&#x27;: {&#x27;Type&#x27;: &#x27;indirect&#x27;}
+			}}
+			
+			&gt;&gt;&gt; # While the above works you should always try to use &#x60;type=&quot;recursive&quot;&#x60;
+			&gt;&gt;&gt; # instead as it will greatly speed up processing and only lists
+			&gt;&gt;&gt; # explicit pins (added with &#x60;.pin.add(…)&#x60; or similar), rather than
+			&gt;&gt;&gt; # than all objects that won&#x27;t be removed as part of &#x60;.repo.gc()&#x60;:
+			&gt;&gt;&gt; client.pin.ls(type=&quot;recursive&quot;)
+			{&#x27;Keys&#x27;: {
+				&#x27;QmNNPMA1eGUbKxeph6yqV8ZmRkdVat … YMuz&#x27;: {&#x27;Type&#x27;: &#x27;recursive&#x27;},
+				&#x27;QmNPZUCeSN5458Uwny8mXSWubjjr6J … kP5e&#x27;: {&#x27;Type&#x27;: &#x27;recursive&#x27;},
+				…
+			}}
+			
+			&gt;&gt;&gt; client.pin.ls(&#x27;/ipfs/QmNNPMA1eGUbKxeph6yqV8ZmRkdVat … YMuz&#x27;)
+			{&#x27;Keys&#x27;: {
+				&#x27;QmNNPMA1eGUbKxeph6yqV8ZmRkdVat … YMuz&#x27;: {&#x27;Type&#x27;: &#x27;recursive&#x27;}}}
+			
+			&gt;&gt;&gt; client.pin.ls(&#x27;/ipfs/QmdBCSn4UJP82MjhRVwpABww48tXL3 … mA6z&#x27;)
+			ipfshttpclient.exceptions.ErrorResponse:
+				path &#x27;/ipfs/QmdBCSn4UJP82MjhRVwpABww48tXL3 … mA6z&#x27; is not pinned
+		
+		Parameters
+		----------
+		paths
+			The IPFS paths or CIDs to search for
+			
+			If none are passed, return information about all pinned objects.
+			If any of the passed CIDs is not pinned, then remote will
+			return an error and an :exc:&#x60;ErrorResponse&#x60; exception will be raised.
+		type
+			The type of pinned keys to list. Can be:
+			
+			 * &#x60;&#x60;&quot;direct&quot;&#x60;&#x60;
+			 * &#x60;&#x60;&quot;indirect&quot;&#x60;&#x60;
+			 * &#x60;&#x60;&quot;recursive&quot;&#x60;&#x60;
+			 * &#x60;&#x60;&quot;all&quot;&#x60;&#x60;
+		
+		Raises
+		------
+		~ipfsapi.exceptions.ErrorResponse
+			Remote returned an error. Remote will return an error
+			if any of the passed CIDs is not pinned. In this case,
+			the exception will contain &#x27;not pinned&#x27; in its args[0].
+		
+		Returns
+		-------
+			dict
+		
+		+------+--------------------------------------------------------------+
+		| Keys | Mapping of IPFS object names currently pinned to their types |
+		+------+--------------------------------------------------------------+
+		&quot;&quot;&quot;
+		kwargs.setdefault(&quot;opts&quot;, {})[&quot;type&quot;] = type
+		
+		args = tuple(str(p) for p in paths)
+		return self._client.request(&#x27;/pin/ls&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def rm(self, path: base.cid_t, *paths: base.cid_t, recursive: bool = True,
+	       **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Removes a pinned object from local storage
+		
+		Removes the pin from the given object allowing it to be garbage
+		collected if needed. That is, depending on the node configuration
+		it may not be garbage anytime soon or at all unless you manually
+		clean up the local repository using :meth:&#x60;~ipfshttpclient.repo.gc&#x60;.
+		
+		Also note that an object is pinned both directly (that is its type
+		is &#x60;&#x60;&quot;recursive&quot;&#x60;&#x60;) and indirectly (meaning that it is referenced
+		by another object that is still pinned) it may not be removed at all
+		after this.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.pin.rm(&#x27;QmfZY61ukoQuCX8e5Pt7v8pRfhkyxwZKZMTodAtmvyGZ5d&#x27;)
+			{&#x27;Pins&#x27;: [&#x27;QmfZY61ukoQuCX8e5Pt7v8pRfhkyxwZKZMTodAtmvyGZ5d&#x27;]}
+		
+		Parameters
+		----------
+		path
+			Path to object(s) to be unpinned
+		recursive
+			Recursively unpin the object linked to by the specified object(s)
+		
+		Returns
+		-------
+			dict
+		
+		+------+-------------------------------------------------------------+
+		| Pins | List of IPFS objects that have been unpinned by this action |
+		+------+-------------------------------------------------------------+
+		&quot;&quot;&quot;
+		kwargs.setdefault(&quot;opts&quot;, {})[&quot;recursive&quot;] = recursive
+		
+		args = (str(path), *(str(p) for p in paths))
+		return self._client.request(&#x27;/pin/rm&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def update(self, from_path: base.cid_t, to_path: base.cid_t, *,
+	           unpin: bool = True, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Replaces one pin with another
+		
+		Updates one pin to another, making sure that all objects in the new pin
+		are local. Then removes the old pin. This is an optimized version of
+		using first using :meth:&#x60;~ipfshttpclient.Client.pin.add&#x60; to add a new pin
+		for an object and then using :meth:&#x60;~ipfshttpclient.Client.pin.rm&#x60; to remove
+		the pin for the old object.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.pin.update(&quot;QmXMqez83NU77ifmcPs5CkNRTMQksBLkyfBf4H5g1NZ52P&quot;,
+			...              &quot;QmUykHAi1aSjMzHw3KmBoJjqRUQYNkFXm8K1y7ZsJxpfPH&quot;)
+			{&quot;Pins&quot;: [&quot;/ipfs/QmXMqez83NU77ifmcPs5CkNRTMQksBLkyfBf4H5g1NZ52P&quot;,
+					  &quot;/ipfs/QmUykHAi1aSjMzHw3KmBoJjqRUQYNkFXm8K1y7ZsJxpfPH&quot;]}
+		
+		Parameters
+		----------
+		from_path
+			Path to the old object
+		to_path
+			Path to the new object to be pinned
+		unpin
+			Should the pin of the old object be removed?
+		
+		Returns
+		-------
+			dict
+		
+		+------+-------------------------------------------------------------+
+		| Pins | List of IPFS objects that have been affected by this action |
+		+------+-------------------------------------------------------------+
+		&quot;&quot;&quot;
+		kwargs.setdefault(&quot;opts&quot;, {})[&quot;unpin&quot;] = unpin
+		
+		args = (str(from_path), str(to_path))
+		return self._client.request(&#x27;/pin/update&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_multiple_items(base.ResponseBase, stream=True)
+	def verify(self, path: base.cid_t, *paths: base.cid_t, verbose: bool = False,
+	           **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Verifies that all recursive pins are completely available in the local
+		repository
+		
+		Scan the repo for pinned object graphs and check their integrity.
+		Issues will be reported back with a helpful human-readable error
+		message to aid in error recovery. This is useful to help recover
+		from datastore corruptions (such as when accidentally deleting
+		files added using the filestore backend).
+		
+		This function returns an iterator has to be exhausted or closed
+		using either a context manager (&#x60;&#x60;with&#x60;&#x60;-statement) or its
+		&#x60;&#x60;.close()&#x60;&#x60; method.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; with client.pin.verify(&quot;QmN…TTZ&quot;, verbose=True) as pin_verify_iter:
+			...     for item in pin_verify_iter:
+			...         print(item)
+			...
+			{&quot;Cid&quot;:&quot;QmVkNdzCBukBRdpyFiKPyL2R15qPExMr9rV9RFV2kf9eeV&quot;,&quot;Ok&quot;:True}
+			{&quot;Cid&quot;:&quot;QmbPzQruAEFjUU3gQfupns6b8USr8VrD9H71GrqGDXQSxm&quot;,&quot;Ok&quot;:True}
+			{&quot;Cid&quot;:&quot;Qmcns1nUvbeWiecdGDPw8JxWeUfxCV8JKhTfgzs3F8JM4P&quot;,&quot;Ok&quot;:True}
+			…
+		
+		Parameters
+		----------
+		path
+			Path to object(s) to be checked
+		verbose
+			Also report status of items that were OK?
+		
+		Returns
+		-------
+			Iterable[dict]
+		
+		+-----+----------------------------------------------------+
+		| Cid | IPFS object ID checked                             |
+		+-----+----------------------------------------------------+
+		| Ok  | Whether the given object was successfully verified |
+		+-----+----------------------------------------------------+
+		&quot;&quot;&quot;
+		kwargs.setdefault(&quot;opts&quot;, {})[&quot;verbose&quot;] = verbose
+		
+		args = (str(path), *(str(p) for p in paths))
+		return self._client.request(&#x27;/pin/verify&#x27;, args, decoder=&#x27;json&#x27;, stream=True, **kwargs)
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

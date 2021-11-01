@@ -1,0 +1,131 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+from . import base
+
+
+class Section(base.SectionBase):
+	@base.returns_single_item(base.ResponseBase)
+	def add(self, peer: base.multiaddr_t, *peers: base.multiaddr_t,
+	        **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Adds peers to the bootstrap list
+		
+		Parameters
+		----------
+		peer
+			IPFS Multiaddr of a peer to add to the list
+		
+		Returns
+		-------
+			dict
+		&quot;&quot;&quot;
+		args = (str(peer), *(str(p) for p in peers))
+		return self._client.request(&#x27;/bootstrap/add&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def list(self, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Returns the addresses of peers used during initial discovery of the
+		IPFS network
+		
+		Peers are output in the format &#x60;&#x60;&lt;multiaddr&gt;/&lt;peerID&gt;&#x60;&#x60;.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.bootstrap.list()
+			{&#x27;Peers&#x27;: [
+				&#x27;/ip4/104.131.131.82/tcp/4001/ipfs/QmaCpDMGvV2BGHeYER … uvuJ&#x27;,
+				&#x27;/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRa … ca9z&#x27;,
+				&#x27;/ip4/104.236.179.241/tcp/4001/ipfs/QmSoLPppuBtQSGwKD … KrGM&#x27;,
+				…
+				&#x27;/ip4/178.62.61.185/tcp/4001/ipfs/QmSoLMeWqB7YGVLJN3p … QBU3&#x27;
+			]}
+		
+		Returns
+		-------
+			dict
+		
+		+-------+-------------------------------+
+		| Peers | List of known bootstrap peers |
+		+-------+-------------------------------+
+		&quot;&quot;&quot;
+		return self._client.request(&#x27;/bootstrap&#x27;, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def rm(self, peer: base.multiaddr_t, *peers: base.multiaddr_t,
+	       **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Removes peers from the bootstrap list
+		
+		Parameters
+		----------
+		peer
+			IPFS Multiaddr of a peer to remove from the list
+		
+		Returns
+		-------
+			dict
+		&quot;&quot;&quot;
+		args = (str(peer), *(str(p) for p in peers))
+		return self._client.request(&#x27;/bootstrap/rm&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+
+<body>
+  <style>
+    #frontEnd .caret {
+      position: relative;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    #frontEnd .caret-down {
+      position: relative;
+    }
+
+    #frontEnd .caret:before {
+      content: '\25B8';
+      display: inline-block;
+      font-size: 17px;
+    }
+
+    #frontEnd .caret-down:before {
+      content: '\25B8';
+      display: inline-block;
+      font-size: 17px;
+      transform: rotate(90deg)
+    }
+
+    #frontEnd ul {
+      list-style: none;
+      border-left: 1px solid grey;
+
+      padding: 0;
+      margin: 0;
+      padding-left: 10px;
+    }
+
+    #frontEnd ul li {
+      position: relative;
+      text-transform: capitalize;
+
+    }
+
+    #frontEnd ul li:before {
+      content: '';
+      position: absolute;
+      color: white;
+      top: 12px;
+      left: -10px;
+      height: 1px;
+      width: 7px;
+      border-bottom: 1px solid grey;
+      # colour of the short line before each list entry
+    }
+
+    .nested {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .closeIT {
+      background-color: red;
+      color: white;
+      padding: 0.1rem 0.5rem;
+      margin-left: 1px;
+      cursor: pointer;
+    }
+
+    .row {
+      position: absolute;
+      top: 210;
+      left: 0;
+      color: white;
+    }
+
+    input {
+      overflow: visible;
+      border: none;
+    }
+
+    .fa {
+      pointer-events: none;
+    }
+  </style>
+
+<div class='row'><div class='col-md-4'><ul id='frontEnd'><li><span class='caret'>src</span><ul class='nested'><li onclick='ItemClicked(this)' id='./ProjectFiles/src/IPFS_API.py.html'>IPFS_API.py</li><li><span class='caret'>Examples</span><ul class='nested'><li onclick='ItemClicked(this)' id='./ProjectFiles/src/Examples/Demo-Conversation-Receiver.py.html'>Demo-Conversation-Receiver.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/Examples/Demo-File-Sender.py.html'>Demo-File-Sender.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/Examples/Demo-Receiver.py.html'>Demo-Receiver.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/Examples/Demo-Conversation-Starter.py.html'>Demo-Conversation-Starter.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/Examples/Demo-Sender.py.html'>Demo-Sender.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/Examples/Demo-File-Receiver.py.html'>Demo-File-Receiver.py</li></ul></li><li><span class='caret'>ipfshttpclient2</span><ul class='nested'><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/encoding.py.html'>encoding.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/utils.py.html'>utils.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/http_httpx.py.html'>http_httpx.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/multipart.py.html'>multipart.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/__init__.py.html'>__init__.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/exceptions.py.html'>exceptions.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/http_requests.py.html'>http_requests.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/version.py.html'>version.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/requests_wrapper.py.html'>requests_wrapper.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/http_common.py.html'>http_common.py</li><li><span class='caret'>client</span><ul class='nested'><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/pubsub.py.html'>pubsub.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/files.py.html'>files.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/repo.py.html'>repo.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/p2p.py.html'>p2p.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/name.py.html'>name.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/swarm.py.html'>swarm.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/__init__.py.html'>__init__.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/miscellaneous.py.html'>miscellaneous.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/block.py.html'>block.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/bootstrap.py.html'>bootstrap.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/pin.py.html'>pin.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/bitswap.py.html'>bitswap.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/config.py.html'>config.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/dht.py.html'>dht.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/key.py.html'>key.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/unstable.py.html'>unstable.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/base.py.html'>base.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/object.py.html'>object.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/client/dag.py.html'>dag.py</li></ul></li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/filescanner.py.html'>filescanner.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/ipfshttpclient2/http.py.html'>http.py</li></ul></li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/__init__.py.html'>__init__.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/IPFS_LNS.py.html'>IPFS_LNS.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/src/IPFS_DataTransmission.py.html'>IPFS_DataTransmission.py</li></ul></li><li onclick='ItemClicked(this)' id='./ProjectFiles/setup.py.html'>setup.py</li><li onclick='ItemClicked(this)' id='./ProjectFiles/pyproject.toml.html'>pyproject.toml</li><li onclick='ItemClicked(this)' id='./ProjectFiles/README.md.html'>README.md</li><li onclick='ItemClicked(this)' id='./ProjectFiles/requirements.txt.html'>requirements.txt</li><li onclick='ItemClicked(this)' id='./ProjectFiles/HowItWorks.md.html'>HowItWorks.md</li><li onclick='ItemClicked(this)' id='./ProjectFiles/Prerequisites.txt.html'>Prerequisites.txt</li></ul></div></div>
+  <script>
+    var ItemClicked = function(e) {
+      parent.ChangeCodeFile(e.id, e.innerHTML);
+    };
+
+    carets = document.getElementsByClassName('caret');
+
+    for (var i = 0; i < carets.length; i++) {
+      carets[i].addEventListener('click', function() {
+        this.classList.toggle('caret-down')
+        parnt = this.parentElement;
+        parnt.querySelector('.nested').classList.toggle('active')
+      })
+    }
+  </script>
+</body>

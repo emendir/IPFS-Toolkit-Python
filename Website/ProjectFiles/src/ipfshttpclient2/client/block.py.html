@@ -1,0 +1,144 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+from . import base
+
+from .. import multipart
+from .. import utils
+
+
+class Section(base.SectionBase):
+	&quot;&quot;&quot;Interacting with raw IPFS blocks&quot;&quot;&quot;
+	
+	def get(self, cid: base.cid_t, **kwargs: base.CommonArgs):
+		r&quot;&quot;&quot;Returns the raw contents of a block
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.block.get(&#x27;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#x27;)
+			b&#x27;\x121\n&quot;\x12 \xdaW&gt;\x14\xe5\xc1\xf6\xe4\x92\xd1 … \n\x02\x08\x01&#x27;
+		
+		Parameters
+		----------
+		cid
+			The CID of an existing block to get
+		
+		Returns
+		-------
+			bytes
+				Contents of the requested block
+		&quot;&quot;&quot;
+		args = (str(cid),)
+		return self._client.request(&#x27;/block/get&#x27;, args, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def put(self, file: utils.clean_file_t,
+	        **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Stores the contents of the given file object as an IPFS block
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.block.put(io.BytesIO(b&#x27;Mary had a little lamb&#x27;))
+				{&#x27;Key&#x27;:  &#x27;QmeV6C6XVt1wf7V7as7Yak3mxPma8jzpqyhtRtCvpKcfBb&#x27;,
+				 &#x27;Size&#x27;: 22}
+		
+		Parameters
+		----------
+		file
+			The data to be stored as an IPFS block
+		
+		Returns
+		-------
+			dict
+				Information about the new block
+				
+				See :meth:&#x60;~ipfshttpclient.Client.block.stat&#x60;
+		&quot;&quot;&quot;
+		body, headers = multipart.stream_files(file, chunk_size=self.chunk_size)
+		return self._client.request(&#x27;/block/put&#x27;, decoder=&#x27;json&#x27;, data=body,
+		                            headers=headers, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def stat(self, cid: base.cid_t, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Returns a dict with the size of the block with the given hash.
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.block.stat(&#x27;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#x27;)
+			{&#x27;Key&#x27;:  &#x27;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#x27;,
+			 &#x27;Size&#x27;: 258}
+		
+		Parameters
+		----------
+		cid
+			The CID of an existing block to stat
+		
+		Returns
+		-------
+			dict
+				Information about the requested block
+		&quot;&quot;&quot;
+		args = (str(cid),)
+		return self._client.request(&#x27;/block/stat&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

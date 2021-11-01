@@ -1,0 +1,206 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+import appdirs
+import os
+import os.path
+import json
+import ipfshttpclient2 as ipfshttpclient
+from subprocess import Popen, PIPE
+from threading import Thread
+
+ipfs = ipfshttpclient.client.Client()
+ipfs_dir = os.path.join(appdirs.user_data_dir(), &quot;IPFS&quot;)
+lns_dir = os.path.join(appdirs.user_data_dir(), &quot;IPFS&quot;, &quot;LNS&quot;)
+
+if not os.path.exists(ipfs_dir):
+    os.makedirs(ipfs_dir)
+
+if not os.path.exists(lns_dir):
+    os.makedirs(lns_dir)
+
+class Node:
+    known_multiaddrs = list()
+    connection_checker = None
+    def __init__(self, id, name = &quot;&quot;, known_multiaddrs = list()):
+        if name == &quot;&quot;:
+            self.id, self.name, self.known_multiaddrs = json.loads(id)
+        else:
+            self.id = id
+            self.name = name
+            self.known_multiaddrs = known_multiaddrs
+
+    def ToSerial(self):
+        return json.dumps([self.id, self.name, self.known_multiaddrs])
+
+    def RememberMultiaddrs(self):
+        multiaddrs = ipfs.dht.findpeer(self.id).get(&quot;Responses&quot;)[0].get(&quot;Addrs&quot;)
+        edited = False
+
+        for addr in multiaddrs:
+            if not &quot;/ip6/::&quot; in addr and not &quot;/ip4/192.168&quot; in addr and not &quot;/ip4/127.0&quot; in addr:
+                found = False
+                for k_addr in self.known_multiaddrs:
+                    if addr == k_addr[0]:
+                        k_addr[1] += 1
+                        edited = True
+                        found =True
+                        break
+                if not found:
+                    self.known_multiaddrs.insert(0, [addr,1])
+                    edited = True
+        if edited:
+            SaveContacts()
+
+    def TryToConnect(self):
+        &quot;&quot;&quot;Tries to connect to this IPFS peer using &#x27;ipfs dht findpeer ...&#x27;
+        and &#x27;ipfs swarm connect ...&#x27; with remembered multiaddresses.
+        Note: Can take a long time time run. You generally want to use
+        CheckConnection() instead of TryToConnect(), that function runs this
+        function if it is not already running&quot;&quot;&quot;
+        # first trying &#x27;ipfs dht findpeer ...&#x27;
+        try:
+            response = ipfs.dht.findpeer(self.id)
+            if(len(response.get(&quot;Responses&quot;)[0].get(&quot;Addrs&quot;))&gt; 0):  # if connections succeeds
+                self.RememberMultiaddrs()
+                return True
+        except:
+            # second trying &#x27;ipfs swarm connect&#x27; with all of this peer&#x27;s previously used multiaddresses
+            for addr in self.known_multiaddrs:
+                #ipfs.swarm.connect(addr + &quot;/ipfs/&quot; + self.id)
+                proc = Popen([&#x27;ipfs&#x27;, &#x27;swarm&#x27;, &#x27;connect&#x27;, addr[0] + &quot;/ipfs/&quot; + self.id], stdout=PIPE)
+                proc.wait()
+
+                if proc.stdout.readline()[-8:-1].decode() == &#x27;success&#x27;:
+                    self.RememberMultiaddrs()
+                    return True
+            # if we still haven&#x27;t found him, try &#x27;ipfs dht findpeer &#x27; one more time
+            try:
+                response = ipfs.dht.findpeer(self.id)
+                if(len(response.get(&quot;Responses&quot;)[0].get(&quot;Addrs&quot;))&gt; 0):
+                    self.RememberMultiaddrs()
+                    return True
+                else:
+                    return False
+            except:
+                return False
+
+    def CheckConnection(self):
+        &quot;&quot;&quot;Starts a new thread to try to connect to this peer,
+        if that thread isn&#x27;t already running.&quot;&quot;&quot;
+        if not self.connection_checker or not self.connection_checker.is_alive():
+            self.connection_checker = Thread(target=self.TryToConnect,args=())
+            self.connection_checker.start()
+
+contacts = list()
+
+try:
+    filereader = open(os.path.join(lns_dir, &quot;config&quot;), &quot;r&quot;)
+    lines = filereader.readlines()
+    filereader.close()
+    for line in lines:
+        contacts.append(Node(line))
+except:
+    filereader = open(os.path.join(lns_dir, &quot;config&quot;), &quot;w+&quot;)
+    filereader.close()
+
+def SaveContacts():
+    &quot;&quot;&quot;Saves the list of contacts to the config file&quot;&quot;&quot;
+    filereader = open(os.path.join(lns_dir, &quot;config&quot;), &quot;w+&quot;)
+    for contact in contacts:
+        filereader.write(contact.ToSerial() + &quot;\n&quot;)
+    filereader.close()
+
+def LookUpContact(name):
+    for contact in contacts:
+        if contact.name == name:
+            return contact.id
+lookupcontact = LookUpContact
+LookupContact = LookUpContact
+lookupContact = LookUpContact
+
+def AddContact(id, name):
+    newcontact = Node(id, name)
+    contacts.append(newcontact)
+    SaveContacts()
+    return newcontact
+
+
+addcontact = AddContact
+addContact = AddContact
+
+def GetContact(id):
+    &quot;&quot;&quot;Parameters:
+        id: either the name or IPFS ID of the contact to retrieve&quot;&quot;&quot;
+    for contact in contacts:
+        if id == contact.id or id == contact.name:
+            return contact
+
+def RemoveContact(id, name):
+    for contact in contacts:
+        if contact.id == id and contact.name == name:
+            contacts.remove(contact)
+            break
+
+    SaveContacts()
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

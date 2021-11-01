@@ -1,0 +1,198 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+from . import base
+
+
+class Section(base.SectionBase):
+	#TODO: Add &#x60;export(name, password)&#x60;
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def gen(self, key_name: str, type: str, size: int = 2048,
+	        **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Adds a new public key that can be used for
+		:meth:&#x60;~ipfshttpclient.Client.name.publish&#x60;
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.key.gen(&#x27;example_key_name&#x27;)
+			{&#x27;Name&#x27;: &#x27;example_key_name&#x27;,
+			 &#x27;Id&#x27;: &#x27;QmQLaT5ZrCfSkXTH6rUKtVidcxj8jrW3X2h75Lug1AV7g8&#x27;}
+		
+		Parameters
+		----------
+		key_name
+			Name of the new Key to be generated. Used to reference the Keys.
+		type
+			Type of key to generate. The current possible keys types are:
+			
+			 * &#x60;&#x60;&quot;rsa&quot;&#x60;&#x60;
+			 * &#x60;&#x60;&quot;ed25519&quot;&#x60;&#x60;
+		size
+			Bitsize of key to generate
+		
+		Returns
+		-------
+			dict
+		
+		+------+---------------------------------------------------+
+		| Name | The name of the newly generated key               |
+		+------+---------------------------------------------------+
+		| Id   | The key ID/fingerprint of the newly generated key |
+		+------+---------------------------------------------------+
+		&quot;&quot;&quot;
+		
+		opts = {&quot;type&quot;: type, &quot;size&quot;: size}
+		kwargs.setdefault(&quot;opts&quot;, {}).update(opts)
+		args = (key_name,)
+		
+		return self._client.request(&#x27;/key/gen&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	#TODO: Add &#x60;import(name, pam, password)&#x60;
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def list(self, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Returns a list of all available IPNS keys
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.key.list()
+			{&#x27;Keys&#x27;: [
+				{&#x27;Name&#x27;: &#x27;self&#x27;,
+				 &#x27;Id&#x27;: &#x27;QmQf22bZar3WKmojipms22PkXH1MZGmvsqzQtuSvQE3uhm&#x27;},
+				{&#x27;Name&#x27;: &#x27;example_key_name&#x27;,
+				 &#x27;Id&#x27;: &#x27;QmQLaT5ZrCfSkXTH6rUKtVidcxj8jrW3X2h75Lug1AV7g8&#x27;}
+			]}
+		
+		Returns
+		-------
+			dict
+		
+		+------+--------------------------------------------------------+
+		| Keys | List of dictionaries with Names and Ids of public keys |
+		+------+--------------------------------------------------------+
+		&quot;&quot;&quot;
+		return self._client.request(&#x27;/key/list&#x27;, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def rename(self, key_name: str, new_key_name: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Rename an existing key
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.key.rename(&quot;bla&quot;, &quot;personal&quot;)
+			{&quot;Was&quot;: &quot;bla&quot;,
+			 &quot;Now&quot;: &quot;personal&quot;,
+			 &quot;Id&quot;: &quot;QmeyrRNxXaasZaoDXcCZgryoBCga9shaHQ4suHAYXbNZF3&quot;,
+			 &quot;Overwrite&quot;: False}
+		
+		Parameters
+		----------
+		key_name
+			Current name of the key to rename
+		new_key_name
+			New name of the key
+		
+		Returns
+		-------
+			dict
+				Information about the key renameal
+		&quot;&quot;&quot;
+		args = (key_name, new_key_name)
+		return self._client.request(
+			&#x27;/key/rename&#x27;, args, decoder=&#x27;json&#x27;, **kwargs
+		)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def rm(self, key_name: str, *key_names: str, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Removes one or more keys
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.key.rm(&quot;bla&quot;)
+			{&quot;Keys&quot;: [
+				{&quot;Name&quot;: &quot;bla&quot;,
+				 &quot;Id&quot;: &quot;QmfJpR6paB6h891y7SYXGe6gapyNgepBeAYMbyejWA4FWA&quot;}
+			]}
+		
+		Parameters
+		----------
+		key_name
+			Name of the key(s) to remove.
+		
+		Returns
+		-------
+			dict
+		
+		+------+--------------------------------------------------+
+		| Keys | List of key names and IDs that have been removed |
+		+------+--------------------------------------------------+
+		&quot;&quot;&quot;
+		args = (key_name,) + key_names
+		return self._client.request(&#x27;/key/rm&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>

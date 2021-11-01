@@ -1,0 +1,132 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
+  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/python.min.js"></script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 15px;
+      font-size: 12
+    }
+    .hljs {
+      margin: -15px;
+      word-wrap: break-word;
+    }
+    body, .hljs {
+      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
+    }
+    .number {
+      float:left;
+      text-align: right;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .ln {
+      opacity: 0.5;
+    }
+    pre {
+      tab-size:      4;
+    }
+  </style>
+</head>
+<body>
+<pre><code class="py">
+from . import base
+
+from .. import utils
+
+
+class Section(base.SectionBase):
+	@base.returns_single_item(base.ResponseBase)
+	def get(self, **kwargs: base.CommonArgs):
+		#TODO: Support the optional &#x60;key&#x60; parameter
+		&quot;&quot;&quot;Returns the currently used node configuration
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; config = client.config.get()
+			&gt;&gt;&gt; config[&#x27;Addresses&#x27;]
+			{&#x27;API&#x27;: &#x27;/ip4/127.0.0.1/tcp/5001&#x27;,
+			 &#x27;Gateway&#x27;: &#x27;/ip4/127.0.0.1/tcp/8080&#x27;,
+			 &#x27;Swarm&#x27;: [&#x27;/ip4/0.0.0.0/tcp/4001&#x27;, &#x27;/ip6/::/tcp/4001&#x27;]},
+			&gt;&gt;&gt; config[&#x27;Discovery&#x27;]
+			{&#x27;MDNS&#x27;: {&#x27;Enabled&#x27;: True, &#x27;Interval&#x27;: 10}}
+		
+		Returns
+		-------
+			dict
+				The entire IPFS daemon configuration
+		&quot;&quot;&quot;
+		return self._client.request(&#x27;/config/show&#x27;, decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def replace(self, config: utils.json_dict_t, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Replaces the existing configuration with a new configuration tree
+		
+		Make sure to back up the config file first if neccessary, as this
+		operation can not be undone.
+		&quot;&quot;&quot;
+		return self._client.request(&#x27;/config/replace&#x27;, (config,), decoder=&#x27;json&#x27;, **kwargs)
+	
+	
+	@base.returns_single_item(base.ResponseBase)
+	def set(self, key: str, value: utils.json_value_t = None, **kwargs: base.CommonArgs):
+		&quot;&quot;&quot;Adds or replaces a single configuration value
+		
+		.. code-block:: python
+		
+			&gt;&gt;&gt; client.config.set(&quot;Addresses.Gateway&quot;)
+			{&#x27;Key&#x27;: &#x27;Addresses.Gateway&#x27;, &#x27;Value&#x27;: &#x27;/ip4/127.0.0.1/tcp/8080&#x27;}
+			&gt;&gt;&gt; client.config.set(&quot;Addresses.Gateway&quot;, &quot;/ip4/127.0.0.1/tcp/8081&quot;)
+			{&#x27;Key&#x27;: &#x27;Addresses.Gateway&#x27;, &#x27;Value&#x27;: &#x27;/ip4/127.0.0.1/tcp/8081&#x27;}
+		
+		Parameters
+		----------
+		key
+			The key of the configuration entry (e.g. &quot;Addresses.API&quot;)
+		value
+			The value to set the configuration entry to
+		
+		Returns
+		-------
+			dict
+		
+		+-------+---------------------------------------------+
+		| Key   | The requested configuration key             |
+		+-------+---------------------------------------------+
+		| Value | The new value of the this configuration key |
+		+-------+---------------------------------------------+
+		&quot;&quot;&quot;
+		args = (key, value)
+		return self._client.request(&#x27;/config&#x27;, args, decoder=&#x27;json&#x27;, **kwargs)
+</code></pre>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+  setTimeout(function() {
+    $(".number").css("width", "20px");
+    $(".number span").attr("class", "ln hljs-subst");
+    resize();
+    var timer = false;
+    $(window).resize(function() {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        resize();
+      }, 200);
+    })
+
+  }, 100);
+  function resize() {
+    $("span.code").each(function(i, c) {
+      var h = $(c).height();
+      $(c).prev().height(h);
+    });
+  }
+</script>
+</body>
+</html>
