@@ -3,3 +3,6 @@ Conversation:
 
 Transmitter:
   Progress function
+
+FileTransmission:
+  abortion
