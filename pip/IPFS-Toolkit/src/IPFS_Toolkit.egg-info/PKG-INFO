@@ -1,3 +1,18 @@
+Metadata-Version: 2.1
+Name: IPFS-Toolkit
+Version: 0.0.9
+Summary: A set of tools  for working with IPFS in Python: a programmer-friendly API wrapper, P2P data-transmission machinery, and accelerated connections to known peers
+Home-page: https://ipfs.io/ipns/k2k4r8m2dzqi5s8jm3shm77sr1728ex7bsds0fk6e9gkf2ld2f3mnhcy
+Author: emendir
+License: UNKNOWN
+Project-URL: Source Code on IPNS, https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh
+Project-URL: Github, https://github.com/emendir/IPFS-Toolkit-Python
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
 A library for working with IPFS in Python.  
 It includes a programmer-friendly wrapper called __IPFS-API__ for the official IPFS Python API (ipfshttpclient), a module called __IPFS-DataTransmission__ for direct P2P data transmission between two IPFS-Nodes and a module called __IPFS-LNS__ for remembering the multiaddrs of known IPFS nodes ("contacts") to speed up connection times.
 
@@ -118,3 +133,5 @@ IPFS (faster):
 https://ipfs.io/ipfs/QmQRUfBXnjqDkGKVUNro3BCUF7frcpkQ1NnRq6zaUfva8u  
 IPNS (more likely to be up-to-date):
 https://ipfs.io/ipns/k2k4r8m2dzqi5s8jm3shm77sr1728ex7bsds0fk6e9gkf2ld2f3mnhcy
+
+

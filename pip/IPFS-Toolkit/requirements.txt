@@ -1,1 +1,9 @@
+# these are the python dependencies you need to install if you want to work with IPFS-Toolkit from source
+# run 'pip install [modulename]' for all of the following modules
+setuptools
+wheel
 multiaddr
+appdirs
+idna
+httpcore
+httpx
