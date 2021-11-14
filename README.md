@@ -115,11 +115,11 @@ Because the Python API for interacting with IPFS (ipfshttpclient) doesn't yet su
 Naturally, I host this project on IPFS too
 ### Source Code:
 IPFS (faster):
-https://ipfs.io/ipfs/QmdCszoMQii7oVKHe6xmHpd8eHyRC8n4LpQu4ii7nLzu7L  
+https://ipfs.io/ipfs/QmU3wAuZLJsbaLy4rBRBNRi7aRivjRrc4FdoHkSzs7fasv  
 IPNS (more likely to be up-to-date):
 https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh
 ### Website:
 IPFS (faster):
-https://ipfs.io/ipfs/QmQRUfBXnjqDkGKVUNro3BCUF7frcpkQ1NnRq6zaUfva8u  
+https://ipfs.io/ipfs/QmTxBa33rCcnr6VxyH3dDd2oNddjMM8WkF6aNpq5mew54F  
 IPNS (more likely to be up-to-date):
 https://ipfs.io/ipns/k2k4r8m2dzqi5s8jm3shm77sr1728ex7bsds0fk6e9gkf2ld2f3mnhcy
