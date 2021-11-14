@@ -18,3 +18,7 @@ To use the IPFS_DataTransmission, the following software must be installed on yo
     pip3 install setuptools
     pip3 install wheel
     pip3 install multiaddr
+    pip3 install appdirs
+    pip3 install idna
+    pip3 install httpcore
+    pip3 install httpx

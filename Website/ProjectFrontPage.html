@@ -1,90 +1,97 @@
 <html>
-<head>
-  <meta charset="UTF-8">
-  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-  <link rel="stylesheet" href="https://rawgithub.com/highlightjs/cdn-release/master/build/styles/atom-one-dark.min.css">
-  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/highlight.min.js"></script>
-  <script src="https://rawgithub.com/highlightjs/cdn-release/master/build/languages/markdown.min.js"></script>
-  <style>
-    body {
-      margin: 0px;
-      padding: 15px;
-      font-size: 12
-    }
-    .hljs {
-      margin: -15px;
-      word-wrap: break-word;
-    }
-    body, .hljs {
-      font-family: Menlo, Consolas, DejaVu Sans Mono, monospace;
-    }
-    .number {
-      float:left;
-      text-align: right;
-      display: inline-block;
-      margin-right: 5px;
-    }
-    .ln {
-      opacity: 0.5;
-    }
-    pre {
-      tab-size:      4;
-    }
-  </style>
-</head>
-<body>
-<pre><code class="md">
-A library for working with IPFS in Python. It includes a programmer-friendly wrapper (IPFS-API) for the official IPFS Python API (ipfshttpclient). It also includes a module (IPFS-DataTransmission) for direct P2P data transmission between two IPFS-Nodes.
+<body bgcolor="#222" text="#eee">
 
-# Package Contents:
-## Modules:
-- IPFS_API: a wrapper for the module ipfshttpclient2 that makes it easier to work with IPFS in Python
-- IPFS_DataTransmission: a Python module that enables P2P data transmission between IPFS nodes
-- IPFS_LNS: a Python module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)
-- ipfshttpclient2: a modified version of the official ipfshttpclient module that has been expanded to include the ipfs.p2p functions
-## Other:
-- Examples: a folder of scripts demonstrating how to work with IPFS_DataTransmission
-- Prerequisites.txt: a set of instructions for installing and configuring all the prerequisite software tools needed for using this module (IPFS and Python)
-- HowItWorks.txt: provides a conceptual overview of how this module works, explaining the understanding needed to use the module properly and giving some technical details about how this module interacts with IPFS
-
-
-# Getting started with IPFS-DataTransmission:
-1. Read HowItWorks.md in order to understand the basic concepts involved.
-2. Read and try out the demo scripts in the Examples folder.
-3. Reread HowItWorks.md to complete your understanding of how IPFS-DataTransmission works.
-
-
-# Links
-Naturally, I host this project on IPFS too:
-IPFS (faster):
-https://ipfs.io/ipfs/QmdCszoMQii7oVKHe6xmHpd8eHyRC8n4LpQu4ii7nLzu7L
+<p>A library for working with IPFS in Python.<br>It includes a programmer-friendly wrapper called <strong>IPFS-API</strong> for the official IPFS Python API (ipfshttpclient), a module called <strong>IPFS-DataTransmission</strong> for direct P2P data transmission between two IPFS-Nodes and a module called <strong>IPFS-LNS</strong> for remembering the multiaddrs of known IPFS nodes (&quot;contacts&quot;) to speed up connection times.</p>
+<h1 id="package-contents-">Package Contents:</h1>
+<h2 id="modules-">Modules:</h2>
+<ul>
+<li><strong>IPFS_API</strong>: a wrapper for the module ipfshttpclient2 that makes it easier to work with IPFS in Python</li>
+<li><strong>IPFS_DataTransmission</strong>: a Python module that enables P2P data transmission between IPFS nodes</li>
+<li><strong>IPFS_LNS</strong>: a Python module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)</li>
+<li><strong>ipfshttpclient2</strong>: a modified version of the official ipfshttpclient module that has been expanded to include the ipfs.p2p functions<h2 id="other-">Other:</h2>
+</li>
+<li><strong>Examples</strong>: a folder of scripts demonstrating how to work with IPFS_DataTransmission</li>
+</ul>
+<h1 id="getting-started-with-ipfs-toolkit-">Getting started with IPFS-Toolkit:</h1>
+<ol>
+<li>Install IPFS-Toolkit (see below)</li>
+<li>Read this <em>Modules Contained in IPFS-Toolkit</em> section below to learn what this package contains and how it works. </li>
+<li>For IPFS-DataTransmission: Read and try out the demo scripts in the Examples folder.</li>
+</ol>
+<h2 id="setup">Setup</h2>
+<h3 id="installation">Installation</h3>
+<p><code>pip install IPFS-Toolkit</code></p>
+<h3 id="prerequsites">Prerequsites</h3>
+<p>IPFS-Toolkit is made for interacting with IPFS in the Python programming language. One configuration must be applied to IPFS in order to use IPFS-Toolkit&#39;s main features.</p>
+<ul>
+<li><strong>Install IPFS</strong> (Desktop version or CLI, doesn&#39;t matter).
+  <a href="https://docs.ipfs.io/install/">https://docs.ipfs.io/install/</a></li>
+<li><p><strong>Enable &quot;Libp2pStreamMounting&quot; in IPFS:</strong><br><strong>Desktop Version/WebUI:</strong> on the Settings tab, scroll down to &quot;IPFS CONFIG&quot; and change the line that reads:</p>
+<pre><code><span class="hljs-keyword">change</span> <span class="hljs-keyword">from</span>:
+<span class="hljs-string">"Libp2pStreamMounting"</span>: <span class="hljs-literal">false</span>,
+<span class="hljs-keyword">to</span>:
+<span class="hljs-string">"Libp2pStreamMounting"</span>: <span class="hljs-literal">true</span>,
+</code></pre><p>Click the &quot;Save&quot; button and restart IPFS.</p>
+<p><strong>CLI Version:</strong> run:<br>  <code>ipfs config --json Experimental.Libp2pStreamMounting true</code></p>
+</li>
+<li><strong>Python3</strong>, version 3.6 or above
+  <a href="https://www.python.org/downloads/">https://www.python.org/downloads/</a></li>
+<li><strong>Pip</strong> for Python3:
+  <a href="https://pip.pypa.io/en/stable/installing/">https://pip.pypa.io/en/stable/installing/</a></li>
+<li>If you want to use the source code, install the following prerequisite Python modules:<br>  <code>pip3 install setuptools</code><br>  <code>pip3 install wheel</code><br>  <code>pip3 install multiaddr</code><br>  <code>pip3 install appdirs</code>  </li>
+</ul>
+<h1 id="modules-contained-in-ipfs-toolkit">Modules Contained in IPFS-Toolkit</h1>
+<h2 id="ipfs-api">IPFS-API</h2>
+<p><code>import IPFS_API</code></p>
+<p>Usage examples:<br><code>print(IPFS_API.MyID()) # print your IPFS peer ID</code><br><code>cid = IPFS_API.Upload(&#39;./SomeFileOrDir&#39;) # upload file or directory to IPFS and store it&#39;s CID in a variable</code>  </p>
+<p><code># Managing IPNS keys</code><br><code>IPFS_API.CreateIPNS_Record(&#39;MyWebsite&#39;) # generate a pair of IPNS name keys</code><br><code>IPFS_API.UpdateIPNS_Record(&#39;MyWebsite&#39;, &#39;./SomeFileOrDir&#39;) # upload file to IPFS &amp; publish</code><br><code>IPFS_API.UpdateIPNS_RecordFromHash(&#39;MyWebsite&#39;, cid) # publish IPFS content to IPNS key</code>  </p>
+<p><code># IPFS PubSub</code><br><code>IPFS_API.SubscribeToTopic(&quot;test&quot;, print) # print is the eventhandler</code><br><code>IPFS_API.PublishToTopic(&quot;test&quot;, &quot;Hello there!&quot;)</code></p>
+<h2 id="ipfs-datatransmission">IPFS-Datatransmission</h2>
+<p><code>import IPFS_DataTransmission</code></p>
+<p>A Python module for limitless, easy, private peer-to-peer data transmission other over the IPFS Network.</p>
+<p>This module has 3 pairs functions for use by the user:</p>
+<ul>
+<li><strong>Simple data transmission:</strong><ul>
+<li><code>TransmitData(data, peerID, listener_name)</code></li>
+<li><code>ListenForTransmissions(listener_name,</code> eventhandler)</li>
+</ul>
+</li>
+<li><strong>File Transmission:</strong><ul>
+<li><code>TransmitFile(data, peerID, listener_name)</code></li>
+<li><code>ListenForFileTransmissions(listener_name, eventhandler)</code></li>
+</ul>
+</li>
+<li><strong>Conversations (Ping-Pong data Transmission):</strong><ul>
+<li><code>StartConversation(data, peerID, listener_name)</code></li>
+<li><code>ListenForConversations(listener_name, eventhandler)</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="listener-functions-">Listener Functions:</h3>
+<p>The listener functions (ListenForTransmissions, ListenForFileTransmissions and ListenForConversations) produce Listener objects () that run on their own threads waiting for incoming data transmission or conversation requests. When another computer wants to send the first computer somthing, the other computer sends a transmission request which the Listener object receives and reacts to by creating a Transmission reception object () which runs on its own separate thread to receive the transmission, or in the case of the conversation listener, calls its user-defined eventhandler so that the conversation can be joined or ignored.
+This system of receiving data transmissions/conversations allows a computer to receive multiple transmission addressed to the same listener simultaneously.
+Multiple Listeners of the same type (the types being DataTransmission, FileTransmission, or Conversation) can be run simultaneously and independently, for example by different programs. Those different listeners (instances of ListenForTransmissions) must me named to distinguish them from each other for addressing purposes. This name is the &quot;listener_name&quot; parameter in the listener functions. The name is chosen by the user when creating the listener (e.g. when calling ListenForTransmission()), and must be provided when starting a transmission (e.g. when calling TransmitData()).</p>
+<h2 id="ipfs-lns-">IPFS-LNS:</h2>
+<p><code>import IPFS_LNS</code></p>
+<p>IPFS-LNS (IPFS Local Name System) allows you to store IPFS nodes&#39; peer IDs and names in a database stored on your local machine. IPFS-LNS also stores a list of multiaddresses (essentially IP addresses) that the peer has been known to use, as long as you use IPFS-LNS to connect or check the connection to that peer. Every time you try to connect to the peer, IPFS-LNS tries to specifically connect to the peer using the known multiaddresses from previous connections, which can dramatically increase the speed of doing so compared to searching the whole IPFS network for the peer.</p>
+<p>Basic usage:<br><code>import IPFS_API</code>  </p>
+<p><code># check connection to peer of peerID &quot;QmHash&quot; and whom we call &quot;Bob&quot;, add him to our list of known peers (&quot;contacts&quot;) if he is not already added</code><br><code>IPFS_API.CheckPeerConnection(&quot;QmHash&quot;, &quot;Bob&quot;)</code></p>
+<p><code>import IPFS_LNS</code>
+<code>peerID = IPFS_LNS.LookUpContact(&quot;Bob&quot;) # get the contact &#39;Bob&#39;s IPFS peer ID</code></p>
+<h1 id="ipfs-technicalities-">IPFS Technicalities:</h1>
+<p>How does IPFS-DataTransmission use IPFS to to send data to another computer? After all, IPFS is a file system and made for sharing and storing files, creating a content addressed internet. Does it really provide the functionality for two computers to communicate directly which each other?<br>Yes, IPFS does provide that functionality, although as of November 2021 that is still an experimental feature. That&#39;s why you have to configure IPFS to enable that feature as described in Prerequisites.txt.<br>After all, IPFS relies on peers sending data to each other over its decentralised network using a communication technology called libp2p. IPFS-DataTransmission essentially uses the libp2p module inside of the IPFS process running on the computer to communicate to other computers via an access point to the module which IPFS provides, the experimental feature which IPFS calls Libp2pStreamMounting. Libp2pStreamMounting works by allowing the user to set up a port forwarding system on the computer between the user&#39;s program (in this case IPFS-DataTransmission) and the libp2p process inside of IPFS. After setting up this port forwarding the user (in this case the IPFS-DataTransmission script) can communicate to the chosen local port on their computer, and IPFS forwards that communication to the libp2p module runnning inside of IPFS on the other computer, which forwards it in turn to a preconfigured port on that computer, to be listened to by the user (in this case an IPFS-DataTransmission Listener object).<br>Because the Python API for interacting with IPFS (ipfshttpclient) doesn&#39;t yet support this experimental feature, I have updated the module myself, the result of which is the ipfshttpclient2 folder in this code project, which will remain part of this project until the changes are integrated into the official ipfshttpclient module.</p>
+<h1 id="links">Links</h1>
+<p>Naturally, I host this project on IPFS too</p>
+<h3 id="source-code-">Source Code:</h3>
+<p>IPFS (faster):
+<a href="https://ipfs.io/ipfs/QmdCszoMQii7oVKHe6xmHpd8eHyRC8n4LpQu4ii7nLzu7L">https://ipfs.io/ipfs/QmdCszoMQii7oVKHe6xmHpd8eHyRC8n4LpQu4ii7nLzu7L</a>
 IPNS (more likely to be up-to-date):
-https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh
-
-</code></pre>
-<script>hljs.initHighlightingOnLoad();</script>
-<script>
-  setTimeout(function() {
-    $(".number").css("width", "20px");
-    $(".number span").attr("class", "ln hljs-subst");
-    resize();
-    var timer = false;
-    $(window).resize(function() {
-      if (timer !== false) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(function() {
-        resize();
-      }, 200);
-    })
-
-  }, 100);
-  function resize() {
-    $("span.code").each(function(i, c) {
-      var h = $(c).height();
-      $(c).prev().height(h);
-    });
-  }
-</script>
+<a href="https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh">https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh</a></p>
+<h3 id="website-">Website:</h3>
+<p>IPFS (faster):
+<a href="https://ipfs.io/ipfs/QmQRUfBXnjqDkGKVUNro3BCUF7frcpkQ1NnRq6zaUfva8u">https://ipfs.io/ipfs/QmQRUfBXnjqDkGKVUNro3BCUF7frcpkQ1NnRq6zaUfva8u</a>
+IPNS (more likely to be up-to-date):
+<a href="https://ipfs.io/ipns/k2k4r8m2dzqi5s8jm3shm77sr1728ex7bsds0fk6e9gkf2ld2f3mnhcy">https://ipfs.io/ipns/k2k4r8m2dzqi5s8jm3shm77sr1728ex7bsds0fk6e9gkf2ld2f3mnhcy</a></p>
 </body>
 </html>
+
