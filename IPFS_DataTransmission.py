@@ -1099,7 +1099,7 @@ class Transmitter:
         self.buffer_size = buffer_size
         if buffer_size < 23:
             buffer_size = 23
-
+        self.on_finish_handler = on_finish_handler
         self.listener = ListenToBuffersOnPort(
             self.TransmissionReplyListener, status_eventhandler=self.NoCommunication)
 
