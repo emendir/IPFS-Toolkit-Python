@@ -67,7 +67,7 @@ free_sending_ports = [x for x in range(20001, 20500)]
 # Returns a transmitter object so that the status of the transmission can be monitored
 
 
-def TransmitData(data, peerID, listener_name, buffer_size=def_buffer_size, await_finish=False):
+def TransmitData(data, peerID, listener_name, buffer_size=def_buffer_size, await_finish=False, on_finish_handler=None):
     """
     Transmits the input data (a bytearray of any length) to the computer with the specified network address.
 
@@ -79,15 +79,18 @@ def TransmitData(data, peerID, listener_name, buffer_size=def_buffer_size, await
         string peerID: the IPFS peer ID of [the recipient computer to send the data to]
         string listener_name: the name of the IPFS-Data-Transmission-Listener instance running on the recipient computer to send the data to (allows distinguishing multiple IPFS-Data-Transmission-Listeners running on the same computer for different applications)
         int buffer_size: the size in bytes of the buffers (data packets which the trnsmitteddata is divided up into) (default 1024 bytes)
-
+        await_finish: whether or not the calling thread should be blocked until transmission has finished
+        on_finish_handler (function(succeeded:bool)): an eventhandler to be called when transmission has finished
     Returns:
         Transmitter transmitter: the object that contains all the machinery used to transmit the data to the receiver, from which the transmission status will in the future be able to get called from
     """
     if IPFS_API.FindPeer(peerID):
-        return Transmitter(data, peerID, listener_name, buffer_size, await_finish)
+        return Transmitter(data, peerID, listener_name, buffer_size, await_finish, on_finish_handler)
     else:
         if print_log:
             print("Could not find the specified peer on the IPFS network.")
+        if on_finish_handler:
+            on_finish_handler(False)
 
 
 def TransmitDataAwait(data, peerID, listener_name, buffer_size=def_buffer_size):
@@ -107,7 +110,6 @@ def TransmitDataAwait(data, peerID, listener_name, buffer_size=def_buffer_size):
         Transmitter transmitter: the object that contains all the machinery used to transmit the data to the receiver, from which the transmission status will in the future be able to get called from
     """
     if IPFS_API.FindPeer(peerID):
-
         t = Transmitter(data, peerID, listener_name, buffer_size, True)
     else:
         if print_log:
@@ -1089,7 +1091,7 @@ class Transmitter:
 
     status = "not started"  # "transitting" "finished" "aborted"
 
-    def __init__(self, data, peerID, req_lis_name, buffer_size=def_buffer_size, await_finish=False):
+    def __init__(self, data, peerID, req_lis_name, buffer_size=def_buffer_size, await_finish=False, on_finish_handler=None):
         self.data = data
         self.peerID = peerID
         self.req_lis_name = req_lis_name
@@ -1335,16 +1337,21 @@ class Transmitter:
         CloseListeningConnection(str(self.our_port), self.our_port)
         CloseSendingConnection(self.peerID, self.req_lis_name)
         CloseSendingConnection(self.peerID, str(self.their_port))
-        if print_log_transmissions:
-            if succeeded:
-                self.status = "finished"
-                print(str(self.our_port) + ": Finished transmission.")
-            else:
-                print(str(self.our_port) + ": Transmission failed.")
-                self.status = "aborted"
 
+        if succeeded:
+            self.status = "finished"
+            if print_log_transmissions:
+                print(str(self.our_port) + ": Finished transmission.")
+        else:
+            if print_log_transmissions:
+                print(str(self.our_port) + ": Transmission failed.")
+            self.status = "aborted"
+        if self.on_finish_handler:
+            self.on_finish_handler(succeeded)
 
 # Contains all the machinery needed for receiving a transmission.
+
+
 class TransmissionListener:
     """
     Contains all the machinery needed for receiving a transmission of data in the form of a bytearray of any length over a network.
