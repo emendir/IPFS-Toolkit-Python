@@ -416,6 +416,8 @@ def TransmitFile(filepath, peerID, others_req_listener, metadata=bytearray(), bl
 
 
 class FileTransmitter:
+    status = "not started"  # "transitting" "finished" "aborted"
+
     def __init__(self, filepath, peerID, others_req_listener, metadata=bytearray(), block_size=def_block_size, buffer_size=def_buffer_size):
         self.filesize = os.path.getsize(filepath)
         self.filename = os.path.basename(filepath)
@@ -436,6 +438,7 @@ class FileTransmitter:
         if print_log_files:
             print("FileTransmission: " + self.filename
                   + ": starting transmmission")
+        self.status = "transmitting"
         position = 0
         with open(self.filepath, "rb") as reader:
             while position < self.filesize:
@@ -451,6 +454,7 @@ class FileTransmitter:
         if print_log_files:
             print("FileTransmission: " + self.filename
                   + ": finished file transmission")
+        self.status = "finished"
 
     def Hear(self, conv, data):
         if print_log_files:
@@ -463,6 +467,7 @@ class FileTransmitter:
 
 class FileTransmissionReceiver:
     transmission_started = False
+    status = "not started"  # "receiving" "finished" "aborted"
 
     def Setup(self, conversation, eventhandler, dir="."):
         if print_log_files:
@@ -476,6 +481,7 @@ class FileTransmissionReceiver:
         if print_log_files:
             print("FileReception: "
                   + ": responded to sender, ready to receive")
+        self.status = "receiving"
 
     def OnDataReceived(self, conv, data):
         if not self.transmission_started:
@@ -518,6 +524,7 @@ class FileTransmissionReceiver:
         if print_log:
             print("FileReception: " + self.filename
                   + ": Transmission finished.")
+        self.status = "finished"
         if signature(self.eventhandler).parameters.get("metadata") != None:
             self.eventhandler(self.conv.peerID, os.path.join(
                 self.dir, self.filename), self.metadata)
@@ -1080,6 +1087,8 @@ class Transmitter:
 
     transmission_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    status = "not started"  # "transitting" "finished" "aborted"
+
     def __init__(self, data, peerID, req_lis_name, buffer_size=def_buffer_size, await_finish=False):
         self.data = data
         self.peerID = peerID
@@ -1149,6 +1158,8 @@ class Transmitter:
         if print_log_transmissions:
             print(str(self.our_port) + ": Transmission started to",
                   str(self.their_port))
+
+        self.status = "transmiting"
 
         self.transmission_socket = self.SetupSendingConnection(
             self.peerID, self.their_port, self.transmission_socket)
@@ -1326,9 +1337,11 @@ class Transmitter:
         CloseSendingConnection(self.peerID, str(self.their_port))
         if print_log_transmissions:
             if succeeded:
+                self.status = "finished"
                 print(str(self.our_port) + ": Finished transmission.")
             else:
                 print(str(self.our_port) + ": Transmission failed.")
+                self.status = "aborted"
 
 
 # Contains all the machinery needed for receiving a transmission.
@@ -1368,6 +1381,8 @@ class TransmissionListener:
 
     trsm_replier = None
 
+    status = "not started"  # "receiving" "finished" "aborted"
+
     def __init__(self, peerID, sender_port, buffer_size, eventhandler):
         self.peerID = peerID
         self.sender_port = sender_port
@@ -1392,6 +1407,7 @@ class TransmissionListener:
         # Telling sender we're ready to start receiving the transmission, telling him which self.port we're listening on
         self.SendBufferToPort(ToB255No0s(self.trsm_lis_port)
                               + bytearray([0]) + "start transmission".encode("utf-8"))
+        self.status = "receiving"
 
     # function for easily replying to sender using the self.port and self.buffer_size they specified
 
@@ -1504,9 +1520,12 @@ class TransmissionListener:
 
             _thread.start_new_thread(self.eventhandler, (data, self.peerID))
 
+            self.status = "finished"
+
         else:
             if print_log:
                 print("Transmission failed.")
+            self.status = "aborted"
 
         def CloseConnections():
             time.sleep(30)
