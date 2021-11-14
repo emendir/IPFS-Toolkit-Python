@@ -3,6 +3,7 @@ Conversation:
 
 Transmitter:
   Progress function
+  recheck if custom protocol can be replaced with TCP, keeping limitlessness
 
 FileTransmission:
   abortion
