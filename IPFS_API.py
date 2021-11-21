@@ -132,7 +132,7 @@ def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: s
 
 def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
     cid = UploadFile(path)
-    UpdateIPNS_RecordFromHash(name, cid, key=name, ttl=ttl, lifetime=lifetime)
+    UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
 
 
 def DownloadIPNS_Record(name, path=""):
