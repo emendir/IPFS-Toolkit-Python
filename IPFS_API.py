@@ -139,12 +139,12 @@ def DownloadIPNS_Record(name, path=""):
     return DownloadFile(ResolveIPNS_Key(name), path)
 
 
-def ResolveIPNS_Key(ipns_id):
-    return ipfs.name.resolve(name=ipns_id).get("Path")
+def ResolveIPNS_Key(ipns_id, nocache=False):
+    return ipfs.name.resolve(name=ipns_id, nocache=nocache).get("Path")
 
 
-def CatIPNS_Record(name):
-    ipfs_path = ipfs.name.resolve(name=name).get("Path")
+def CatIPNS_Record(name, nocache=False):
+    ipfs_path = ipfs.name.resolve(name=name, nocache=nocache).get("Path")
     return CatFile(ipfs_path)
 
 # Returns a list of the multiaddresses of all connected peers
