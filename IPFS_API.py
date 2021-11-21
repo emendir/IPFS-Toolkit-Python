@@ -135,8 +135,8 @@ def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
     UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
 
 
-def DownloadIPNS_Record(name, path=""):
-    return DownloadFile(ResolveIPNS_Key(name), path)
+def DownloadIPNS_Record(name, path="", nocache=False):
+    return DownloadFile(ResolveIPNS_Key(name, nocache=nocache), path)
 
 
 def ResolveIPNS_Key(ipns_id, nocache=False):
