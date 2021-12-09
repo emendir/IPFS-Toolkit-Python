@@ -190,7 +190,7 @@ listentcp = ListenOnPortTCP
 
 
 def ListenOnPort(protocol, port):
-    ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/udp/" + str(port))
+    ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
 listenonportUDP = ListenOnPort
