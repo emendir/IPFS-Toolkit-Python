@@ -27,11 +27,11 @@ IPFS-Toolkit is made for interacting with IPFS in the Python programming languag
 - __Install IPFS__ (Desktop version or CLI, doesn't matter).
     https://docs.ipfs.io/install/
 - __Enable "Libp2pStreamMounting" in IPFS:__  
-  __Desktop Version/WebUI:__ on the Settings tab, scroll down to "IPFS CONFIG" and change the line that reads:
-      change from:
-      "Libp2pStreamMounting": false,
-      to:
-      "Libp2pStreamMounting": true,
+  __Desktop Version/WebUI:__ on the Settings tab, scroll down to "IPFS CONFIG" and change the line that reads:  
+    change from:  
+    `"Libp2pStreamMounting": false,`  
+    to:  
+    `"Libp2pStreamMounting": true,`  
   Click the "Save" button and restart IPFS.
 
   __CLI Version:__ run:  
