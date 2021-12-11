@@ -174,7 +174,10 @@ def ListenForTransmissions(listener_name, eventhandler):
             if print_log_transmissions:
                 print(
                     listener_name + ": Received transmission request.")
-            return _thread.start_new_thread(TransmissionListener, (peerID, sender_port, buffer_size, eventhandler))
+            listener = Thread(target=TransmissionListener, args=(
+                peerID, sender_port, buffer_size, eventhandler))
+            listener.start()
+            return listener
 
         except Exception as e:
             print("")
@@ -187,21 +190,25 @@ def ListenForTransmissions(listener_name, eventhandler):
             print(e)
             print(listener_name + ": Could not decode transmission request.")
 
-    context = zmq.Context()
-    socket = context.socket(zmq.REP)
-    port = socket.bind_to_random_port("tcp://*")
-    CreateListeningConnection(listener_name, port)
-    if print_log_transmissions:
-        print(listener_name
-              + ": Listening for transmission requests as " + listener_name)
-    while True:
-        data = socket.recv()
-        print("RECEIVED DATA")
-        if ReceiveTransmissionRequests(data):
-            socket.send(b"Transmission request accepted.")
-        else:
-            socket.send(b"Transmission request not accepted.")
-        print("FINISHED HANDLING TRANSMISSION REQUEST")
+    def Listen():
+        context = zmq.Context()
+        socket = context.socket(zmq.REP)
+        port = socket.bind_to_random_port("tcp://*")
+        CreateListeningConnection(listener_name, port)
+        if print_log_transmissions:
+            print(listener_name
+                  + ": Listening for transmission requests as " + listener_name)
+        while True:
+            data = socket.recv()
+            print("RECEIVED DATA")
+            if ReceiveTransmissionRequests(data):
+                socket.send(b"Transmission request accepted.")
+            else:
+                socket.send(b"Transmission request not accepted.")
+            print("FINISHED HANDLING TRANSMISSION REQUEST")
+    listener = Thread(target=Listen, args=())
+    listener.start()
+    return listener
 
 
 def StartConversation(conversation_name, peerID, others_req_listener, eventhandler):
@@ -398,7 +405,7 @@ class Conversation:
 
 class ConversationListener:
     def __init__(self, listener_name, eventhandler):
-
+        self.listener_name = listener_name
         if(print_log_conversations):
             print("Listening for conversations as " + listener_name)
         self.eventhandler = eventhandler
@@ -406,12 +413,12 @@ class ConversationListener:
             listener_name, self.OnRequestReceived)
 
     def OnRequestReceived(self, data, peerID):
-        if print_log:
-            print("Received Transmission Request")
+        if print_log_conversations:
+            print(f"ConvLisReceived {self.listener_name}: Received Conversation Request")
         info = SplitBy255(data)
         if info[0] == bytearray("I want to start a conversation".encode('utf-8')):
-            if print_log:
-                print("starting conversation...")
+            if print_log_conversations:
+                print(f"ConvLisReceived {self.listener_name}: Starting conversation...")
             conversation_name = info[1].decode('utf-8')
             self.eventhandler(conversation_name, peerID)
 
