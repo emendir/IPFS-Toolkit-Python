@@ -21,19 +21,16 @@ peerID = "12D3KooWEkcGRPJUYyb3P2pxes6jBpET9wzDrFXxfHX8CTwHq4YB"
 IPFS_API.FindPeer(peerID)
 
 
-def OnMessageReceived(conversation, data, peerID):
-    """Eventhandler for messages from the other peer."""
-    print("Received message:", data.decode('utf-8'))
-
-
 # Starting a conversation with name "test-con",
 # where the peer is listening for conversations on a ConversationListener called "general_listener",
 # waiting for the peer to join the conversation until executing the next line of code
 print("Setting up conversation...")
 conv = IPFS_DataTransmission.StartConversationAwait(
-    "test-con", peerID, "general_listener", OnMessageReceived)
+    "test-con", peerID, "general_listener")  # , OnMessageReceived)
 print("Peer joined conversation.")
 conv.Say("Hello there!".encode('utf-8'))
+data = conv.Listen()
+print("Received data: " + data.decode())
 
 # endless loop to stop program from terminating
 while True:
