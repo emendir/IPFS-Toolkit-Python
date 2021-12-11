@@ -15,14 +15,10 @@ import IPFS_API
 
 # replace QmHash with your peer's IPFS ID
 peerID = "QmHash"
+peerID = "12D3KooWEkcGRPJUYyb3P2pxes6jBpET9wzDrFXxfHX8CTwHq4YB"
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
 IPFS_API.FindPeer(peerID)
-
-
-def OnMessageReceived(conversation, data, peerID):
-    """Eventhandler for messages from the other peer."""
-    print("Received message:", data.decode('utf-8'))
 
 
 # Starting a conversation with name "test-con",
@@ -30,9 +26,10 @@ def OnMessageReceived(conversation, data, peerID):
 # waiting for the peer to join the conversation until executing the next line of code
 print("Setting up conversation...")
 conv = IPFS_DataTransmission.StartConversationAwait(
-    "test-con", peerID, "general_listener", OnMessageReceived)
+    "test-con", peerID, "general_listener")  # , OnMessageReceived)
 print("Peer joined conversation.")
 conv.Say("Hello there!".encode('utf-8'))
+print(conv.Listen())
 
 # endless loop to stop program from terminating
 while True:

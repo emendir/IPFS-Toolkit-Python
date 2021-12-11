@@ -21,7 +21,7 @@
 
 import socket
 import threading
-from threading import Thread
+from threading import Thread, Event
 import _thread
 from datetime import datetime
 import time
@@ -36,10 +36,10 @@ IPFS_API.Start()
 
 
 # -------------- Settings ---------------------------------------------------------------------------------------------------
-print_log = False  # whether or not to print debug in output terminal
-print_log_connections = True
-print_log_transmissions = True
-print_log_conversations = False
+print_log = True  # whether or not to print debug in output terminal
+print_log_connections = False
+print_log_transmissions = False
+print_log_conversations = True
 print_log_files = False
 
 if not print_log:
@@ -194,7 +194,7 @@ def ListenForTransmissions(listener_name, eventhandler):
     return request_listener
 
 
-def StartConversation(conversation_name, peerID, others_req_listener, eventhandler):
+def StartConversation(conversation_name, peerID, others_req_listener, eventhandler=None):
     """Starts a conversation object with which peers can send data transmissions to each other.
     Code execution continues before the other peer joins the conversation.
     Sends a conversation request to the other peer's conversation request listener which the other peer must accept (joining the conversation) in order to start the conversation.
@@ -219,7 +219,7 @@ def StartConversation(conversation_name, peerID, others_req_listener, eventhandl
     return conv
 
 
-def StartConversationAwait(conversation_name, peerID, others_req_listener, eventhandler):
+def StartConversationAwait(conversation_name, peerID, others_req_listener, eventhandler=None):
     """Starts a conversation object with which peers can send data transmissions to each other.
     Waits (Blocks the calling thread) until the target peer has joined the conversation.
     Sends a conversation request to the other peer's conversation request listener which the other peer must accept (joining the conversation) in order to start the conversation.
@@ -270,8 +270,9 @@ class Conversation:
         Join: join a conversation which another peer started. Used by a conversation listener. See ListenForConversations for usage.
     """
     conversation_started = False
+    started = Event()
 
-    def Start(self, conversation_name, peerID, others_req_listener, eventhandler):
+    def Start(self, conversation_name, peerID, others_req_listener, eventhandler=None):
         """Starts a conversation object with which peers can send data transmissions to each other.
         Code execution continues before the other peer joins the conversation
         Usage:
@@ -294,25 +295,29 @@ class Conversation:
         if(print_log_conversations):
             print(conversation_name + ": Starting conversation")
         self.conversation_name = conversation_name
+        self.eventhandler = eventhandler
 
         def AwaitResponse(conversation, data):
             info = SplitBy255(data)
             if info[0] == bytearray("I'm listening".encode('utf-8')):
                 self.others_conv_listener = info[1].decode('utf-8')
-                self.hear_eventhandler = eventhandler
+                self.hear_eventhandler = self.Hear
                 self.conversation_started = True
+                self.started.set()
                 if print_log_conversations:
                     print(conversation_name + ": conversation started")
+            if print_log_conversations:
+                print(conversation_name + ": received unrecognisable buffer, expected join confirmation")
         self.hear_eventhandler = AwaitResponse
         self.peerID = peerID
         if print_log_conversations:
-            print(conversation_name + ": about to start conversation")
+            print(conversation_name + ": sending conversation request")
         self.listener = ListenForTransmissions(conversation_name, self.Hear)
         data = bytearray("I want to start a conversation".encode(
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
         TransmitData(data, peerID, others_req_listener)
 
-    def StartAwait(self, conversation_name, peerID, others_req_listener, eventhandler):
+    def StartAwait(self, conversation_name, peerID, others_req_listener, eventhandler=None):
         """Starts a conversation object with which peers can send data transmissions to each other.
         Waits (Blocks the calling thread) until the target peer has joined the conversation.
         Usage:
@@ -333,10 +338,9 @@ class Conversation:
         """
         self.Start(conversation_name, peerID,
                    others_req_listener, eventhandler)
-        while not self.conversation_started:
-            time.sleep(0.1)
+        self.started.wait()
 
-    def Join(self, conversation_name, peerID, others_conv_listener, eventhandler):
+    def Join(self, conversation_name, peerID, others_conv_listener, eventhandler=None):
         """Joins a conversation which another peer started. Used by a conversation listener. See ListenForConversations for usage."""
         self.conversation_name = conversation_name
         if print_log_conversations:
@@ -350,15 +354,27 @@ class Conversation:
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
         TransmitData(data, peerID, others_conv_listener)
         self.conversation_started = True
+        if print_log_conversations:
+            print(conversation_name + ": Joined conversation "
+                  + others_conv_listener)
 
     def Hear(self, data, peerID, arg3=""):
         """
         Receives data from the conversation and forwards it to the user's eventhandler
         """
-        if len(signature(self.hear_eventhandler).parameters) == 2:    # if the eventhandler has 2 parameters
-            self.hear_eventhandler(self, data)
-        else:
-            self.hear_eventhandler(self, data, arg3)
+        if self.eventhandler:
+            if len(signature(self.hear_eventhandler).parameters) == 2:    # if the eventhandler has 2 parameters
+                Thread(self.hear_eventhandler, (self, data)).start()
+            else:
+                Thread(self.hear_eventhandler, (self, data, arg3)).start()
+        self.message_args = (data, peerID)
+        self.message_received.set()
+    message_received = Event()
+
+    def Listen(self):
+        """Waits until the conversation peer sends a message, then returns that message."""
+        self.message_received.wait()
+        return self.message_args
 
     def Say(self, data, buffer_size=def_buffer_size, await_finish=False):
         """Transmits data of any length to the other peer.
@@ -396,7 +412,7 @@ class ConversationListener:
             listener_name, self.OnRequestReceived)
 
     def OnRequestReceived(self, data, peerID):
-        if print_log:
+        if print_log_conversations:
             print("Received Transmission Request")
         info = SplitBy255(data)
         if info[0] == bytearray("I want to start a conversation".encode('utf-8')):
