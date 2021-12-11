@@ -132,19 +132,20 @@ def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: s
 
 def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
     cid = UploadFile(path)
-    UpdateIPNS_RecordFromHash(name, cid, key=name, ttl=ttl, lifetime=lifetime)
+    UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
+    return cid
 
 
-def DownloadIPNS_Record(name, path=""):
-    return DownloadFile(ResolveIPNS_Key(name), path)
+def DownloadIPNS_Record(name, path="", nocache=False):
+    return DownloadFile(ResolveIPNS_Key(name, nocache=nocache), path)
 
 
-def ResolveIPNS_Key(ipns_id):
-    return ipfs.name.resolve(name=ipns_id).get("Path")
+def ResolveIPNS_Key(ipns_id, nocache=False):
+    return ipfs.name.resolve(name=ipns_id, nocache=nocache).get("Path")
 
 
-def CatIPNS_Record(name):
-    ipfs_path = ipfs.name.resolve(name=name).get("Path")
+def CatIPNS_Record(name, nocache=False):
+    ipfs_path = ipfs.name.resolve(name=name, nocache=nocache).get("Path")
     return CatFile(ipfs_path)
 
 # Returns a list of the multiaddresses of all connected peers
@@ -189,7 +190,7 @@ listentcp = ListenOnPortTCP
 
 
 def ListenOnPort(protocol, port):
-    ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/udp/" + str(port))
+    ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
 listenonportUDP = ListenOnPort
