@@ -20,6 +20,7 @@
 # Close conversations
 
 import socket
+import zmq
 import threading
 from threading import Thread, Event
 import _thread
@@ -55,6 +56,8 @@ delay_2 = 0.1*delaymodifier
 
 resend_timeout_sec = 1
 close_timeout_sec = 100
+transmission_request_timeout_sec = 5
+transmission_request_max_retriies = 5
 
 def_buffer_size = 4096  # the communication buffer size
 # the size of the chunks into which files should be split before transmission
@@ -139,7 +142,7 @@ def ListenForTransmissions(listener_name, eventhandler):
         function(bytearray data, string peerID) eventhandler: the function that should be called when a transmission of data is received
     """
     # This function itself is called to process the transmission request buffer sent by the transmission sender.
-    def ReceiveTransmissionRequests(data, addr):
+    def ReceiveTransmissionRequests(data):
         if print_log_transmissions:
             print(listener_name + ": processing transmission request...")
         # decoding the transission request buffer
@@ -168,8 +171,13 @@ def ListenForTransmissions(listener_name, eventhandler):
             data = data[index + 1:]
 
             buffer_size = FromB255No0s(data)
-
-            return TransmissionListener(peerID, sender_port, buffer_size, eventhandler)
+            if print_log_transmissions:
+                print(
+                    listener_name + ": Received transmission request.")
+            listener = Thread(target=TransmissionListener, args=(
+                peerID, sender_port, buffer_size, eventhandler))
+            listener.start()
+            return listener
 
         except Exception as e:
             print("")
@@ -182,16 +190,25 @@ def ListenForTransmissions(listener_name, eventhandler):
             print(e)
             print(listener_name + ": Could not decode transmission request.")
 
-    request_listener = Listener(
-        ReceiveTransmissionRequests, 0, def_buffer_size)
-    port = request_listener.port
-    CreateListeningConnection(listener_name, port)
-
-    if print_log_transmissions:
-        print(listener_name
-              + ": Listening for transmission requests as " + listener_name)
-
-    return request_listener
+    def Listen():
+        context = zmq.Context()
+        socket = context.socket(zmq.REP)
+        port = socket.bind_to_random_port("tcp://*")
+        CreateListeningConnection(listener_name, port)
+        if print_log_transmissions:
+            print(listener_name
+                  + ": Listening for transmission requests as " + listener_name)
+        while True:
+            data = socket.recv()
+            print("RECEIVED DATA")
+            if ReceiveTransmissionRequests(data):
+                socket.send(b"Transmission request accepted.")
+            else:
+                socket.send(b"Transmission request not accepted.")
+            print("FINISHED HANDLING TRANSMISSION REQUEST")
+    listener = Thread(target=Listen, args=())
+    listener.start()
+    return listener
 
 
 def StartConversation(conversation_name, peerID, others_req_listener, eventhandler=None):
@@ -404,7 +421,7 @@ class Conversation:
 
 class ConversationListener:
     def __init__(self, listener_name, eventhandler):
-
+        self.listener_name = listener_name
         if(print_log_conversations):
             print("Listening for conversations as " + listener_name)
         self.eventhandler = eventhandler
@@ -413,11 +430,11 @@ class ConversationListener:
 
     def OnRequestReceived(self, data, peerID):
         if print_log_conversations:
-            print("Received Transmission Request")
+            print(f"ConvLisReceived {self.listener_name}: Received Conversation Request")
         info = SplitBy255(data)
         if info[0] == bytearray("I want to start a conversation".encode('utf-8')):
-            if print_log:
-                print("starting conversation...")
+            if print_log_conversations:
+                print(f"ConvLisReceived {self.listener_name}: Starting conversation...")
             conversation_name = info[1].decode('utf-8')
             self.eventhandler(conversation_name, peerID)
 
@@ -591,13 +608,15 @@ def CreateSendingConnection(peerID: str, protocol: str, port=None):
     IPFS_API.ClosePortForwarding(
         targetaddress="/p2p/" + peerID, protocol="/x/" + protocol)
 
+    context = zmq.Context()
     if port == None:
         for prt in free_sending_ports:
             try:
                 ForwardFromPortToPeer(protocol, prt, peerID)
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.connect(('127.0.0.1', prt))
-                return s
+                socket = context.socket(zmq.REQ)
+                socket.connect(f"tcp://localhost:{prt}")
+
+                return socket
             except:
                 pass
         print("failed to find free port for sending connection")
@@ -645,6 +664,8 @@ def CreateListeningConnection(protocol, port):
         try:
             time.sleep(0.1)
             ListenOnPort(protocol, port)
+            if print_log_connections:
+                print(f"listening fas \"{protocol}\" on {port}")
         except:
             print(f"listening as \"{protocol}\" on {port}")
             print("")
@@ -1116,6 +1137,484 @@ class Transmitter:
         if buffer_size < 23:
             buffer_size = 23
         self.on_finish_handler = on_finish_handler
+
+        while True:
+            context = zmq.Context()
+            socket = context.socket(zmq.REP)
+            self.our_port = socket.bind_to_random_port("tcp://*")
+            CreateListeningConnection(str(self.our_port), self.our_port)
+
+            self.SendTransmissionRequest()
+            response = socket.recv()
+            if response == b"start transmission":
+                socket.send(data)
+                socket.close()
+                break
+            else:
+                print("RECIEVED OTHER DATA")
+        self.FinishedTransmission(True)
+
+    def SendTransmissionRequest(self):
+        # sending transmission request, telling the receiver our code for the transmission, our listening port on which they should send confirmation buffers, and the buffer size to use
+        #sock.connect(("127.0.0.1", port))
+        data = AddIntegrityByteToBuffer(IPFS_API.MyID().encode(
+        ) + bytearray([255]) + ToB255No0s(self.our_port) + bytearray([0]) + ToB255No0s(self.buffer_size))
+        tries = 0
+        while(tries < transmission_request_max_retriies):
+            sock = CreateSendingConnection(self.peerID, self.req_lis_name)
+            sock.send(data)
+            if print_log_transmissions:
+                print(str(self.our_port)
+                      + ": Sent transmission request to " + str(self.req_lis_name))
+            poller = zmq.Poller()
+            poller.register(sock, zmq.POLLIN)
+            evts = poller.poll(transmission_request_timeout_sec*1000)
+
+            sock.close()
+
+            print(evts)
+            if len(evts) > 0:
+                if print_log_transmissions:
+                    print(str(self.our_port)
+                          + ": Transmission request to " + str(self.req_lis_name) + "was received.")
+                break
+
+    def SendBufferToPort(self, buffer):
+        # Adding an integrity byte that equals the sum of all the bytes in the buffer modulus 256
+        # to be able to detect data corruption:
+        try:
+            self.transmission_socket.send(AddIntegrityByteToBuffer(buffer))
+            return True
+        except:
+            if print_log:
+                print(str(self.our_port) + ": Communication to receiver at "
+                      + str(self.their_port) + " broken down.")
+            self.FinishedTransmission(False)
+            return False
+
+    # transmits the self.data as a series of buffers
+    def SetupSendingConnection(self, peerID, protocol, sock):
+        sock = None
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock = CreateSendingConnection(peerID, str(protocol))
+            port = sock.getsockname()[1]
+            return sock
+
+        except:
+            CloseSendingConnection(peerID, str(protocol))
+            if print_log:
+                print("connecting to port " + str(port)
+                      + " failed.")
+
+    def Transmit(self):
+
+        if print_log_transmissions:
+            print(str(self.our_port) + ": Transmission started to",
+                  str(self.their_port))
+
+        self.status = "transmiting"
+
+        self.transmission_socket = self.SetupSendingConnection(
+            self.peerID, self.their_port, self.transmission_socket)
+        #self.transmission_socket.connect(("127.0.0.1", 0))
+        #CreateSendingConnection(self.peerID, str(self.their_port), self.transmission_socket.port)
+        position = 0
+        buffer_No = 0
+        time.sleep(delay_2)
+
+        socket = zmq.Context().socket(zmq.REQ)
+        socket.connect(f"tcp://localhost:{self.their_port}")
+        socket.send(self.data)
+        time.sleep(delay_2)
+        # sending last buffer saying transmission is finished
+        # if sending the buffer succeeds
+        if self.SendBufferToPort("finished transmission".encode("utf-8")):
+            # adding the buffer to the list of sent buffers, just in case we have to resend it
+            self.sent_buffers.append(
+                (buffer_No, "finished transmission".encode("utf-8")))
+            if print_log_transmissions:
+                print(str(self.our_port)
+                      + ": sent all data to transmit to " + str(self.their_port))
+
+    def WaitToStartTransmission(self, data):
+        if print_log_transmissions:
+            print(str(self.our_port) + ": Waiting to start transmission "
+                  + str(self.their_port) + ", received buffer...")
+
+        # decoding the transission request buffer
+        try:
+            index = data.index(bytearray([0]))
+            self.their_port = FromB255No0s(data[0:index])
+            data = data[index + 1:]
+
+            content = data.decode("utf-8")
+        except Exception as e:
+            print("")
+            print(str(self.our_port)
+                  + ": Exception in NetTerm.Transmission.WaitToStartTransmission()")
+            print("----------------------------------------------------")
+            traceback.print_exc()  # printing stack trace
+            print("----------------------------------------------------")
+            print("")
+            print(e)
+            print(str(self.our_port) + ": could not decode buffer")
+            return
+
+        if content == "start transmission":
+            self.transmission_started = True
+
+            self.Transmit()
+        else:
+            if print_log:
+                print(str(self.our_port)
+                      + ": buffer wasn't a transmission start confirmation")
+            if print_log:
+                print(content)
+
+    def ProcessConfirmationBuffer(self, data):
+        if(data == "finished transmission".encode("utf-8")):
+            if print_log_transmissions:
+                print(str(self.our_port)
+                      + ": Listener finished receiving transmission.")
+            self.FinishedTransmission()
+            return
+
+        index = data.index(bytearray([0]))
+        buffer_No = FromB255No0s(data[0:index])
+        data = data[index + 1:]
+
+        if(data) == "conf".encode("utf-8"):
+            # remving buffer from self.sent_buffers
+            index = 0
+            found = False
+            for buffer in self.sent_buffers:
+                if buffer[0] == buffer_No:
+                    found = True
+                    break
+                index += 1
+            if found == True:
+                self.sent_buffers.pop(index)
+                if print_log_transmissions:
+                    print(
+                        str(self.our_port) + ": received confirmation buffer and removed buffer from list", buffer_No)
+
+                # if there are older unconfirmed buffers, resend those
+                if(False and index > 0):
+                    for i in range(index):
+                        self.SendBufferToPort(self.sent_buffers[i][1])
+                        if print_log_transmissions:
+                            print(str(self.our_port) + ": Resent buffer",
+                                  self.sent_buffers[i][0])
+            else:
+                if print_log:
+                    print(
+                        str(self.our_port) + ": received confirmation buffer but could not find buffer in list", buffer_No)
+        elif(data == "resend".encode("utf-8")):
+            for buffer in self.sent_buffers:
+                if buffer[0] == buffer_No:
+                    self.SendBufferToPort(buffer[1])
+                    if print_log_transmissions:
+                        print(str(self.our_port)
+                              + ": Resent buffer", buffer[0])
+                    return
+            if print_log:
+                print(str(self.our_port)
+                      + ": Could not find the buffer which was requested to be resent.")
+
+        else:
+            if print_log:
+                print(data.decode("utf-8"))
+                print(str(self.our_port)
+                      + ": config buffer with unexpected format")
+                print(data)
+
+    def TransmissionReplyListener(self, data, peerID):
+        # Performing buffer integrity check
+        integrity_byte = data[0]
+        data = data[1:]
+        sum = 0
+        for byte in data:
+            sum += byte
+            if sum > 65000:  # if the sum is reaching the upper limit of an unsigned 16-bit integer
+                sum = sum % 256   # reduce the sum to its modulus256 so that the calculation above doesn't take too much processing power in later iterations of this for loop
+        # if the integrity byte doesn't match the buffer, exit the function ignoring the buffer
+        if sum % 256 != integrity_byte:
+            if print_log:
+                print(data)
+                print(str(self.our_port)
+                      + ": Received a buffer with a non-matching integrity buffer")
+            return
+
+        if self.transmission_started:
+            self.ProcessConfirmationBuffer(data)
+        else:
+            self.WaitToStartTransmission(data)
+
+    def NoCommunication(self, time_since_last):
+        if print_log_transmissions:
+            print(str(self.our_port) + ": NO COMMUNICATION " + str(time_since_last))
+        if(time_since_last > close_timeout_sec):
+            print(str(self.our_port)
+                  + ": Aborting data transmission due to no response from receiver.")
+            self.FinishedTransmission(False)
+        elif(time_since_last > resend_timeout_sec):
+            if self.transmission_started:
+                if print_log_transmissions:
+                    print(str(self.our_port)
+                          + ": Resending all stored buffers due to no response from receiver.")
+                for buffer in self.sent_buffers:
+                    self.SendBufferToPort(buffer[1])
+            else:
+                if print_log_transmissions:
+                    print(str(self.our_port)
+                          + ": Resending transmission request.")
+                self.SendTransmissionRequest()
+
+    def FinishedTransmission(self, succeeded=True):
+        CloseListeningConnection(str(self.our_port), self.our_port)
+        CloseSendingConnection(self.peerID, self.req_lis_name)
+
+        if succeeded:
+            self.status = "finished"
+            if print_log_transmissions:
+                print(str(self.our_port) + ": Finished transmission.")
+        else:
+            if print_log_transmissions:
+                print(str(self.our_port) + ": Transmission failed.")
+            self.status = "aborted"
+        if self.on_finish_handler:
+            self.on_finish_handler(succeeded)
+
+# Contains all the machinery needed for receiving a transmission.
+
+
+class TransmissionListener:
+    """
+    Contains all the machinery needed for receiving a transmission of data in the form of a bytearray of any length over a network.
+    It receives the data divided into buffers by the sender, who has a Transmitter object running and transmitting the data to us.
+    This system is immune to the buffers getting muddled up in their order or getting lost in cyberspace on their way to the receiver.
+
+    Usage:
+        This class must be used within a larger piece of machinery for receiving transmissions. This class only handles the reception
+        of a single transmission after the transmitter has alsready sent the transmission request.
+        That transmission request (a single buffer) contains encoded in it the port and buffer size needed to create a TransmissionListener object.
+        To learn how to use this class, see ReceiveTransmissions(port, eventhandler)
+
+    Parameters:
+        string peerID: the IP address of [the computer who wants to transmit data to s]
+        int sender_port: the port on the sender computer to send our transmission status data to
+        int buffer_size: the size in bytes of the buffers (data packets which the trnsmitteddata is divided up into) (default 1024 bytes)
+        function(bytearray data, string sender_peerID): the user-defined eventhandler to receive the data transmitted once the the transmission is finished
+    """
+
+    peerID = None
+    port = 0
+    eventhandler = None
+    buffer_size = 0
+
+    sender_port = None
+
+    transmitter_finished = False
+    transmission_finished = False
+    buffers = list()
+    lis_port = None
+    trsm_lis_port = None
+    buffer_size = None
+    listener_thread = None
+
+    trsm_replier = None
+
+    status = "not started"  # "receiving" "finished" "aborted"
+
+    def __init__(self, peerID, sender_port, buffer_size, eventhandler):
+        self.peerID = peerID
+        self.sender_port = sender_port
+        self.buffer_size = buffer_size
+        self.eventhandler = eventhandler
+
+        # needed for some reason in conversations cause it otherwise keeps the values from the last transmission listener
+        self.buffers = list()
+
+        context = zmq.Context()
+        sock = CreateSendingConnection(self.peerID, str(self.sender_port))
+        # setting up listener for receiving and processing the transmission self.buffers
+
+        if print_log_transmissions:
+            print("Ready to receive transmission.")
+
+        #self.trsm_replier = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.trsm_replier.connect(("127.0.0.1", port))
+        # Telling sender we're ready to start receiving the transmission, telling him which self.port we're listening on
+        self.status = "receiving"
+        sock.send(b"start transmission")
+        self.data = sock.recv()
+        if print_log_transmissions:
+            print("Received Transmission.")
+        self.FinishedTransmission(True)
+
+    # function for easily replying to sender using the self.port and self.buffer_size they specified
+
+    def SendBufferToPort(self, buffer):
+        try:
+            self.trsm_replier.send(AddIntegrityByteToBuffer(buffer))
+        except:
+            if print_log:
+                print("Communication to transmitter has broken down")
+            if not self.transmission_finished:
+                self.FinishedTransmission(False)
+
+    # Processes the buffers received over the transmission
+    def ProcessTransmissionBuffer(self, data, peerID):
+        if self.transmission_finished:
+            self.SendBufferToPort("finished transmission".encode("utf-8"))
+            return
+        # Performing buffer integrity check
+        integrity_byte = data[0]
+        data = data[1:]
+        sum = 0
+        for byte in data:
+            sum += byte
+            if sum > 65000:  # if the sum is reaching the upper limit of an unsigned 16-bit integer
+                sum = sum % 256   # reduce the sum to its modulus256 so that the calculation above doesn't take too much processing power in later iterations of this for loop
+        # if the integrity byte doesn't match the buffer, exit the function ignoring the buffer
+        if sum % 256 != integrity_byte:
+            if print_log:
+                print("Received a buffer with a non-matching integrity byte")
+                print(data)
+            return
+
+        # decoding the transission buffer
+        if(data == "finished transmission".encode("utf-8")):
+            if print_log_transmissions:
+                print("Sender finished transmission")
+            self.transmitter_finished = True
+            missing_buffer_count = 0
+            index = 0
+            for buffer in self.buffers:
+                if(buffer == bytearray()):
+                    self.SendBufferToPort(ToB255No0s(index)
+                                          + bytearray([0]) + "resend".encode("utf-8"))
+                    if print_log_transmissions:
+                        print("Requested buffer", index, "to be resent")
+                    missing_buffer_count += 1
+                index += 1
+            if(missing_buffer_count == 0):
+                self.FinishedTransmission()
+
+            return
+
+        index = data.index(bytearray([0]))
+        buffer_No = FromB255No0s(data[0:index])
+        data = data[index + 1:]
+
+        if print_log_transmissions:
+            print("received transmission buffer" + str(buffer_No))
+
+        content = data
+
+        # Adding empty entries to the sorted buffer list if the list doesn't have an entry for this buffer yet
+        while buffer_No >= len(self.buffers):
+            self.buffers.append(bytearray())
+        self.buffers[buffer_No] = content
+
+        # sending confirmation buffer so that the sender knows we've received this buffer
+        self.SendBufferToPort(ToB255No0s(buffer_No)
+                              + bytearray([0]) + "conf".encode("utf-8"))
+
+        if self.transmitter_finished:
+            missing_buffer_count = 0
+            index = 0
+            for buffer in self.buffers:
+                if(buffer == bytearray()):
+                    missing_buffer_count += 1
+
+            if(missing_buffer_count == 0):
+                self.FinishedTransmission()
+            return
+
+    def NoCommunication(self, time_since_last):
+        if self.transmission_finished:
+            return
+        if print_log_transmissions:
+            print("NO COMMUNICATION " + str(time_since_last))
+        if(time_since_last > close_timeout_sec):
+            print("Aborting data transmission due to no response from receiver.")
+            if not self.transmission_finished:
+                self.FinishedTransmission(False)
+        elif(time_since_last > resend_timeout_sec):
+            if print_log_transmissions:
+                print("Resending transmission confirmation.")
+            self.SendBufferToPort(ToB255No0s(self.trsm_lis_port)
+                                  + bytearray([0]) + "start transmission".encode("utf-8"))
+
+    def FinishedTransmission(self, succeeded=True):
+        if self.transmission_finished:
+            return
+        self.transmission_finished = True
+
+        if succeeded:
+            if print_log_transmissions:
+                print("Transmission finished.")
+            _thread.start_new_thread(self.eventhandler, (self.data, self.peerID))
+
+            self.status = "finished"
+
+        else:
+            if print_log:
+                print("Transmission failed.")
+            self.status = "aborted"
+
+        def CloseConnections():
+            time.sleep(30)
+            self.listener_thread.Terminate()
+            self.trsm_replier.close()
+            CloseSendingConnection(self.peerID, str(self.sender_port))
+        Thread(target=CloseConnections).start()
+
+
+class Transmitter_OLD:
+    """
+    Contains all the machinery needed for transmitting data in the form of a bytearray of any length to a network address.
+    It works by dividing the data into buffers and sending those buffers to the receiver, who must have a TransmissionListener object running and listening on that address.
+    This system is immune to the buffers getting muddled up in their order or getting lost in cyberspace on their way to the receiver.
+
+    Usage:
+        transmitter = Transmitter("data to transmit".encode("utf-8"), "127.0.0.1", 8888, 2048)    # transmits "data to transmit" to the computer 127.0.0.1:8888 at a buffersize of 1024 bytes
+
+    Parameters:
+        bytearray data: the data to be transmitted to the receiver
+        string peerID: the IP address of [the recipient computer to send the data to]
+        int port: the port on the recipient computer to send the data to (on which the TransmissionListener is listening for transmission requests)
+        int buffer_size: the size in bytes of the buffers (data packets which the trnsmitteddata is divided up into) (default 1024 bytes)
+
+    """
+
+    data = ""
+    peerID = ""
+    buffer_size = 1024
+
+    their_port = None
+
+    listener = None
+    our_port = 0
+    transmission_started = False
+
+    sent_buffers = list()   # list(buffer, buffer_No)
+
+    transmission_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    status = "not started"  # "transitting" "finished" "aborted"
+
+    def __init__(self, data, peerID, req_lis_name, buffer_size=def_buffer_size, await_finish=False, on_finish_handler=None):
+        self.data = data
+        self.peerID = peerID
+        self.req_lis_name = req_lis_name
+
+        self.buffer_size = buffer_size
+        if buffer_size < 23:
+            buffer_size = 23
+        self.on_finish_handler = on_finish_handler
         self.listener = ListenToBuffersOnPort(
             self.TransmissionReplyListener, status_eventhandler=self.NoCommunication)
 
@@ -1368,7 +1867,7 @@ class Transmitter:
 # Contains all the machinery needed for receiving a transmission.
 
 
-class TransmissionListener:
+class TransmissionListener_OLD:
     """
     Contains all the machinery needed for receiving a transmission of data in the form of a bytearray of any length over a network.
     It receives the data divided into buffers by the sender, who has a Transmitter object running and transmitting the data to us.

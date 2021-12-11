@@ -14,9 +14,10 @@ import os
 
 # replace QmHash with your peer's IPFS ID
 peerID = "QmHash"
+peerID = "12D3KooWEkcGRPJUYyb3P2pxes6jBpET9wzDrFXxfHX8CTwHq4YB"
 
 # insert the path of the file to transmit here
-filepath = ""
+filepath = "/mnt/CommonStorage/Music/Test.zip"
 
 # you can send any metadata your like
 metadata = os.path.basename(filepath).encode()
