@@ -57,7 +57,7 @@ IPFS-Toolkit is made for interacting with IPFS in the Python programming languag
 
 Usage examples:  
 `print(IPFS_API.MyID()) # print your IPFS peer ID`  
-`cid = IPFS_API.Upload('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable`  
+`cid = IPFS_API.Publish('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable`  
 
 `# Managing IPNS keys`  
 `IPFS_API.CreateIPNS_Record('MyWebsite') # generate a pair of IPNS name keys`  

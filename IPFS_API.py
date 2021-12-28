@@ -13,6 +13,7 @@ import os.path
 import threading
 import base64
 import ipfshttpclient2 as ipfshttpclient
+from requests.exceptions import ConnectionError
 # import multiprocessing
 import traceback
 import IPFS_LNS
@@ -56,11 +57,16 @@ def PublishToTopic(topic, text):
 
 def SubscribeToTopic(topic, eventhandler):
     def Listen():
-        sub = ipfs.pubsub.subscribe(topic)
-        with ipfs.pubsub.subscribe(topic) as sub:
-            for text in sub:
-                _thread.start_new_thread(
-                    eventhandler, (str(base64.b64decode(str(text).split('\'')[7]), "utf-8"),))
+        while True:
+            try:
+                sub = ipfs.pubsub.subscribe(topic)
+                with ipfs.pubsub.subscribe(topic) as sub:
+                    for text in sub:
+                        _thread.start_new_thread(
+                            eventhandler, (str(base64.b64decode(str(text).split('\'')[7]), "utf-8"),))
+            except ConnectionError as e:
+                print(f"IPFS API Pubsub: restarting sub {topic}")
+
     #thread =  multiprocessing.Process(target = Listen, args= ())
     # thread.start()
     _thread.start_new_thread(Listen, ())
@@ -78,20 +84,14 @@ def UnSubscribeFromTopic(topic, eventhandler):
     subscriptions.pop(index)    # remove the subscription from the list of subscriptions
 
 
-# publishes the input file on IPFS and returns the newly published file's ID
-def PublishFile(path):
-    output = ipfs.add(path)
-    return str(output).split("\'")[7]  # extracting the file ID from the process' output
-
-
-def UploadFile(filename: str):
+def PublishFile(filename: str):
     """
     Upload a file to IPFS. Does not work for directories.
     """
     return ipfs.add(filename).get("Hash")
 
 
-def Upload(path: str):
+def Publish(path: str):
     """
     Upload a file or a directory to IPFS.
     Returns the Hash of the uploaded file.
@@ -102,6 +102,14 @@ def Upload(path: str):
     else:
         return result.get("Hash")
 # Downloads the file with the specified ID and saves it with the specified path
+
+
+def Pin(cid: str):
+    ipfs.pin.add(cid)
+
+
+def Unpin(cid: str):
+    ipfs.pin.rm(cid)
 
 
 def DownloadFile(ID, path=""):
@@ -131,7 +139,7 @@ def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: s
 
 
 def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
-    cid = UploadFile(path)
+    cid = PublishFile(path)
     UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
     return cid
 

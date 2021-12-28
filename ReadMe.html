@@ -58,7 +58,7 @@
 <h1 id="modules-contained-in-ipfs-toolkit">Modules Contained in IPFS-Toolkit</h1>
 <h2 id="ipfs-api">IPFS-API</h2>
 <p><code>import IPFS_API</code></p>
-<p>Usage examples:<br><code>print(IPFS_API.MyID()) # print your IPFS peer ID</code><br><code>cid = IPFS_API.Upload('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable</code>  </p>
+<p>Usage examples:<br><code>print(IPFS_API.MyID()) # print your IPFS peer ID</code><br><code>cid = IPFS_API.Publish('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable</code>  </p>
 <p><code># Managing IPNS keys</code><br><code>IPFS_API.CreateIPNS_Record('MyWebsite') # generate a pair of IPNS name keys</code><br><code>IPFS_API.UpdateIPNS_Record('MyWebsite', './SomeFileOrDir') # upload file to IPFS &amp; publish</code><br><code>IPFS_API.UpdateIPNS_RecordFromHash('MyWebsite', cid) # publish IPFS content to IPNS key</code>  </p>
 <p><code># IPFS PubSub</code><br><code>IPFS_API.SubscribeToTopic("test", print) # print is the eventhandler</code><br><code>IPFS_API.PublishToTopic("test", "Hello there!")</code></p>
 <h2 id="ipfs-datatransmission">IPFS-Datatransmission</h2>
