@@ -21,7 +21,12 @@ def NewConvHandler(conversation_name, peerID):
             "utf-8"))
         conversation.Say("Hi back".encode("utf-8"))
     conv = IPFS_DataTransmission.Conversation()
-    conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived)
+    conv.Join(conversation_name, peerID, conversation_name)#, OnMessageReceived)
+    print("joined")
+    data = conv.Listen()
+    print("Received data: ", data)
+    # time.sleep(1)
+    conv.Say("Hi back".encode("utf-8"))
 
 
 conv_lis = IPFS_DataTransmission.ListenForConversations(

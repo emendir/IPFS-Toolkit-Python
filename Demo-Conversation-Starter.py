@@ -28,9 +28,11 @@ print("Setting up conversation...")
 conv = IPFS_DataTransmission.StartConversationAwait(
     "test-con", peerID, "general_listener")  # , OnMessageReceived)
 print("Peer joined conversation.")
+# time.sleep(1)
 conv.Say("Hello there!".encode('utf-8'))
+# time.sleep(1)
 data = conv.Listen()
-print("Received data: " + data.decode())
+print("Received data: ", data)
 
 # endless loop to stop program from terminating
 while True:

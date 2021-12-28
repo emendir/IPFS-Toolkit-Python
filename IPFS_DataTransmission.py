@@ -75,7 +75,9 @@ def TransmitData(data, peerID, listener_name, buffer_size=def_buffer_size, await
     Transmits the input data (a bytearray of any length) to the computer with the specified network address.
 
     Usage:
-        transmitter = Send("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2", 2048)    # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+        # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+        transmitter = Send("data to transmit".encode("utf-8"),
+                           "Qm123456789", "applicationNo2", 2048)
 
     Parameters:
         bytearray data: the data to be transmitted to the receiver
@@ -101,7 +103,9 @@ def TransmitDataAwait(data, peerID, listener_name, buffer_size=def_buffer_size):
     Transmits the input data (a bytearray of any length) to the computer with the specified network address.
 
     Usage:
-        transmitter = Send("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2", 2048)    # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+        # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+        transmitter = Send("data to transmit".encode("utf-8"),
+                           "Qm123456789", "applicationNo2", 2048)
 
     Parameters:
         bytearray data: the data to be transmitted to the receiver
@@ -122,7 +126,7 @@ def TransmitDataAwait(data, peerID, listener_name, buffer_size=def_buffer_size):
 # Returns the Listener object so that receiving the data transmissions can be stopped by calling listener.Terminate().
 
 
-def ListenForTransmissions(listener_name, eventhandler):
+class ListenForTransmissions:
     """
     Listens for incoming transmission requests (senders requesting to transmit data to us) and sets up the machinery needed to receive those transmissions.
 
@@ -142,9 +146,11 @@ def ListenForTransmissions(listener_name, eventhandler):
         function(bytearray data, string peerID) eventhandler: the function that should be called when a transmission of data is received
     """
     # This function itself is called to process the transmission request buffer sent by the transmission sender.
-    def ReceiveTransmissionRequests(data):
+    terminate = False
+
+    def ReceiveTransmissionRequests(self, data):
         if print_log_transmissions:
-            print(listener_name + ": processing transmission request...")
+            print(self.listener_name + ": processing transmission request...")
         # decoding the transission request buffer
         try:
             # Performing buffer integrity check
@@ -159,7 +165,7 @@ def ListenForTransmissions(listener_name, eventhandler):
             if sum % 256 != integrity_byte:
                 if print_log:
                     print(
-                        listener_name + ": Received a buffer with a non-matching integrity buffer")
+                        self.listener_name + ": Received a buffer with a non-matching integrity buffer")
                 return
 
             index = data.index(bytearray([255]))
@@ -173,42 +179,60 @@ def ListenForTransmissions(listener_name, eventhandler):
             buffer_size = FromB255No0s(data)
             if print_log_transmissions:
                 print(
-                    listener_name + ": Received transmission request.")
+                    self.listener_name + ": Received transmission request.")
             listener = Thread(target=TransmissionListener, args=(
-                peerID, sender_port, buffer_size, eventhandler))
+                peerID, sender_port, buffer_size, self.eventhandler))
             listener.start()
             return listener
 
         except Exception as e:
             print("")
             print(
-                listener_name + ": Exception in NetTerm.ReceiveTransmissions.ReceiveTransmissionRequests()")
+                self.listener_name + ": Exception in NetTerm.ReceiveTransmissions.ReceiveTransmissionRequests()")
             print("----------------------------------------------------")
             traceback.print_exc()  # printing stack trace
             print("----------------------------------------------------")
             print("")
             print(e)
-            print(listener_name + ": Could not decode transmission request.")
+            print(self.listener_name + ": Could not decode transmission request.")
 
-    def Listen():
+    def Listen(self):
         context = zmq.Context()
-        socket = context.socket(zmq.REP)
-        port = socket.bind_to_random_port("tcp://*")
-        CreateListeningConnection(listener_name, port)
+        self.socket = context.socket(zmq.REP)
+        self.port = self.socket.bind_to_random_port("tcp://*")
+        CreateListeningConnection(self.listener_name, self.port)
         if print_log_transmissions:
-            print(listener_name
-                  + ": Listening for transmission requests as " + listener_name)
-        while True:
-            data = socket.recv()
-            print("RECEIVED DATA")
-            if ReceiveTransmissionRequests(data):
-                socket.send(b"Transmission request accepted.")
+            print(self.listener_name
+                  + ": Listening for transmission requests as " + self.listener_name)
+        while self.socket:
+            data = self.socket.recv()
+            if self.terminate:
+                self.socket.send(b"Righto.")
+                return
+            if self.ReceiveTransmissionRequests(data):
+                self.socket.send(b"Transmission request accepted.")
             else:
-                socket.send(b"Transmission request not accepted.")
-            print("FINISHED HANDLING TRANSMISSION REQUEST")
-    listener = Thread(target=Listen, args=())
-    listener.start()
-    return listener
+                self.socket.send(b"Transmission request not accepted.")
+
+    def __init__(self, listener_name, eventhandler):
+        self.listener_name = listener_name
+        self.eventhandler = eventhandler
+        self.listener = Thread(target=self.Listen, args=())
+        self.listener.start()
+
+    def Terminate(self):
+        # self.socket.unbind(self.port)
+        self.terminate = True
+        CloseListeningConnection(self.listener_name, self.port)
+        socket = zmq.Context().socket(zmq.REQ)
+        socket.connect(f"tcp://localhost:{self.port}")
+        socket.send("close".encode())
+        socket.recv()
+        socket.close()
+        del socket
+        self.socket.close()
+        del self.socket
+        del self.listener
 
 
 def StartConversation(conversation_name, peerID, others_req_listener, eventhandler=None):
@@ -224,7 +248,8 @@ def StartConversation(conversation_name, peerID, others_req_listener, eventhandl
         conversation.Say("Hello there!".encode())
 
         # the other peer must have a conversation listener named "conv listener" running, e.g. via:
-        ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+        # forwards communication from any conversation to the OnReceive function
+        ListenForConversations("conv listener", OnReceive)
 
     Parameters:
         1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
@@ -249,7 +274,8 @@ def StartConversationAwait(conversation_name, peerID, others_req_listener, event
         conversation.Say("Hello there!".encode())
 
         # the other peer must have a conversation listener named "conv listener" running, e.g. via:
-        ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+        # forwards communication from any conversation to the OnReceive function
+        ListenForConversations("conv listener", OnReceive)
 
     Parameters:
         1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
@@ -278,7 +304,8 @@ class Conversation:
         conversation.Say("Hello there!".encode())
 
         # the other peer must have a conversation listener named "conv listener" running, e.g. via:
-        ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+        # forwards communication from any conversation to the OnReceive function
+        ListenForConversations("conv listener", OnReceive)
 
     Methods:
         Start: start a conversation with another peer, continuing code execution without waiting for the other peer to join.
@@ -288,6 +315,9 @@ class Conversation:
     """
     conversation_started = False
     started = Event()
+    last_message = None
+    message_received = Event()
+    eventhandler = None
 
     def Start(self, conversation_name, peerID, others_req_listener, eventhandler=None):
         """Starts a conversation object with which peers can send data transmissions to each other.
@@ -302,7 +332,8 @@ class Conversation:
             conversation.Say("Hello there!".encode())
 
             # the other peer must have a conversation listener named "conv listener" running, e.g. via:
-            ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+            # forwards communication from any conversation to the OnReceive function
+            ListenForConversations("conv listener", OnReceive)
 
         Parameters:
             1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
@@ -314,26 +345,27 @@ class Conversation:
         self.conversation_name = conversation_name
         self.eventhandler = eventhandler
 
-        def AwaitResponse(conversation, data):
-            info = SplitBy255(data)
-            if bytearray(info[0]) == bytearray("I'm listening".encode('utf-8')):
-                self.others_conv_listener = info[1].decode('utf-8')
-                self.hear_eventhandler = self.Hear
-                self.conversation_started = True
-                if print_log_conversations:
-                    print(conversation_name + ": peer joined, conversation started")
-                self.started.set()
-            elif print_log_conversations:
-                print(conversation_name + ": received unrecognisable buffer, expected join confirmation")
-                print(info[0])
-        self.hear_eventhandler = AwaitResponse
+        # def AwaitResponse(data, peerID):
+        #     info = SplitBy255(data)
+        #     if bytearray(info[0]) == bytearray("I'm listening".encode('utf-8')):
+        #         self.others_conv_listener = info[1].decode('utf-8')
+        #         # self.hear_eventhandler = self.Hear
+        #         self.conversation_started = True
+        #         if print_log_conversations:
+        #             print(conversation_name + ": peer joined, conversation started")
+        #         self.started.set()
+        #     elif print_log_conversations:
+        #         print(conversation_name + ": received unrecognisable buffer, expected join confirmation")
+        #         print(info[0])
+        # self.hear_eventhandler = AwaitResponse
         self.peerID = peerID
         if print_log_conversations:
             print(conversation_name + ": sending conversation request")
         self.listener = ListenForTransmissions(conversation_name, self.Hear)
+        # self.listener = ListenForTransmissions(conversation_name, self.hear_eventhandler)
         data = bytearray("I want to start a conversation".encode(
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
-        TransmitData(data, peerID, others_req_listener)
+        TransmitDataAwait(data, peerID, others_req_listener)
         if print_log_conversations:
             print(conversation_name + ": sent conversation request")
 
@@ -349,7 +381,8 @@ class Conversation:
             conversation.Say("Hello there!".encode())
 
             # the other peer must have a conversation listener named "conv listener" running, e.g. via:
-            ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+            # forwards communication from any conversation to the OnReceive function
+            ListenForConversations("conv listener", OnReceive)
 
         Parameters:
             1. conversation_name: the name of the IPFS port forwarding proto (IPFS connection instance)
@@ -372,8 +405,8 @@ class Conversation:
         self.peerID = peerID
         data = bytearray("I'm listening".encode(
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
-        TransmitData(data, peerID, others_conv_listener)
         self.conversation_started = True
+        TransmitDataAwait(data, peerID, others_conv_listener)
         if print_log_conversations:
             print(conversation_name + ": Joined conversation "
                   + others_conv_listener)
@@ -382,20 +415,46 @@ class Conversation:
         """
         Receives data from the conversation and forwards it to the user's eventhandler
         """
-        if self.hear_eventhandler:
-            if len(signature(self.hear_eventhandler).parameters) == 2:    # if the eventhandler has 2 parameters
-                Thread(target=self.hear_eventhandler, args=(self, data)).start()
-            else:
-                Thread(target=self.hear_eventhandler, args=(self, data, arg3)).start()
+        # print("HEAR", data)
+        if not data:
+            print("CONV.HEAR: RECEIVED NONE")
+            return
+
+        if not self.conversation_started:
+            info = SplitBy255(data)
+            if bytearray(info[0]) == bytearray("I'm listening".encode('utf-8')):
+                self.others_conv_listener = info[1].decode('utf-8')
+                # self.hear_eventhandler = self.Hear
+                self.conversation_started = True
+                if print_log_conversations:
+                    print(self.conversation_name + ": peer joined, conversation started")
+                self.started.set()
+            elif print_log_conversations:
+                print(self.conversation_name +
+                      ": received unrecognisable buffer, expected join confirmation")
+                print(info[0])
+            return
+        # if self.conversation_started:
         self.last_message = data
         self.message_received.set()
-        self.message_received = Event()
-    message_received = Event()
+        # self.message_received = Event()
+
+        if self.eventhandler:
+            if len(signature(self.eventhandler).parameters) == 2:    # if the eventhandler has 2 parameters
+                Thread(target=self.eventhandler, args=(self, data)).start()
+            else:
+                Thread(target=self.eventhandler, args=(self, data, arg3)).start()
 
     def Listen(self):
         """Waits until the conversation peer sends a message, then returns that message."""
         self.message_received.wait()
-        return self.last_message
+        self.message_received = Event()
+        if self.last_message:
+            return self.last_message
+        else:
+            if print_log_conversations:
+                print("Conv.Listen: received NONE, restarting Event Wait")
+            self.Listen()
 
     def Say(self, data, buffer_size=def_buffer_size, await_finish=False):
         """Transmits data of any length to the other peer.
@@ -408,7 +467,8 @@ class Conversation:
             conversation.Say("Hello there!".encode())
 
             # the other peer must have a conversation listener named "conv listener" running, e.g. via:
-            ListenForConversations("conv listener", OnReceive)  # forwards communication from any conversation to the OnReceive function
+            # forwards communication from any conversation to the OnReceive function
+            ListenForConversations("conv listener", OnReceive)
         """
         if not self.conversation_started:
             if print_log:
@@ -418,9 +478,40 @@ class Conversation:
                      buffer_size, await_finish)
         return True
 
+    def SayAwait(self, data, buffer_size=def_buffer_size, await_finish=False):
+        """Transmits data of any length to the other peer.
+        Usage:
+            def OnReceive(conversation, data):
+                print(data.decode("utf-8"))
+
+            conversation = Conversation()
+            conversation.StartAwait("test", "QmHash", "conv listener", OnReceive)
+            conversation.Say("Hello there!".encode())
+
+            # the other peer must have a conversation listener named "conv listener" running, e.g. via:
+            # forwards communication from any conversation to the OnReceive function
+            ListenForConversations("conv listener", OnReceive)
+        """
+        if not self.conversation_started:
+            if print_log:
+                print("Wanted to say something but conversation was not yet started")
+                return False
+        TransmitDataAwait(data, self.peerID, self.others_conv_listener,
+                          buffer_size)
+        return True
+
     def Close(self):
         self.listener.Terminate()
         self = None
+
+    def __exit__(self):
+        self.Close()
+
+    def __del__(self):
+        self.Close()
+
+    def __delete__(self):
+        self.Close()
 
 
 class ConversationListener:
@@ -441,6 +532,9 @@ class ConversationListener:
                 print(f"ConvLisReceived {self.listener_name}: Starting conversation...")
             conversation_name = info[1].decode('utf-8')
             self.eventhandler(conversation_name, peerID)
+        elif print_log_conversations:
+            print(f"ConvLisReceived {self.listener_name}: Received unreadable request")
+            print(info[0])
 
 
 def TransmitFile(filepath, peerID, others_req_listener, metadata=bytearray(), block_size=def_block_size, buffer_size=def_buffer_size):
@@ -817,7 +911,7 @@ class ListenerTCP(threading.Thread):
 
     # thread =  multiprocessing.Process(target = ListenIndefinately, args= ())
     # thread.start()
-    #thread = _thread.start_new_thread(ListenIndefinately,())
+    # thread = _thread.start_new_thread(ListenIndefinately,())
 
     # return thread, used_port
 
@@ -897,14 +991,14 @@ class Listener2TCP(threading.Thread):
                 ev.start()
         conn.close()
 
-        #_thread.start_new_thread(eventhandler, (data, peerID))
+        # _thread.start_new_thread(eventhandler, (data, peerID))
         self.sock.close()
         if print_log_connections:
             print("Closed listener.")
 
     # thread =  multiprocessing.Process(target = ListenIndefinately, args= ())
     # thread.start()
-    #thread = _thread.start_new_thread(ListenIndefinately,())
+    # thread = _thread.start_new_thread(ListenIndefinately,())
 
     # return thread, used_port
 
@@ -1004,7 +1098,7 @@ class Listener(threading.Thread):
 
     # thread =  multiprocessing.Process(target = ListenIndefinately, args= ())
     # thread.start()
-    #thread = _thread.start_new_thread(ListenIndefinately,())
+    # thread = _thread.start_new_thread(ListenIndefinately,())
 
     # return thread, used_port
 
@@ -1082,14 +1176,14 @@ class Listener2(threading.Thread):
                 ev = Thread(target=self.eventhandler, args=(data, ip_addr))
                 ev.start()
 
-        #_thread.start_new_thread(eventhandler, (data, peerID))
+        # _thread.start_new_thread(eventhandler, (data, peerID))
         self.sock.close()
         if print_log_connections:
             print("Closed listener.")
 
     # thread =  multiprocessing.Process(target = ListenIndefinately, args= ())
     # thread.start()
-    #thread = _thread.start_new_thread(ListenIndefinately,())
+    # thread = _thread.start_new_thread(ListenIndefinately,())
 
     # return thread, used_port
 
@@ -1160,7 +1254,7 @@ class Transmitter:
 
     def SendTransmissionRequest(self):
         # sending transmission request, telling the receiver our code for the transmission, our listening port on which they should send confirmation buffers, and the buffer size to use
-        #sock.connect(("127.0.0.1", port))
+        # sock.connect(("127.0.0.1", port))
         data = AddIntegrityByteToBuffer(IPFS_API.MyID().encode(
         ) + bytearray([255]) + ToB255No0s(self.our_port) + bytearray([0]) + ToB255No0s(self.buffer_size))
         tries = 0
@@ -1221,8 +1315,8 @@ class Transmitter:
 
         self.transmission_socket = self.SetupSendingConnection(
             self.peerID, self.their_port, self.transmission_socket)
-        #self.transmission_socket.connect(("127.0.0.1", 0))
-        #CreateSendingConnection(self.peerID, str(self.their_port), self.transmission_socket.port)
+        # self.transmission_socket.connect(("127.0.0.1", 0))
+        # CreateSendingConnection(self.peerID, str(self.their_port), self.transmission_socket.port)
         position = 0
         buffer_No = 0
         time.sleep(delay_2)
@@ -1390,6 +1484,17 @@ class Transmitter:
         if self.on_finish_handler:
             self.on_finish_handler(succeeded)
 
+    def __exit__(self):
+        if self.status != "finished":
+            self.FinishedTransmission(False)
+
+    def __del__(self):
+        if self.status != "finished":
+            self.FinishedTransmission(False)
+
+    def __delete__(self):
+        if self.status != "finished":
+            self.FinishedTransmission(False)
 # Contains all the machinery needed for receiving a transmission.
 
 
@@ -1447,8 +1552,8 @@ class TransmissionListener:
         if print_log_transmissions:
             print("Ready to receive transmission.")
 
-        #self.trsm_replier = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #self.trsm_replier.connect(("127.0.0.1", port))
+        # self.trsm_replier = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.trsm_replier.connect(("127.0.0.1", port))
         # Telling sender we're ready to start receiving the transmission, telling him which self.port we're listening on
         self.status = "receiving"
         sock.send(b"start transmission")
@@ -1577,6 +1682,18 @@ class TransmissionListener:
             CloseSendingConnection(self.peerID, str(self.sender_port))
         Thread(target=CloseConnections).start()
 
+    def __exit__(self):
+        if self.status != "finished":
+            self.FinishedTransmission(False)
+
+    def __del__(self):
+        if self.status != "finished":
+            self.FinishedTransmission(False)
+
+    def __delete__(self):
+        if self.status != "finished":
+            self.FinishedTransmission(False)
+
 
 class Transmitter_OLD:
     """
@@ -1639,7 +1756,7 @@ class Transmitter_OLD:
 
         sock = CreateSendingConnection(self.peerID, self.req_lis_name)
         port = sock.getsockname()[1]
-        #sock.connect(("127.0.0.1", port))
+        # sock.connect(("127.0.0.1", port))
         sock.send(AddIntegrityByteToBuffer(IPFS_API.MyID().encode(
         ) + bytearray([255]) + ToB255No0s(self.our_port) + bytearray([0]) + ToB255No0s(self.buffer_size)))
         sock.close()
@@ -1685,8 +1802,8 @@ class Transmitter_OLD:
 
         self.transmission_socket = self.SetupSendingConnection(
             self.peerID, self.their_port, self.transmission_socket)
-        #self.transmission_socket.connect(("127.0.0.1", 0))
-        #CreateSendingConnection(self.peerID, str(self.their_port), self.transmission_socket.port)
+        # self.transmission_socket.connect(("127.0.0.1", 0))
+        # CreateSendingConnection(self.peerID, str(self.their_port), self.transmission_socket.port)
         position = 0
         buffer_No = 0
         time.sleep(delay_2)
@@ -1929,8 +2046,8 @@ class TransmissionListener_OLD:
 
         self.trsm_replier = CreateSendingConnection(peerID, str(sender_port))
         port = self.trsm_replier.getsockname()[1]
-        #self.trsm_replier = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #self.trsm_replier.connect(("127.0.0.1", port))
+        # self.trsm_replier = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.trsm_replier.connect(("127.0.0.1", port))
         # Telling sender we're ready to start receiving the transmission, telling him which self.port we're listening on
         self.SendBufferToPort(ToB255No0s(self.trsm_lis_port)
                               + bytearray([0]) + "start transmission".encode("utf-8"))

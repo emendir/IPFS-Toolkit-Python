@@ -19,9 +19,7 @@ def OnReceive(data, PeerID):
 
 
 # starting to listen for incoming data transmissions
-IPFS_DataTransmission.ListenForTransmissions("test application", OnReceive)
-
-
+listener = IPFS_DataTransmission.ListenForTransmissions("test application", OnReceive)
 # endless loop to stop program from terminating
 while True:
     time.sleep(1)
