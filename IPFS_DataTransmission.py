@@ -19,6 +19,7 @@
 # Error handling for conversations and FileTransmission
 # Close conversations
 
+from queue import Queue
 import socket
 import zmq
 import threading
@@ -37,7 +38,7 @@ IPFS_API.Start()
 
 
 # -------------- Settings ---------------------------------------------------------------------------------------------------
-print_log = True  # whether or not to print debug in output terminal
+print_log = False  # whether or not to print debug in output terminal
 print_log_connections = False
 print_log_transmissions = False
 print_log_conversations = True
@@ -314,10 +315,14 @@ class Conversation:
         Join: join a conversation which another peer started. Used by a conversation listener. See ListenForConversations for usage.
     """
     conversation_started = False
-    started = Event()
-    last_message = None
-    message_received = Event()
+    # started = Event()
+    # last_message = None
+    # message_received = Event()
     eventhandler = None
+    message_queue = Queue()
+
+    def __init__(self):
+        self.started = Event()
 
     def Start(self, conversation_name, peerID, others_req_listener, eventhandler=None):
         """Starts a conversation object with which peers can send data transmissions to each other.
@@ -429,14 +434,18 @@ class Conversation:
                 if print_log_conversations:
                     print(self.conversation_name + ": peer joined, conversation started")
                 self.started.set()
+
             elif print_log_conversations:
                 print(self.conversation_name +
                       ": received unrecognisable buffer, expected join confirmation")
                 print(info[0])
             return
         # if self.conversation_started:
-        self.last_message = data
-        self.message_received.set()
+        # self.last_message = data
+        # self.message_received.set()
+
+        self.message_queue.put(data)
+        # self.message_received.clear()
         # self.message_received = Event()
 
         if self.eventhandler:
@@ -447,14 +456,23 @@ class Conversation:
 
     def Listen(self):
         """Waits until the conversation peer sends a message, then returns that message."""
-        self.message_received.wait()
-        self.message_received = Event()
-        if self.last_message:
-            return self.last_message
+        data = self.message_queue.get()
+        if data:
+            return data
         else:
             if print_log_conversations:
-                print("Conv.Listen: received NONE, restarting Event Wait")
+                print("Conv.Listen: received", self.last_message, "restarting Event Wait")
             self.Listen()
+            return
+        self.message_received.clear()
+
+        # self.message_received.wait()
+        # if self.last_message:
+        #     return self.last_message
+        # else:
+        #     if print_log_conversations:
+        #         print("Conv.Listen: received", self.last_message, "restarting Event Wait")
+        #     self.Listen()
 
     def Say(self, data, buffer_size=def_buffer_size, await_finish=False):
         """Transmits data of any length to the other peer.
@@ -470,10 +488,10 @@ class Conversation:
             # forwards communication from any conversation to the OnReceive function
             ListenForConversations("conv listener", OnReceive)
         """
-        if not self.conversation_started:
+        while not self.conversation_started:
             if print_log:
                 print("Wanted to say something but conversation was not yet started")
-                return False
+            time.sleep(0.01)
         TransmitData(data, self.peerID, self.others_conv_listener,
                      buffer_size, await_finish)
         return True
@@ -495,7 +513,7 @@ class Conversation:
         if not self.conversation_started:
             if print_log:
                 print("Wanted to say something but conversation was not yet started")
-                return False
+            self.started.wait()
         TransmitDataAwait(data, self.peerID, self.others_conv_listener,
                           buffer_size)
         return True
@@ -504,13 +522,7 @@ class Conversation:
         self.listener.Terminate()
         self = None
 
-    def __exit__(self):
-        self.Close()
-
     def __del__(self):
-        self.Close()
-
-    def __delete__(self):
         self.Close()
 
 
