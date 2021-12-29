@@ -33,6 +33,7 @@ conv.Say("Hello there!".encode('utf-8'))
 # time.sleep(1)
 data = conv.Listen()
 print("Received data: ", data)
+conv.Say("Hello again!".encode('utf-8'))
 
 # endless loop to stop program from terminating
 while True:
