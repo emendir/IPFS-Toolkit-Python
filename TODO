@@ -1,5 +1,6 @@
 Conversation:
   Sendfile function
+  timeouts
 
 Transmitter:
   Progress function
