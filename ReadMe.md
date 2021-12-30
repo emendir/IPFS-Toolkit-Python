@@ -6,7 +6,7 @@ It includes a programmer-friendly wrapper called __IPFS-API__ for the official I
 - Failure management in IPFS_DataTransmission: all transmission functions, such as TransmitData(), Conversation.Start(), Conversation.Say() and TransmitFile() now return a boolean to indicate whether or not they were successful. You can also specify timeouts.
 - IPFS_DataTransmission.Conversation has a Listen() method: it allows you to block the calling thread as you wait for an incoming transmission.
 
-Unfortunately, all these great changes and simplifications have deprecated some functions, so you may need to update some of your code which uses IPFS_API. See the [ChangeLog](./ChangleLof.md) for full details.
+Unfortunately, all these great changes and simplifications have deprecated some functions, so you may need to update some of your code which uses IPFS_API. See the [ChangeLog](./ChangleLog.md) for full details.
 
 # Package Contents:
 ## Modules:
