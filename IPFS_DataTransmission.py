@@ -35,12 +35,13 @@ from inspect import signature
 from IPFS_API import *
 import IPFS_API
 IPFS_API.Start()
+zmq_context = zmq.Context()
 
 
 # -------------- Settings ---------------------------------------------------------------------------------------------------
 print_log = False  # whether or not to print debug in output terminal
 print_log_connections = False
-print_log_transmissions = False
+print_log_transmissions = True
 print_log_conversations = True
 print_log_files = False
 
@@ -57,8 +58,8 @@ delay_2 = 0.1*delaymodifier
 
 resend_timeout_sec = 1
 close_timeout_sec = 100
-transmission_request_timeout_sec = 5
-transmission_request_max_retriies = 5
+transmission_request_timeout_sec = 3
+transmission_request_max_retriies = 3
 
 def_buffer_size = 4096  # the communication buffer size
 # the size of the chunks into which files should be split before transmission
@@ -71,7 +72,7 @@ free_sending_ports = [x for x in range(20001, 20500)]
 # Returns a transmitter object so that the status of the transmission can be monitored
 
 
-def TransmitData(data, peerID, listener_name, buffer_size=def_buffer_size, await_finish=False, on_finish_handler=None):
+def TransmitDataOLD(data, peerID, listener_name, buffer_size=def_buffer_size, await_finish=False, on_finish_handler=None):
     """
     Transmits the input data (a bytearray of any length) to the computer with the specified network address.
 
@@ -97,6 +98,78 @@ def TransmitData(data, peerID, listener_name, buffer_size=def_buffer_size, await
             print("Could not find the specified peer on the IPFS network.")
         if on_finish_handler:
             on_finish_handler(False)
+
+
+def TransmitData(data, peerID, req_lis_name, buffer_size=def_buffer_size, await_finish=False, on_finish_handler=None):
+    def SendTransmissionRequest():
+        # sending transmission request, telling the receiver our code for the transmission, our listening port on which they should send confirmation buffers, and the buffer size to use
+        # sock.connect(("127.0.0.1", port))
+        data = AddIntegrityByteToBuffer(IPFS_API.MyID().encode(
+        ) + bytearray([255]) + ToB255No0s(our_port) + bytearray([0]) + ToB255No0s(buffer_size))
+        tries = 0
+        poller = zmq.Poller()
+        while(tries < transmission_request_max_retriies):
+            sock = CreateSendingConnection(peerID, req_lis_name)
+            success = sock.send(data)
+            if print_log_transmissions:
+                print(str(our_port)
+                      + ": Sent transmission request to " + str(req_lis_name))
+
+            poller.register(sock, zmq.POLLIN)
+            evts = poller.poll(transmission_request_timeout_sec*1000)
+
+            poller.unregister(sock)
+            sock.close()
+            del sock
+            CloseSendingConnection(peerID, req_lis_name)
+            if len(evts) > 0:
+                if print_log_transmissions:
+                    print(str(our_port)
+                          + ": Transmission request to " + str(req_lis_name) + "was received.")
+                return True  # signal success
+            else:
+                if print_log_transmissions:
+                    print(str(our_port)
+                          + ": Transmission request send " + str(req_lis_name) + "timeout reached.")
+            tries += 1
+        return False    # signal Failure
+    while True:
+        sock = zmq_context.socket(zmq.REP)
+        our_port = sock.bind_to_random_port("tcp://*")
+        CreateListeningConnection(str(our_port), our_port)
+
+        poller = zmq.Poller()
+        poller.register(sock, zmq.POLLIN)
+        if SendTransmissionRequest():
+            evts = poller.poll(transmission_request_timeout_sec*1000)
+            if len(evts) > 0 and sock.recv() == b"start transmission":
+                poller = zmq.Poller()
+                poller.register(sock, zmq.POLLIN)
+                sock.send(data)
+                evts = poller.poll(transmission_request_timeout_sec*1000)
+                print(evts[0])
+
+                if len(evts) > 0 and sock.recv() == b'Finished!':
+                    sock.close()
+
+                    CloseListeningConnection(str(our_port), our_port)
+                    CloseSendingConnection(peerID, req_lis_name)
+
+                    if print_log_transmissions:
+                        print(str(our_port) + ": Finished transmission.")
+
+                    if on_finish_handler:
+                        on_finish_handler(True)
+
+                    return True  # signal success
+                else:
+                    sock.close()
+                    return False
+            else:
+                print("RECIEVED OTHER DATA")
+        else:
+            sock.close()
+            return False
 
 
 def TransmitDataAwait(data, peerID, listener_name, buffer_size=def_buffer_size):
@@ -198,8 +271,8 @@ class ListenForTransmissions:
             print(self.listener_name + ": Could not decode transmission request.")
 
     def Listen(self):
-        context = zmq.Context()
-        self.socket = context.socket(zmq.REP)
+        # context = zmq.Context()
+        self.socket = zmq_context.socket(zmq.REP)
         self.port = self.socket.bind_to_random_port("tcp://*")
         CreateListeningConnection(self.listener_name, self.port)
         if print_log_transmissions:
@@ -225,7 +298,7 @@ class ListenForTransmissions:
         # self.socket.unbind(self.port)
         self.terminate = True
         CloseListeningConnection(self.listener_name, self.port)
-        socket = zmq.Context().socket(zmq.REQ)
+        socket = zmq_context.socket(zmq.REQ)
         socket.connect(f"tcp://localhost:{self.port}")
         socket.send("close".encode())
         socket.recv()
@@ -370,7 +443,7 @@ class Conversation:
         # self.listener = ListenForTransmissions(conversation_name, self.hear_eventhandler)
         data = bytearray("I want to start a conversation".encode(
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
-        TransmitDataAwait(data, peerID, others_req_listener)
+        TransmitData(data, peerID, others_req_listener)
         if print_log_conversations:
             print(conversation_name + ": sent conversation request")
 
@@ -411,7 +484,7 @@ class Conversation:
         data = bytearray("I'm listening".encode(
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
         self.conversation_started = True
-        TransmitDataAwait(data, peerID, others_conv_listener)
+        TransmitData(data, peerID, others_conv_listener)
         if print_log_conversations:
             print(conversation_name + ": Joined conversation "
                   + others_conv_listener)
@@ -514,8 +587,8 @@ class Conversation:
             if print_log:
                 print("Wanted to say something but conversation was not yet started")
             self.started.wait()
-        TransmitDataAwait(data, self.peerID, self.others_conv_listener,
-                          buffer_size)
+        TransmitData(data, self.peerID, self.others_conv_listener,
+                     buffer_size)
         return True
 
     def Close(self):
@@ -718,21 +791,22 @@ def CreateSendingConnection(peerID: str, protocol: str, port=None):
     IPFS_API.ClosePortForwarding(
         targetaddress="/p2p/" + peerID, protocol="/x/" + protocol)
 
-    context = zmq.Context()
+    sock = zmq_context.socket(zmq.REQ)
+    # socket.CONNECT_TIMEOUT = 1
     if port == None:
         for prt in free_sending_ports:
             try:
                 ForwardFromPortToPeer(protocol, prt, peerID)
-                socket = context.socket(zmq.REQ)
-                socket.connect(f"tcp://localhost:{prt}")
-
-                return socket
+                sock.connect(f"tcp://localhost:{prt}")
+                return sock
             except:
                 pass
+
         print("failed to find free port for sending connection")
     else:
         ForwardFromPortToPeer(protocol, port, peerID)
-        print("PORT SPECIFIED")
+        sock.connect(f"tcp://localhost:{prt}")
+        return sock
 
 
 def CreateListeningConnectionTCP(protocol, port):
@@ -1249,19 +1323,21 @@ class Transmitter:
         self.on_finish_handler = on_finish_handler
 
         while True:
-            context = zmq.Context()
-            socket = context.socket(zmq.REP)
+            socket = zmq_context.socket(zmq.REP)
             self.our_port = socket.bind_to_random_port("tcp://*")
             CreateListeningConnection(str(self.our_port), self.our_port)
 
-            self.SendTransmissionRequest()
-            response = socket.recv()
-            if response == b"start transmission":
-                socket.send(data)
-                socket.close()
-                break
+            if self.SendTransmissionRequest():
+                response = socket.recv()
+                if response == b"start transmission":
+                    socket.send(data)
+                    socket.close()
+                    break
+                else:
+                    print("RECIEVED OTHER DATA")
             else:
-                print("RECIEVED OTHER DATA")
+                socket.close()
+
         self.FinishedTransmission(True)
 
     def SendTransmissionRequest(self):
@@ -1270,24 +1346,32 @@ class Transmitter:
         data = AddIntegrityByteToBuffer(IPFS_API.MyID().encode(
         ) + bytearray([255]) + ToB255No0s(self.our_port) + bytearray([0]) + ToB255No0s(self.buffer_size))
         tries = 0
+        poller = zmq.Poller()
         while(tries < transmission_request_max_retriies):
             sock = CreateSendingConnection(self.peerID, self.req_lis_name)
             sock.send(data)
             if print_log_transmissions:
                 print(str(self.our_port)
                       + ": Sent transmission request to " + str(self.req_lis_name))
-            poller = zmq.Poller()
+
             poller.register(sock, zmq.POLLIN)
             evts = poller.poll(transmission_request_timeout_sec*1000)
 
+            poller.unregister(sock)
             sock.close()
-
-            print(evts)
+            del sock
+            CloseSendingConnection(self.peerID, self.req_lis_name)
             if len(evts) > 0:
                 if print_log_transmissions:
                     print(str(self.our_port)
                           + ": Transmission request to " + str(self.req_lis_name) + "was received.")
-                break
+                return True  # signal success
+            else:
+                if print_log_transmissions:
+                    print(str(self.our_port)
+                          + ": Transmission request send " + str(self.req_lis_name) + "timeout reached.")
+            tries += 1
+        return False    # signal Failure
 
     def SendBufferToPort(self, buffer):
         # Adding an integrity byte that equals the sum of all the bytes in the buffer modulus 256
@@ -1333,7 +1417,7 @@ class Transmitter:
         buffer_No = 0
         time.sleep(delay_2)
 
-        socket = zmq.Context().socket(zmq.REQ)
+        socket = zmq_context.socket(zmq.REQ)
         socket.connect(f"tcp://localhost:{self.their_port}")
         socket.send(self.data)
         time.sleep(delay_2)
@@ -1557,7 +1641,7 @@ class TransmissionListener:
         # needed for some reason in conversations cause it otherwise keeps the values from the last transmission listener
         self.buffers = list()
 
-        context = zmq.Context()
+        # context = zmq.Context()
         sock = CreateSendingConnection(self.peerID, str(self.sender_port))
         # setting up listener for receiving and processing the transmission self.buffers
 
@@ -1570,6 +1654,8 @@ class TransmissionListener:
         self.status = "receiving"
         sock.send(b"start transmission")
         self.data = sock.recv()
+        sock.send("Finished!".encode())
+        sock.close()
         if print_log_transmissions:
             print("Received Transmission.")
         self.FinishedTransmission(True)
