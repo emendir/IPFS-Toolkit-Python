@@ -1,12 +1,20 @@
 A library for working with IPFS in Python.  
 It includes a programmer-friendly wrapper called __IPFS-API__ for the official IPFS Python API (ipfshttpclient), a module called __IPFS-DataTransmission__ for direct P2P data transmission between two IPFS-Nodes and a module called __IPFS-LNS__ for remembering the multiaddrs of known IPFS nodes ("contacts") to speed up connection times.
 
+## Version 0.2.X is out!
+- In IPFS_DataTransmission the transmission protocol which has so far been my schoolboy-style home-made buffer-management system has been replaced with the much more efficient [ZeroMQ](zeromq.org) protocol. That means greater speed and greater reliability.
+- Failure management in IPFS_DataTransmission: all transmission functions, such as TransmitData(), Conversation.Start(), Conversation.Say() and TransmitFile() now return a boolean to indicate whether or not they were successful. You can also specify timeouts.
+- IPFS_DataTransmission.Conversation has a Listen() method: it allows you to block the calling thread as you wait for an incoming transmission.
+
+Unfortunately, all these great changes and simplifications have deprecated some functions, so you may need to update some of your code which uses IPFS_API. See the [ChangeLog](./ChangleLof.md) for full details.
+
 # Package Contents:
 ## Modules:
 - __IPFS_API__: a wrapper for the module ipfshttpclient2 that makes it easier to work with IPFS in Python
 - __IPFS_DataTransmission__: a Python module that enables P2P data transmission between IPFS nodes
 - __IPFS_LNS__: a Python module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)
 - __ipfshttpclient2__: a modified version of the official ipfshttpclient module that has been expanded to include the ipfs.p2p functions
+
 ## Other:
 - __Examples__: a folder of scripts demonstrating how to work with IPFS_DataTransmission
 
@@ -41,33 +49,48 @@ IPFS-Toolkit is made for interacting with IPFS in the Python programming languag
 - __Pip__ for Python3:
     https://pip.pypa.io/en/stable/installing/
 - If you want to use the source code, install the following prerequisite Python modules:  
-    `pip3 install setuptools`  
-    `pip3 install wheel`  
-    `pip3 install multiaddr`  
-    `pip3 install appdirs`  
-    `pip3 install multiaddr`  
-    `pip3 install appdirs`  
-    `pip3 install idna`  
-    `pip3 install httpcore`  
-    `pip3 install httpx`
-
+```python
+pip3 install setuptools  
+pip3 install wheel  
+pip3 install multiaddr  
+pip3 install appdirs  
+pip3 install multiaddr  
+pip3 install appdirs  
+pip3 install idna  
+pip3 install httpcore  
+pip3 install httpx
+pip3 install zmq
+```
 # Modules Contained in IPFS-Toolkit
 ## IPFS-API
 `import IPFS_API`
 
+This has a simplified and more user-friendly yet limited API for interacting with IPFS compared to the ipfshttpclient.
+
 Usage examples:  
-`print(IPFS_API.MyID()) # print your IPFS peer ID`  
-`cid = IPFS_API.Publish('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable`  
+```python
+print(IPFS_API.MyID()) # print your IPFS peer ID  
+cid = IPFS_API.Publish('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable  
 
-`# Managing IPNS keys`  
-`IPFS_API.CreateIPNS_Record('MyWebsite') # generate a pair of IPNS name keys`  
-`IPFS_API.UpdateIPNS_Record('MyWebsite', './SomeFileOrDir') # upload file to IPFS & publish `  
-`IPFS_API.UpdateIPNS_RecordFromHash('MyWebsite', cid) # publish IPFS content to IPNS key`  
+# Managing IPNS keys  
+IPFS_API.CreateIPNS_Record('MyWebsite') # generate a pair of IPNS name keys  
+IPFS_API.UpdateIPNS_Record('MyWebsite', './SomeFileOrDir') # upload file to IPFS & publish   
+IPFS_API.UpdateIPNS_RecordFromHash('MyWebsite', cid) # publish IPFS content to IPNS key  
 
-`# IPFS PubSub`  
-`IPFS_API.SubscribeToTopic("test", print) # print is the eventhandler`  
-`IPFS_API.PublishToTopic("test", "Hello there!")`
+# IPFS PubSub  
+IPFS_API.SubscribeToTopic("test", print) # print is the eventhandler  
+IPFS_API.PublishToTopic("test", "Hello there!")
+```
+#### HTTP API access:
+This allows you to access the official IPFS API (the same as the command line ipfs utility) through ipfshttpclients' `client` object. At this stage of development it is incomplete.
 
+Examples:
+```Python
+import IPFS_API
+IPFS_API.http_client.add("helloworld.txt")
+IPFS_API.dht.findpeer("QMHash")
+print(IPFS_API.swarm.peers())
+```
 
 ## IPFS-Datatransmission
 `import IPFS_DataTransmission`
@@ -97,14 +120,15 @@ IPFS-LNS (IPFS Local Name System) allows you to store IPFS nodes' peer IDs and n
 
 
 Basic usage:  
-`import IPFS_API`  
+```python
+import IPFS_API  
 
-`# check connection to peer of peerID "QmHash" and whom we call "Bob", add him to our list of known peers ("contacts") if he is not already added`  
-`IPFS_API.CheckPeerConnection("QmHash", "Bob") `
+# check connection to peer of peerID "QmHash" and whom we call "Bob", add him to our list of known peers ("contacts") if he is not already added  
+IPFS_API.CheckPeerConnection("QmHash", "Bob") 
 
-`import IPFS_LNS`
-`peerID = IPFS_LNS.LookUpContact("Bob") # get the contact 'Bob's IPFS peer ID`
-
+import IPFS_LNS
+peerID = IPFS_LNS.LookUpContact("Bob") # get the contact 'Bob's IPFS peer ID
+```
 # IPFS Technicalities:
 How does IPFS-DataTransmission use IPFS to to send data to another computer? After all, IPFS is a file system and made for sharing and storing files, creating a content addressed internet. Does it really provide the functionality for two computers to communicate directly which each other?  
 Yes, IPFS does provide that functionality, although as of November 2021 that is still an experimental feature. That's why you have to configure IPFS to enable that feature as described in Prerequisites.txt.  
