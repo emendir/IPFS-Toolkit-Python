@@ -1,13 +1,9 @@
 Conversation:
   Sendfile function
-  timeouts
-
-Transmitter:
-  Progress function
-  recheck if custom protocol can be replaced with TCP, keeping limitlessness
 
 FileTransmission:
   abortion
-  
+  Progress function
+  download location
   
 Document new Conversation functionality and publish it

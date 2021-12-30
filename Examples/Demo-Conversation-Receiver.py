@@ -19,9 +19,16 @@ def NewConvHandler(conversation_name, peerID):
         """Eventhandler for when the other peer says something in the conversation."""
         print(f"Received message on {conversation.conversation_name}:", message.decode(
             "utf-8"))
-        conversation.Say("Hi back".encode("utf-8"))
+        if message.decode("utf-8") == "Bye!":
+            conversation.Close()
     conv = IPFS_DataTransmission.Conversation()
     conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived)
+    print("joined")
+    data = conv.Listen()
+    print("Received data: ", data)
+    conv.Say("Hi back".encode("utf-8"))
+    data = conv.Listen()
+    print("Received data: ", data)
 
 
 conv_lis = IPFS_DataTransmission.ListenForConversations(
@@ -30,3 +37,6 @@ conv_lis = IPFS_DataTransmission.ListenForConversations(
 # endless loop to stop program from terminating
 while True:
     time.sleep(1)
+
+# when you no longer need to listen for incoming conversations, clean up resources:
+conv_lis.Terminate()

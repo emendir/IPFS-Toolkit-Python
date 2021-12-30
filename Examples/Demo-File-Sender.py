@@ -27,3 +27,7 @@ IPFS_API.FindPeer(peerID)
 # Transmit the file. The object ft can be referenced for example to check transmission progress
 ft = IPFS_DataTransmission.TransmitFile(
     filepath, peerID, "my_apps_filelistener", metadata)
+if ft:
+    print("Started Transmission")
+else:
+    print("Failed to start transmission")

@@ -22,7 +22,7 @@ print_log = False
 
 autostart = True
 started = False
-ipfs = ipfshttpclient.client.Client()
+http_client = ipfshttpclient.client.Client()
 # List for keeping track of subscriptions to IPFS topics, so that subscriptions can be ended
 subscriptions = list([])
 
@@ -50,7 +50,7 @@ def Start():
 
 # Publishes the input text to specified the IPFS PubSub topic
 def PublishToTopic(topic, text):
-    ipfs.pubsub.publish(topic, text)
+    http_client.pubsub.publish(topic, text)
 
 # Listens to the specified IPFS PubSub topic and passes received text to the input eventhandler function
 
@@ -59,8 +59,8 @@ def SubscribeToTopic(topic, eventhandler):
     def Listen():
         while True:
             try:
-                sub = ipfs.pubsub.subscribe(topic)
-                with ipfs.pubsub.subscribe(topic) as sub:
+                sub = http_client.pubsub.subscribe(topic)
+                with http_client.pubsub.subscribe(topic) as sub:
                     for text in sub:
                         _thread.start_new_thread(
                             eventhandler, (str(base64.b64decode(str(text).split('\'')[7]), "utf-8"),))
@@ -84,11 +84,14 @@ def UnSubscribeFromTopic(topic, eventhandler):
     subscriptions.pop(index)    # remove the subscription from the list of subscriptions
 
 
-def PublishFile(filename: str):
-    """
-    Upload a file to IPFS. Does not work for directories.
-    """
-    return ipfs.add(filename).get("Hash")
+def UploadFile(filename: str):
+    print("IPFS_API: WARNING: deprecated. Use Publish() instead.")
+    return Publish(filename)
+
+
+def Upload(filename: str):
+    print("IPFS_API: WARNING: deprecated. Use Publish() instead.")
+    return Publish(filename)
 
 
 def Publish(path: str):
@@ -96,7 +99,7 @@ def Publish(path: str):
     Upload a file or a directory to IPFS.
     Returns the Hash of the uploaded file.
     """
-    result = ipfs.add(path, recursive=True)
+    result = http_client.add(path, recursive=True)
     if(type(result) == list):
         return result[-1].get("Hash")
     else:
@@ -105,15 +108,15 @@ def Publish(path: str):
 
 
 def Pin(cid: str):
-    ipfs.pin.add(cid)
+    http_client.pin.add(cid)
 
 
 def Unpin(cid: str):
-    ipfs.pin.rm(cid)
+    http_client.pin.rm(cid)
 
 
 def DownloadFile(ID, path=""):
-    data = ipfs.cat(ID)
+    data = http_client.cat(ID)
     if path != "":
         file = open(path, "wb")
         file.write(data)
@@ -122,11 +125,11 @@ def DownloadFile(ID, path=""):
 
 
 def CatFile(ID):
-    return ipfs.cat(ID)
+    return http_client.cat(ID)
 
 
 def CreateIPNS_Record(name: str):
-    result = ipfs.key.gen(key_name=name, type="rsa")
+    result = http_client.key.gen(key_name=name, type="rsa")
     print(result)
     if(type(result) == list):
         return result[-1].get("Id")
@@ -135,7 +138,7 @@ def CreateIPNS_Record(name: str):
 
 
 def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
-    ipfs.name.publish(ipfs_path=cid, key=name, ttl=ttl, lifetime=lifetime)
+    http_client.name.publish(ipfs_path=cid, key=name, ttl=ttl, lifetime=lifetime)
 
 
 def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
@@ -149,11 +152,11 @@ def DownloadIPNS_Record(name, path="", nocache=False):
 
 
 def ResolveIPNS_Key(ipns_id, nocache=False):
-    return ipfs.name.resolve(name=ipns_id, nocache=nocache).get("Path")
+    return http_client.name.resolve(name=ipns_id, nocache=nocache).get("Path")
 
 
 def CatIPNS_Record(name, nocache=False):
-    ipfs_path = ipfs.name.resolve(name=name, nocache=nocache).get("Path")
+    ipfs_path = http_client.name.resolve(name=name, nocache=nocache).get("Path")
     return CatFile(ipfs_path)
 
 # Returns a list of the multiaddresses of all connected peers
@@ -173,7 +176,7 @@ def ListPeerMaddresses():
 
 def FindPeer(ID: str):
     try:
-        response = ipfs.dht.findpeer(ID)
+        response = http_client.dht.findpeer(ID)
         if(len(response.get("Responses")[0].get("Addrs")) > 0):
             return response
     except:
@@ -182,14 +185,14 @@ def FindPeer(ID: str):
 
 # Returns the IPFS ID of the currently running IPFS node
 def MyID():
-    return ipfs.id().get("ID")
+    return http_client.id().get("ID")
 
 
 myid = MyID
 
 
 def ListenOnPortTCP(protocol, port):
-    ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
+    http_client.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
 listenonportTCP = ListenOnPortTCP
@@ -198,7 +201,7 @@ listentcp = ListenOnPortTCP
 
 
 def ListenOnPort(protocol, port):
-    ipfs.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
+    http_client.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
 listenonportUDP = ListenOnPort
@@ -210,11 +213,11 @@ listen = ListenOnPort
 
 
 def ForwardFromPortToPeer(protocol: str, port, peerID):
-    ipfs.p2p.forward("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port), "/p2p/" + peerID)
+    http_client.p2p.forward("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port), "/p2p/" + peerID)
 
 
 def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
-    ipfs.p2p.close(all, protocol, listenaddress, targetaddress)
+    http_client.p2p.close(all, protocol, listenaddress, targetaddress)
 
 
 def CheckPeerConnection(id, name=""):
