@@ -15,7 +15,6 @@ import IPFS_API
 
 # replace QmHash with your peer's IPFS ID
 peerID = "QmHash"
-peerID = "12D3KooWEkcGRPJUYyb3P2pxes6jBpET9wzDrFXxfHX8CTwHq4YB"
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
 IPFS_API.FindPeer(peerID)
 
