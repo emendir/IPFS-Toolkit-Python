@@ -24,5 +24,7 @@ data = "Hello IPFS World! New way of networking coming up. Can't wait to use it!
     "utf-8")
 
 # sending data to peer, waiting for the transmission to complete until executing the next line of code
-IPFS_DataTransmission.TransmitDataAwait(data, peerID, "test application")
-print("Sent Data!!")
+if IPFS_DataTransmission.TransmitData(data, peerID, "test application"):
+    print("Sent Data!!")
+else:
+    print("Failed to send data.")
