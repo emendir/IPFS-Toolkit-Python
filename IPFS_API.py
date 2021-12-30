@@ -30,7 +30,7 @@ subscriptions = list([])
 def Start():
     try:
         global started
-        ipfs = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
+        http_client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
         started = True
         return True
     except Exception as e:
