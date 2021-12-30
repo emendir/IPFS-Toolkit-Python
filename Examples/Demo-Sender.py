@@ -14,7 +14,6 @@ import IPFS_API
 
 # replace QmHash with your peer's IPFS ID
 peerID = "QmHash"
-peerID = "12D3KooWGoNkKHtZS9zJit3z6FWZyAZzd5KTfoxseuNbu26yKvXn"
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
 IPFS_API.FindPeer(peerID)
@@ -24,5 +23,7 @@ data = "Hello IPFS World! New way of networking coming up. Can't wait to use it!
     "utf-8")
 
 # sending data to peer, waiting for the transmission to complete until executing the next line of code
-IPFS_DataTransmission.TransmitDataAwait(data, peerID, "test application")
-print("Sent Data!!")
+if IPFS_DataTransmission.TransmitData(data, peerID, "test application"):
+    print("Sent Data!!")
+else:
+    print("Failed to send data.")

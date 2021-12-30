@@ -8,6 +8,7 @@ and of course make sure IPFS is running on both computers first.
 """
 
 import time
+
 import IPFS_DataTransmission
 
 
@@ -19,9 +20,12 @@ def OnDataReceived(peer, file, metadata):
     print("Sender:", peer)
 
 
-fr = IPFS_DataTransmission.ListenForFileTransmissions(
+file_receiver = IPFS_DataTransmission.ListenForFileTransmissions(
     "my_apps_filelistener", OnDataReceived)
 
 # endless loop to stop program from terminating
 while(True):
     time.sleep(1)
+
+# when you no longer need to listen for incoming files, clean up resources:
+file_receiver.Terminate()
