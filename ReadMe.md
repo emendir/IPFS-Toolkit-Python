@@ -61,6 +61,7 @@ pip3 install httpcore
 pip3 install httpx
 pip3 install zmq
 ```
+
 # Modules Contained in IPFS-Toolkit
 ## IPFS-API
 `import IPFS_API`
