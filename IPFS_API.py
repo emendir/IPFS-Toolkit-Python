@@ -17,6 +17,7 @@ from requests.exceptions import ConnectionError
 # import multiprocessing
 import traceback
 import IPFS_LNS
+import logging
 
 print_log = False
 
@@ -32,8 +33,11 @@ def Start():
         global started
         http_client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
         started = True
+        logging.info("Started IPFS_API, connected to daemon")
         return True
     except Exception as e:
+        logging.warning("could not connect to daemon")
+        logging.debug(traceback.format_exc())
         if print_log:
             print("")
             print("----------------------------------------------------")

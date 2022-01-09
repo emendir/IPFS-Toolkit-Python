@@ -617,7 +617,7 @@ class ConversationListener:
         self.listener.Terminate()
 
 
-def TransmitFile(filepath, peerID, others_req_listener, metadata=bytearray(), block_size=def_block_size):
+def TransmitFile(filepath, peerID, others_req_listener, metadata=bytearray(), progress_handler=None, block_size=def_block_size):
     """Transmits the given file to the specified peer
     Usage:
         transmitter = TransmitFile("text.txt", "QMHash", "my_apps_filelistener", "testmeadata".encode())
@@ -626,18 +626,20 @@ def TransmitFile(filepath, peerID, others_req_listener, metadata=bytearray(), bl
         string peerID: the IPFS ID of the computer to send the file to
         string others_req_listener: the name of the ther peer's conversation listener object
         bytes metadata: optional metadata to send to the receiver
+        function(progress:float) progress_handler: eventhandler to send progress (fraction twix 0-1) every time a block has been transmitted to
         int block_size: the FileTransmitter sends the file in chunks.
             This is the siize of those chunks in bytes (default 1MiB) 
     Returns:
         FileTransmitter file_transmitter: returned only if the transmission starts successfully
     """
-    file_transmitter = FileTransmitter(filepath, peerID, others_req_listener, metadata, block_size)
+    file_transmitter = FileTransmitter(
+        filepath, peerID, others_req_listener, metadata, progress_handler, block_size)
     success = file_transmitter.Start()
     if success:
         return file_transmitter
 
 
-def ListenForFileTransmissions(listener_name, eventhandler, dir="."):
+def ListenForFileTransmissions(listener_name, eventhandler, progress_handler=None, dir="."):
     """
     Listens to incoming file transmission requests.
     Whenever a file is received, the specified eventhandler is called.
@@ -652,34 +654,20 @@ def ListenForFileTransmissions(listener_name, eventhandler, dir="."):
 
         fr = IPFS_DataTransmission.ListenForFileTransmissions(
             "my_apps_filelistener", OnDataReceived)
+    Parameters:
+        function(peerID:str, path:str, metadata:bytes) eventhandler:
+                            function to be called when a file is received
+        function(peerID:str, filesize:int, progress:float) progress_handler:
+                            function to be called whenever a block of data
+                            is received during an ongoing file transmission.
+                            progress is a value between 0 and 1
     """
     def RequestHandler(conv_name, peerID):
         ft = FileTransmissionReceiver()
         conv = Conversation()
-        ft.Setup(conv, eventhandler, dir)
+        ft.Setup(conv, eventhandler, progress_handler, dir)
         conv.Join(conv_name, peerID, conv_name, ft.OnDataReceived)
 
-        return
-
-        filesize, filename, conv_name = SplitBy255(data)
-        file_size = FromB255No0s(filesize)
-        filename = filename.decode('utf-8')
-        conv_name = conv_name.decode('utf-8')
-        FileTransmissionReceiver(
-            peerID, conv_name, filename, file_size, eventhandler)
-
-        return
-        try:
-            filesize, filename, conv_name = SplitBy255(data)
-            file_size = FromB255No0s(filesize)
-            filename = filename.decode('utf-8')
-            conv_name = conv_name.decode('utf-8')
-            FileTransmissionReceiver(
-                peerID, conv_name, filename, file_size, eventhandler)
-        except:
-            if print_log:
-                print(
-                    "Received unreadable data on FileTransmissionListener " + listener_name)
     return ConversationListener(listener_name, RequestHandler)
 
 
@@ -692,6 +680,7 @@ class FileTransmitter:
         string peerID: the IPFS ID of the computer to send the file to
         string others_req_listener: the name of the ther peer's conversation listener object
         bytes metadata: optional metadata to send to the receiver
+        function(progress:float) progress_handler: eventhandler to send progress (fraction twix 0-1) every time a block has been transmitted to
         int block_size: the FileTransmitter sends the file in chunks.
             This is the siize of those chunks in bytes (default 1MiB) 
     Returns:
@@ -699,7 +688,7 @@ class FileTransmitter:
     """
     status = "not started"  # "transitting" "finished" "aborted"
 
-    def __init__(self, filepath, peerID, others_req_listener, metadata=bytearray(), block_size=def_block_size):
+    def __init__(self, filepath, peerID, others_req_listener, metadata=bytearray(), progress_handler=None, block_size=def_block_size):
         self.filesize = os.path.getsize(filepath)
         self.filename = os.path.basename(filepath)
         self.filepath = filepath
@@ -707,6 +696,7 @@ class FileTransmitter:
         self.block_size = block_size
         self.peerID = peerID
         self.others_req_listener = others_req_listener
+        self.progress_handler = progress_handler
 
         print("IPFS_API: WARNING: In this new version the FileTransmitter no longer starts automatically.\n" +
               "Call the Start() function to start the transmission." +
@@ -727,6 +717,8 @@ class FileTransmitter:
             if print_log_files:
                 print("FileTransmission: " + self.filename
                       + ": Sent transmission request")
+            if self.progress_handler:
+                _thread.start_new_thread(self.progress_handler, (0,))
             return True
         else:
             return False
@@ -744,8 +736,12 @@ class FileTransmitter:
                     blocksize = self.block_size
                 data = reader.read(blocksize)
                 position += len(data)
-                print("FileTransmission: " + self.filename
-                      + ": sending data " + str(position) + "/" + str(self.filesize))
+                if self.progress_handler:
+                    _thread.start_new_thread(self.progress_handler, (position/self.filesize,))
+
+                if print_log_files:
+                    print("FileTransmission: " + self.filename
+                          + ": sending data " + str(position) + "/" + str(self.filesize))
                 self.conversation.Say(data)
         if print_log_files:
             print("FileTransmission: " + self.filename
@@ -764,20 +760,34 @@ class FileTransmitter:
 
 class FileTransmissionReceiver:
     transmission_started = False
+    writtenbytes = 0
     status = "not started"  # "receiving" "finished" "aborted"
 
-    def Setup(self, conversation, eventhandler, dir="."):
+    def Setup(self, conversation, eventhandler, progress_handler=None, dir="."):
+        """
+        Parameters:
+            Conversation conversation: the Conversation object with which to
+                                        communicate with the transmitter
+            function(peerID:str, path:str, metadata:bytes) eventhandler:
+                                function to be called when a file is received
+            function(peerID:str, filesize:int, progress:float) progress_handler:
+                                function to be called whenever a block of data
+                                is received during an ongoing file transmission.
+                                progress is a value between 0 and 1
+
+        """
         if print_log_files:
             print("FileReception: "
                   + ": Preparing to receive file")
 
         self.eventhandler = eventhandler
-
+        self.progress_handler = progress_handler
         self.conv = conversation
         self.dir = dir
         if print_log_files:
             print("FileReception: "
                   + ": responded to sender, ready to receive")
+
         self.status = "receiving"
 
     def OnDataReceived(self, conv, data):
@@ -794,6 +804,10 @@ class FileTransmissionReceiver:
                 if print_log_files:
                     print("FileReception: " + self.filename
                           + ": ready to receive file")
+                if self.progress_handler:
+                    _thread.start_new_thread(self.progress_handler,
+                                             (self.conv.peerID, self.filename, self.filesize, 0))
+
                 if(self.filesize == 0):
                     self.Finish()
             except:
@@ -804,6 +818,10 @@ class FileTransmissionReceiver:
         else:
             self.writer.write(data)
             self.writtenbytes += len(data)
+
+            if self.progress_handler:
+                _thread.start_new_thread(self.progress_handler,
+                                         (self.conv.peerID, self.filename, self.filesize, self.writtenbytes/self.filesize))
 
             if print_log_files:
                 print("FileTransmission: " + self.filename

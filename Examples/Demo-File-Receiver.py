@@ -12,6 +12,13 @@ import time
 import IPFS_DataTransmission
 
 
+# --OPTIONAL--
+def ReceivingFileProgress(peer, file, filesize, progress):
+    """Eventhandler which reports progress updates while receiving a file."""
+    print(f"Receiving a file '{file}' from {peer}. {progress}")
+# ------------
+
+
 def OnDataReceived(peer, file, metadata):
     """Eventhandler which gets executed after a file has been received."""
     print("Received file.")
@@ -21,7 +28,7 @@ def OnDataReceived(peer, file, metadata):
 
 
 file_receiver = IPFS_DataTransmission.ListenForFileTransmissions(
-    "my_apps_filelistener", OnDataReceived)
+    "my_apps_filelistener", OnDataReceived, ReceivingFileProgress)
 
 # endless loop to stop program from terminating
 while(True):

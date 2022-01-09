@@ -1,5 +1,5 @@
-# ChangeLog IPFS-Toolkit Version 0.2.0
-A lot of improvements have been made since version 0.1.5, which unfortunately means some users may have to change their code where they used this library. Here is an overview of most of what is new to v0.2.0.
+# ChangeLog IPFS-Toolkit Version 0.2.2 vs 0.1.X
+A lot of improvements have been made since version 0.1.5, which unfortunately means some users may have to change their code where they used this library. Here is an overview of most of what is new to v0.2.2.
 
 ## IPFS_DataTransmission:
 #### DataTransmission:
@@ -49,6 +49,33 @@ if data:
 else:
     print("Received no more messages after waiting 5 seconds.")
 conv.Close()
+```
+
+#### FileTransmission Progress Callbacks:
+You can finally add progress callback functions to FileTransmitters and FileTransmissionReceivers!
+The FileTransmitter will give the callback the transmission progress as a value between 0 and 1, while the FileTransmissionReceiver also provides the sender's IPFS peerID, the filename and filesize.
+
+Example Sender:
+```python
+def ProgressUpdate(progress):
+    print(f"sending file ... {round(progress*100)}%")
+
+ft = IPFS_DataTransmission.TransmitFile(
+    filepath, peerID, "my_apps_filelistener", metadata, ProgressUpdate)
+```
+Example Receiver:
+```python
+def ReceivingFileProgress(peer, file, filesize, progress):
+    """Eventhandler which reports progress updates while receiving a file."""
+    print(f"Receiving a file '{file}' from {peer}. {progress}")
+
+def OnDataReceived(peer, file, metadata):
+    """Eventhandler which gets executed after a file has been received."""
+    print(f"Received file '{file}' from {peer}")
+
+
+file_receiver = IPFS_DataTransmission.ListenForFileTransmissions(
+    "my_apps_filelistener", OnDataReceived, ReceivingFileProgress)
 ```
 
 ## IPFS_API
