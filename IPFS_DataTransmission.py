@@ -73,7 +73,8 @@ def TransmitData(data: bytes, peerID: str, req_lis_name: str, timeout_sec: int =
     Transmits the input data (a bytearray of any length) to the computer with the specified IPFS peer ID.
 
     Usage:
-        success = TransmitData("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")    # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+        # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+        success = TransmitData("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")
 
     Parameters:
         bytearray data: the data to be transmitted to the receiver
@@ -311,7 +312,7 @@ def StartConversation(conversation_name, peerID, others_req_listener, eventhandl
         conversation = StartConversation("test", "QmHash", "conv listener", OnReceive)
         conversation.Say("Hello there!".encode())
 
-        ## The other peer must have a conversation listener named "conv listener" running, e.g. via:
+        # The other peer must have a conversation listener named "conv listener" running, e.g. via:
         # forwards communication from any conversation to the OnReceive function
         ListenForConversations("conv listener", OnReceive)
 
@@ -336,7 +337,7 @@ def ListenForConversations(conv_name, eventhandler):
     """
     Listen to incoming conversation requests.
     Whenever a new conversation request is received, the specified eventhandler
-    is called which must then decide whether or not to join the conversation, 
+    is called which must then decide whether or not to join the conversation,
     and then act upon that decision.
 
     Usage Example:
@@ -367,7 +368,7 @@ class Conversation:
     Communication object which allows 2 peers to repetatively make
     data transmissions to each other asynchronously and bidirectionally.
     Usage example:
-        ## Conversation Initiator:
+        # Conversation Initiator:
         def OnReceive(conversation, data):
             print(data.decode("utf-8"))
 
@@ -375,7 +376,7 @@ class Conversation:
         conversation.Start("test", "QmHash", "conv listener", OnReceive)
         conversation.Say("Hello there!".encode())
 
-        ## The other peer must have a conversation listener named "conv listener" running, e.g. via:
+        # The other peer must have a conversation listener named "conv listener" running, e.g. via:
         # forwards communication from any conversation to the OnReceive function
         ListenForConversations("conv listener", OnReceive)
 
@@ -391,17 +392,21 @@ class Conversation:
                 (can be used as an alternative to the event handler which is
                 optionally specified in the Start() or Join() methods)
     """
-    conversation_started = False
-    # started = Event()
-    # last_message = None
-    # message_received = Event()
+    # file_progress_callback = None
     eventhandler = None
-    message_queue = Queue()
+    file_eventhandler = None
+    file_progress_callback = None
 
     def __init__(self):
         self.started = Event()
+        self.conversation_started = False
+        self.eventhandler = None
+        self.file_eventhandler = None
+        self.file_progress_callback = None
+        self.message_queue = Queue()
+        self.file_queue = Queue()
 
-    def Start(self, conversation_name, peerID, others_req_listener, eventhandler=None, timeout_sec=transmission_send_timeout_sec, max_retries=transmission_request_max_retries):
+    def Start(self, conversation_name, peerID, others_req_listener, eventhandler=None, file_eventhandler=None, file_progress_callback=None, timeout_sec=transmission_send_timeout_sec, max_retries=transmission_request_max_retries):
         """Starts a conversation object with which peers can send data transmissions to each other.
         Code blocks until the other peer joins the conversation or timeout is reached
         Usage:
@@ -428,11 +433,14 @@ class Conversation:
             print(conversation_name + ": Starting conversation")
         self.conversation_name = conversation_name
         self.eventhandler = eventhandler
-
+        self.file_eventhandler = file_eventhandler
+        self.file_progress_callback = file_progress_callback
         self.peerID = peerID
         if print_log_conversations:
             print(conversation_name + ": sending conversation request")
         self.listener = ListenForTransmissions(conversation_name, self.Hear)
+        self.file_receiver = ListenForFileTransmissions(
+            f"{conversation_name}:files", self.FileReceived, self.file_progress_callback)
         # self.listener = ListenForTransmissions(conversation_name, self.hear_eventhandler)
         data = bytearray("I want to start a conversation".encode(
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
@@ -449,7 +457,7 @@ class Conversation:
               "The reason for this is the introduction of a proper failure handling system.\n")
         return self.Start(self, conversation_name, peerID, others_req_listener, eventhandler=None)
 
-    def Join(self, conversation_name, peerID, others_trsm_listener, eventhandler=None):
+    def Join(self, conversation_name, peerID, others_trsm_listener, eventhandler=None, file_eventhandler=None, file_progress_callback=None):
         """
         Joins a conversation which another peer started, given their peer ID
         and conversation's transmission-listener's name.
@@ -462,7 +470,11 @@ class Conversation:
             print(conversation_name + ": Joining conversation "
                   + others_trsm_listener)
         self.eventhandler = eventhandler
+        self.file_eventhandler = file_eventhandler
+        self.file_progress_callback = file_progress_callback
         self.listener = ListenForTransmissions(conversation_name, self.Hear)
+        self.file_receiver = ListenForFileTransmissions(
+            f"{conversation_name}:files", self.FileReceived, self.file_progress_callback)
         self.others_trsm_listener = others_trsm_listener
         self.peerID = peerID
         data = bytearray("I'm listening".encode(
@@ -531,8 +543,30 @@ class Conversation:
             return data
         else:
             if print_log_conversations:
-                print("Conv.Listen: received", self.last_message, "restarting Event Wait")
+                print("Conv.Listen: received nothing restarting Event Wait")
             self.Listen()
+            return
+
+    def FileReceived(self, peer, filepath, metadata):
+        self.file_queue.put(filepath)
+        print(filepath)
+        if self.file_eventhandler:
+            _thread.start_new_thread(self.file_eventhandler, (filepath, metadata))
+
+    def ListenForFile(self, timeout=None):
+        if not timeout:
+            data = self.file_queue.get()
+        else:
+            try:
+                data = self.file_queue.get(timeout=timeout)
+            except:  # timeout reached
+                return None
+        if data:
+            return data
+        else:
+            if print_log_conversations:
+                print("Conv.FileListen: received nothign restarting Event Wait")
+            self.ListenForFile(timeout)
             return
 
     def Say(self, data, timeout_sec=transmission_send_timeout_sec, max_retries=transmission_request_max_retries):
@@ -556,6 +590,28 @@ class Conversation:
                 print("Wanted to say something but conversation was not yet started")
             time.sleep(0.01)
         return TransmitData(data, self.peerID, self.others_trsm_listener, timeout_sec, max_retries)
+
+    def TransmitFile(self, filepath, metadata=bytearray(), progress_handler=file_progress_callback, block_size=def_block_size):
+        """
+        Transmits the input data (a bytearray of any length) to the other computer in this conversation.
+
+        Usage:
+            success = conv.Say("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")    # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+
+        Parameters:
+            bytearray data: the data to be transmitted to the receiver
+            string peerID: the IPFS peer ID of [the recipient computer to send the data to]
+            string listener_name: the name of the IPFS-Data-Transmission-Listener instance running on the recipient computer to send the data to (allows distinguishing multiple IPFS-Data-Transmission-Listeners running on the same computer for different applications)
+            timeout_sec: connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
+            max_retries: how often the transmission should be reattempted when the timeout is reached
+        Returns:
+            bool success: whether or not the transmission succeeded
+        """
+        while not self.conversation_started:
+            if print_log:
+                print("Wanted to say something but conversation was not yet started")
+            time.sleep(0.01)
+        return TransmitFile(filepath, self.peerID, f"{self.others_trsm_listener}:files", metadata, progress_handler, block_size)
 
     def Close(self):
         self.listener.Terminate()
@@ -849,12 +905,13 @@ class FileTransmissionReceiver:
                   + ": Transmission finished.")
         self.status = "finished"
         self.conv.Close()
-        if signature(self.eventhandler).parameters.get("metadata") != None:
-            self.eventhandler(self.conv.peerID, os.path.join(
-                self.dir, self.filename), self.metadata)
-        else:
-            self.eventhandler(self.conv.peerID, os.path.join(
-                self.dir, self.filename))
+        if self.eventhandler:
+            if signature(self.eventhandler).parameters["metadata"]:
+                self.eventhandler(self.conv.peerID, os.path.join(
+                    self.dir, self.filename), self.metadata)
+            else:
+                self.eventhandler(self.conv.peerID, os.path.join(
+                    self.dir, self.filename))
 
 
 # ----------IPFS Technicalitites-------------------------------------------
