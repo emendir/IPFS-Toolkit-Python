@@ -717,8 +717,7 @@ class FileTransmitter:
             if print_log_files:
                 print("FileTransmission: " + self.filename
                       + ": Sent transmission request")
-            if self.progress_handler:
-                _thread.start_new_thread(self.progress_handler, (0,))
+            self.CallProgressCallBack(0)
             return True
         else:
             return False
@@ -736,8 +735,7 @@ class FileTransmitter:
                     blocksize = self.block_size
                 data = reader.read(blocksize)
                 position += len(data)
-                if self.progress_handler:
-                    _thread.start_new_thread(self.progress_handler, (position/self.filesize,))
+                self.CallProgressCallBack(position/self.filesize,)
 
                 if print_log_files:
                     print("FileTransmission: " + self.filename
@@ -748,6 +746,16 @@ class FileTransmitter:
                   + ": finished file transmission")
         self.status = "finished"
         self.conversation.Close()
+
+    def CallProgressCallBack(self, progress):
+        if self.progress_handler:
+            if len(signature(self.progress_handler).parameters) == 1:
+                _thread.start_new_thread(self.progress_handler, (progress,))
+            elif len(signature(self.progress_handler).parameters) == 2:
+                _thread.start_new_thread(self.progress_handler, (self.filename, progress))
+            elif len(signature(self.progress_handler).parameters) == 3:
+                _thread.start_new_thread(self.progress_handler,
+                                         (self.filename, self.filesize, progress))
 
     def Hear(self, conv, data):
         if print_log_files:
