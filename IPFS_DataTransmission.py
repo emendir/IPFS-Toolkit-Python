@@ -85,6 +85,9 @@ def TransmitData(data: bytes, peerID: str, req_lis_name: str, timeout_sec: int =
     Returns:
         bool success: whether or not the transmission succeeded
     """
+    if peerID == IPFS_API.MyID():
+        return
+
     def SendTransmissionRequest():
         # sending transmission request, telling the receiver our code for the transmission, our listening port on which they should send confirmation buffers, and the buffer size to use
         # sock.connect(("127.0.0.1", port))
@@ -429,6 +432,8 @@ class Conversation:
         Returns:
             bool success: whether or not the conversation with the peer was successfully started
         """
+        if peerID == IPFS_API.MyID():
+            return
         if(print_log_conversations):
             print(conversation_name + ": Starting conversation")
         self.conversation_name = conversation_name
@@ -730,7 +735,8 @@ def ListenForFileTransmissions(listener_name, eventhandler, progress_handler=Non
 class FileTransmitter:
     """Transmits the given file to the specified peer
     Usage:
-        transmitter = TransmitFile("text.txt", "QMHash", "filelistener", "testmeadata".encode())
+        file_transmitter = FileTransmitter("text.txt", "QMHash", "filelistener", "testmeadata".encode())
+        file_transmitter.Start()
     Paramaters:
         string filepath: the path of the file to transmit
         string peerID: the IPFS ID of the computer to send the file to
@@ -745,6 +751,8 @@ class FileTransmitter:
     status = "not started"  # "transitting" "finished" "aborted"
 
     def __init__(self, filepath, peerID, others_req_listener, metadata=bytearray(), progress_handler=None, block_size=def_block_size):
+        if peerID == IPFS_API.MyID():
+            return
         self.filesize = os.path.getsize(filepath)
         self.filename = os.path.basename(filepath)
         self.filepath = filepath
@@ -906,12 +914,12 @@ class FileTransmissionReceiver:
         self.status = "finished"
         self.conv.Close()
         if self.eventhandler:
+            filepath = os.path.abspath(os.path.join(
+                self.dir, self.filename))
             if signature(self.eventhandler).parameters["metadata"]:
-                self.eventhandler(self.conv.peerID, os.path.join(
-                    self.dir, self.filename), self.metadata)
+                self.eventhandler(self.conv.peerID, filepath, self.metadata)
             else:
-                self.eventhandler(self.conv.peerID, os.path.join(
-                    self.dir, self.filename))
+                self.eventhandler(self.conv.peerID, filepath)
 
 
 # ----------IPFS Technicalitites-------------------------------------------
