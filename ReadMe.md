@@ -49,6 +49,7 @@ IPFS-Toolkit is made for interacting with IPFS in the Python programming languag
 - __Pip__ for Python3:
     https://pip.pypa.io/en/stable/installing/
 - If you want to use the source code, install the following prerequisite Python modules:  
+  (depending on your python installation you may need to use `pip` instead of `pip3` in the following commands)  
 ```python
 pip3 install setuptools  
 pip3 install wheel  
@@ -139,12 +140,6 @@ Because the Python API for interacting with IPFS (ipfshttpclient) doesn't yet su
 # Links
 Naturally, I host this project on IPFS too
 ### Source Code:
-IPFS (faster):
-https://ipfs.io/ipfs/QmU3wAuZLJsbaLy4rBRBNRi7aRivjRrc4FdoHkSzs7fasv  
-IPNS (more likely to be up-to-date):
 https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh
 ### Website:
-IPFS (faster):
-https://ipfs.io/ipfs/QmTxBa33rCcnr6VxyH3dDd2oNddjMM8WkF6aNpq5mew54F  
-IPNS (more likely to be up-to-date):
 https://ipfs.io/ipns/k2k4r8m2dzqi5s8jm3shm77sr1728ex7bsds0fk6e9gkf2ld2f3mnhcy
