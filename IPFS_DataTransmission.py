@@ -35,7 +35,7 @@ try:
     import IPFS_API
 except:
     import IPFS_API_Remote_Client as IPFS_API
-IPFS_API.Start()
+# IPFS_API.Start()
 
 
 # -------------- Settings ---------------------------------------------------------------------------------------------------
