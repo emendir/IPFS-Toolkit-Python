@@ -7,4 +7,5 @@ pip3 install appdirs
 pip3 install idna  
 pip3 install httpcore  
 pip3 install httpx
-pip3 install zmq
+pip3 install requests
+pip3 install pyzmq
