@@ -142,10 +142,26 @@ def CreateIPNS_Record(name: str):
 
 
 def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
+    """
+    Parameters:
+        string ttl: Time duration this record should be cached for.
+                                Uses the same syntax as the lifetime option.
+                                (caution: experimental).
+        string lifetime: Time duration that the record will be valid for.
+                                Default: 24h.    
+    """
     http_client.name.publish(ipfs_path=cid, key=name, ttl=ttl, lifetime=lifetime)
 
 
 def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
+    """
+    Parameters:
+        string ttl: Time duration this record should be cached for.
+                                Uses the same syntax as the lifetime option.
+                                (caution: experimental).
+        string lifetime: Time duration that the record will be valid for.
+                                Default: 24h.    
+    """
     cid = PublishFile(path)
     UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
     return cid

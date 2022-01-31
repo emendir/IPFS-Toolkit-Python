@@ -32,8 +32,10 @@ import os
 import inspect
 from inspect import signature
 
-from IPFS_API import *
-import IPFS_API
+try:
+    import IPFS_API
+except:
+    import IPFS_API_Remote_Client as IPFS_API
 IPFS_API.Start()
 zmq_context = zmq.Context()
 
@@ -460,7 +462,7 @@ class Conversation:
     def StartAwait(self, conversation_name, peerID, others_req_listener, eventhandler=None):
         print("IPFS_API: WARNING: This function is deprecated.Please use StartConversation() instead.\n" +
               "The reason for this is the introduction of a proper failure handling system.\n")
-        return self.Start(self, conversation_name, peerID, others_req_listener, eventhandler=None)
+        return self.Start(self, conversation_name, peerID, others_req_listener, None)
 
     def Join(self, conversation_name, peerID, others_trsm_listener, eventhandler=None, file_eventhandler=None, file_progress_callback=None):
         """
@@ -936,7 +938,7 @@ def CreateSendingConnection(peerID: str, protocol: str, port=None):
     if port == None:
         for prt in sending_ports:
             try:
-                ForwardFromPortToPeer(protocol, prt, peerID)
+                IPFS_API.ForwardFromPortToPeer(protocol, prt, peerID)
                 sock.connect(f"tcp://localhost:{prt}")
                 return sock
             except:
@@ -944,14 +946,14 @@ def CreateSendingConnection(peerID: str, protocol: str, port=None):
 
         print("failed to find free port for sending connection")
     else:
-        ForwardFromPortToPeer(protocol, port, peerID)
+        IPFS_API.ForwardFromPortToPeer(protocol, port, peerID)
         sock.connect(f"tcp://localhost:{prt}")
         return sock
 
 
 def CreateListeningConnectionTCP(protocol, port):
     try:
-        ListenOnPort(protocol, port)
+        IPFS_API.ListenOnPort(protocol, port)
         if print_log_connections:
             print(f"listening as \"{protocol}\" on {port}")
     except Exception as e:
@@ -959,7 +961,7 @@ def CreateListeningConnectionTCP(protocol, port):
             listenaddress=f"/ip4/127.0.0.1/tcp/{port}")
         IPFS_API.ClosePortForwarding(protocol=f"/x/{protocol}")
         try:
-            ListenOnPort(protocol, port)
+            IPFS_API.ListenOnPort(protocol, port)
         except:
             print(f"listening as \"{protocol}\" on {port}")
             print("")
@@ -978,7 +980,7 @@ def CreateListeningConnectionTCP(protocol, port):
 
 def CreateListeningConnection(protocol, port):
     try:
-        ListenOnPort(protocol, port)
+        IPFS_API.ListenOnPort(protocol, port)
         if print_log_connections:
             print(f"listening fas \"{protocol}\" on {port}")
     except Exception as e:
@@ -987,7 +989,7 @@ def CreateListeningConnection(protocol, port):
         IPFS_API.ClosePortForwarding(protocol=f"/x/{protocol}")
         try:
             time.sleep(0.1)
-            ListenOnPort(protocol, port)
+            IPFS_API.ListenOnPort(protocol, port)
             if print_log_connections:
                 print(f"listening fas \"{protocol}\" on {port}")
         except:
