@@ -1,13 +1,6 @@
 A library for working with IPFS in Python.  
 It includes a programmer-friendly wrapper called __IPFS-API__ for the official IPFS Python API (ipfshttpclient), a module called __IPFS-DataTransmission__ for direct P2P data transmission between two IPFS-Nodes and a module called __IPFS-LNS__ for remembering the multiaddrs of known IPFS nodes ("contacts") to speed up connection times.
 
-## Version 0.2.X is out!
-- In IPFS_DataTransmission the transmission protocol which has so far been my schoolboy-style home-made buffer-management system has been replaced with the much more efficient [ZeroMQ](zeromq.org) protocol. That means greater speed and greater reliability.
-- Failure management in IPFS_DataTransmission: all transmission functions, such as TransmitData(), Conversation.Start(), Conversation.Say() and TransmitFile() now return a boolean to indicate whether or not they were successful. You can also specify timeouts.
-- IPFS_DataTransmission.Conversation has a Listen() method: it allows you to block the calling thread as you wait for an incoming transmission.
-
-Unfortunately, all these great changes and simplifications have deprecated some functions, so you may need to update some of your code which uses IPFS_API. See the [ChangeLog](./ChangeLog.md) for full details.
-
 # Package Contents:
 ## Modules:
 - __IPFS_API__: a wrapper for the module ipfshttpclient2 that makes it easier to work with IPFS in Python
