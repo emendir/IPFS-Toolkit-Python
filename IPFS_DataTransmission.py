@@ -324,13 +324,6 @@ def StartConversation(conversation_name, peerID, others_req_listener, eventhandl
     return conv
 
 
-def StartConversationAwait(conversation_name, peerID, others_req_listener, eventhandler=None):
-    print("IPFS_API: WARNING: This function is deprecated.Please use StartConversation() instead.\n" +
-          "The reason for this is the introduction of a proper failure handling system.\n")
-    return StartConversation(conversation_name, peerID,
-                             others_req_listener, eventhandler)
-
-
 def ListenForConversations(conv_name, eventhandler):
     """
     Listen to incoming conversation requests.
@@ -452,11 +445,6 @@ class Conversation:
         else:
             return False    # signal Failure
 
-    def StartAwait(self, conversation_name, peerID, others_req_listener, eventhandler=None):
-        print("IPFS_API: WARNING: This function is deprecated.Please use StartConversation() instead.\n" +
-              "The reason for this is the introduction of a proper failure handling system.\n")
-        return self.Start(self, conversation_name, peerID, others_req_listener, None)
-
     def Join(self, conversation_name, peerID, others_trsm_listener, eventhandler=None, file_eventhandler=None, file_progress_callback=None):
         """
         Joins a conversation which another peer started, given their peer ID
@@ -551,7 +539,7 @@ class Conversation:
         self.file_queue.put(filepath)
         print(filepath)
         if self.file_eventhandler:
-            _thread.start_new_thread(self.file_eventhandler, (filepath, metadata))
+            _thread.start_new_thread(self.file_eventhandler, (self, filepath, metadata))
 
     def ListenForFile(self, timeout=None):
         if not timeout:
@@ -756,10 +744,6 @@ class FileTransmitter:
         self.peerID = peerID
         self.others_req_listener = others_req_listener
         self.progress_handler = progress_handler
-
-        print("IPFS_API: WARNING: In this new version the FileTransmitter no longer starts automatically.\n" +
-              "Call the Start() function to start the transmission." +
-              "The reason for this is the introduction of a proper failure handling system.\n")
 
     def Start(self):
         """

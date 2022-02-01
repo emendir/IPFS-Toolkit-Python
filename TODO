@@ -1,11 +1,5 @@
-Conversation:
-  Sendfile function
-
 FileTransmission:
   abortion
-  Progress function
   download location
-  
-Document COnversation FileTransmission
 
 Filetransmission and Conversation encryption
