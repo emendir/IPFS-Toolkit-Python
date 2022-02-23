@@ -18,7 +18,7 @@ from requests.exceptions import ConnectionError
 import traceback
 import IPFS_LNS
 import logging
-
+from threading import Thread
 print_log = False
 
 autostart = True
@@ -59,23 +59,49 @@ def PublishToTopic(topic, text):
 # Listens to the specified IPFS PubSub topic and passes received text to the input eventhandler function
 
 
-def SubscribeToTopic(topic, eventhandler):
-    def Listen():
-        while True:
-            try:
-                sub = http_client.pubsub.subscribe(topic)
-                with http_client.pubsub.subscribe(topic) as sub:
-                    for text in sub:
-                        _thread.start_new_thread(
-                            eventhandler, (str(base64.b64decode(str(text).split('\'')[7]), "utf-8"),))
-            except ConnectionError as e:
-                print(f"IPFS API Pubsub: restarting sub {topic}")
+class PubsubListener():
+    terminate = False
+    __listening = False
 
-    #thread =  multiprocessing.Process(target = Listen, args= ())
-    # thread.start()
-    _thread.start_new_thread(Listen, ())
-    #subscriptions.append((topic, eventhandler, thread))
-    # return thread
+    def __init__(self, topic, eventhandler):
+        self.topic = topic
+        self.eventhandler = eventhandler
+        self.Listen()
+
+    def _listen(self):
+        if self.__listening:
+            return
+        self.__listening = True
+        """blocks the calling thread"""
+        while not self.terminate:
+            try:
+                #sub = http_client.pubsub.subscribe(self.topic)
+                with http_client.pubsub.subscribe(self.topic) as self.sub:
+                    for text in self.sub:
+                        if self.terminate:
+                            self.__listening = False
+                            return
+                        _thread.start_new_thread(
+                            self.eventhandler, (str(base64.b64decode(str(text).split('\'')[7]), "utf-8"),))
+            except ConnectionError as e:
+                print(f"IPFS API Pubsub: restarting sub {self.topic}")
+        self.__listening = False
+
+    def Listen(self):
+        self.terminate = False
+        thr = Thread(target=self._listen, args=())
+        thr.start()
+
+    def Terminate(self):
+        """May let one more pubsub message through"""
+        self.terminate = True
+
+
+def SubscribeToTopic(topic, eventhandler):
+    """
+    Returns a PubsubListener object which can  be terminated with the .Terminate() method (and restarted with the .Listen() method)
+    """
+    return PubsubListener(topic, eventhandler)
 
 
 def UnSubscribeFromTopic(topic, eventhandler):
