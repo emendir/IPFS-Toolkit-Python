@@ -37,7 +37,7 @@
 <h1 id="getting-started-with-ipfs-toolkit-">Getting started with IPFS-Toolkit:</h1>
 <ol>
 <li>Install IPFS-Toolkit (see below)</li>
-<li>Read this <em>Modules Contained in IPFS-Toolkit</em> section below to learn what this package contains and how it works. </li>
+<li>Read the <em>Modules Contained in IPFS-Toolkit</em> section below to learn what this package contains and how it works. </li>
 <li>For IPFS-DataTransmission: Read and try out the demo scripts in the Examples folder.</li>
 </ol>
 <h2 id="setup">Setup</h2>
@@ -93,9 +93,9 @@ print(IPFS_API.swarm.peers())</code></pre>
 <h2 id="ipfs-datatransmission">IPFS-Datatransmission</h2>
 <p><code>import IPFS_DataTransmission</code></p>
 <p>A Python module for limitless, easy, private peer-to-peer data transmission other over the IPFS Network.</p>
-<p>This module has 3 pairs functions for use by the user:</p>
+<p>This module has three main pairs functions for use by the user:</p>
 <ul>
-<li><strong>Simple data transmission:</strong><ul>
+<li><strong>Simple Data Transmission:</strong><ul>
 <li><code>TransmitData(data, peerID, listener_name)</code></li>
 <li><code>ListenForTransmissions(listener_name,</code> eventhandler)</li>
 </ul>
@@ -105,12 +105,13 @@ print(IPFS_API.swarm.peers())</code></pre>
 <li><code>ListenForFileTransmissions(listener_name, eventhandler)</code></li>
 </ul>
 </li>
-<li><strong>Conversations (Ping-Pong data Transmission):</strong><ul>
+<li><strong>Conversations (Ping-Pong Data &amp; File Transmission):</strong><ul>
 <li><code>StartConversation(data, peerID, listener_name)</code></li>
 <li><code>ListenForConversations(listener_name, eventhandler)</code></li>
 </ul>
 </li>
 </ul>
+<p>See the <em>Examples</em> folder for the different ways of using these functions. They are designed in a way that makes them easy to use for simple applications but feature-rich for more demanding ones, such as encryption integration and access to low-level protocol settings.</p>
 <h3 id="listener-functions-">Listener Functions:</h3>
 <p>The listener functions (ListenForTransmissions, ListenForFileTransmissions and ListenForConversations) produce Listener objects () that run on their own threads waiting for incoming data transmission or conversation requests. When another computer wants to send the first computer somthing, the other computer sends a transmission request which the Listener object receives and reacts to by creating a Transmission reception object () which runs on its own separate thread to receive the transmission, or in the case of the conversation listener, calls its user-defined eventhandler so that the conversation can be joined or ignored.
 This system of receiving data transmissions/conversations allows a computer to receive multiple transmission addressed to the same listener simultaneously.
