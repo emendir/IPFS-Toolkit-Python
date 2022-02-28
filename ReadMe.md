@@ -14,7 +14,7 @@ It includes a programmer-friendly wrapper called __IPFS-API__ for the official I
 
 # Getting started with IPFS-Toolkit:
 1. Install IPFS-Toolkit (see below)
-2. Read this _Modules Contained in IPFS-Toolkit_ section below to learn what this package contains and how it works. 
+2. Read the _Modules Contained in IPFS-Toolkit_ section below to learn what this package contains and how it works. 
 3. For IPFS-DataTransmission: Read and try out the demo scripts in the Examples folder.
 
 ## Setup
@@ -92,16 +92,18 @@ print(IPFS_API.swarm.peers())
 
 A Python module for limitless, easy, private peer-to-peer data transmission other over the IPFS Network.
 
-This module has 3 pairs functions for use by the user:
-- __Simple data transmission:__
+This module has three main pairs functions for use by the user:
+- __Simple Data Transmission:__
     - `TransmitData(data, peerID, listener_name)`
     - `ListenForTransmissions(listener_name,` eventhandler)
 - __File Transmission:__
     - `TransmitFile(data, peerID, listener_name)`
     - `ListenForFileTransmissions(listener_name, eventhandler)`
-- __Conversations (Ping-Pong data Transmission):__
+- __Conversations (Ping-Pong Data & File Transmission):__
     - `StartConversation(data, peerID, listener_name)`
     - `ListenForConversations(listener_name, eventhandler)`
+
+See the _Examples_ folder for the different ways of using these functions. They are designed in a way that makes them easy to use for simple applications but feature-rich for more demanding ones, such as encryption integration and access to low-level protocol settings.
 
 ### Listener Functions:
 The listener functions (ListenForTransmissions, ListenForFileTransmissions and ListenForConversations) produce Listener objects () that run on their own threads waiting for incoming data transmission or conversation requests. When another computer wants to send the first computer somthing, the other computer sends a transmission request which the Listener object receives and reacts to by creating a Transmission reception object () which runs on its own separate thread to receive the transmission, or in the case of the conversation listener, calls its user-defined eventhandler so that the conversation can be joined or ignored.

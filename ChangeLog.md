@@ -4,7 +4,8 @@ This library is still under development and is currently being tested in various
 ## v0.2.4:
 IPFS_API:
   - SubscribeToTopic(): Returns a listener object (PubsubListener), on which Terminate() and Listen() functions can be called to stop and restart the PubSub Subscription.
-
+IPFS_DataTransmission:
+  - Conversations and FileTransission: Encryption support is now integrated! Encryption and decryption callbacks can be passed as optional parameters when starting, joining, or listening for conversations and file transmissions.
 ## v0.2.3 (not backward-compatible):
 IPFS_DataTransmission:
   - Data transmission protocol (in TransmitData() and ListenForTransmissions()) changed from using the faster ZMQ protocol to simple TCP sockets.  

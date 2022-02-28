@@ -26,11 +26,10 @@
 <h2 id="v0-2-4-">v0.2.4:</h2>
 <p>IPFS_API:</p>
 <ul>
-<li>SubscribeToTopic(): Returns a listener object (PubsubListener), on which Terminate() and Listen() functions can be called to stop and restart the PubSub Subscription.</li>
-</ul>
-<h2 id="v0-2-3-not-backward-compatible-">v0.2.3 (not backward-compatible):</h2>
-<p>IPFS_DataTransmission:</p>
-<ul>
+<li>SubscribeToTopic(): Returns a listener object (PubsubListener), on which Terminate() and Listen() functions can be called to stop and restart the PubSub Subscription.
+IPFS_DataTransmission:</li>
+<li>Conversations and FileTransission: Encryption support is now integrated! Encryption and decryption callbacks can be passed as optional parameters when starting, joining, or listening for conversations and file transmissions.<h2 id="v0-2-3-not-backward-compatible-">v0.2.3 (not backward-compatible):</h2>
+IPFS_DataTransmission:</li>
 <li>Data transmission protocol (in TransmitData() and ListenForTransmissions()) changed from using the faster ZMQ protocol to simple TCP sockets.<br>Reasons:<ul>
 <li>ZMQ is not supported by all python virtual environments</li>
 <li>using ZMQ over Libp2pStreamMounting transports sometimes failed without warning. Superior reliability of the current TCP system is supposed, but not yet definitvely studied.</li>
