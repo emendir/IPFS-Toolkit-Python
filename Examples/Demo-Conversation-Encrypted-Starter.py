@@ -1,8 +1,8 @@
 """
-This script demonstrates, together with Demo-Conversation-Receiver,
-the usage of the IPFS_DataTransmission.Conversation class.
+This script demonstrates, together with Demo-ConversationEncrypted-Receiver,
+the usage of the IPFS_DataTransmission.Conversation class' encryption feature.
 
-Run Demo-Conversation-Receiver.py on another computer,
+Run Demo-ConversationEncrypted-Receiver.py on another computer,
 make sure IPFS is running on both computers first,
 paste the other's IPFS ID in the peerID variable below,
 and then run this script.

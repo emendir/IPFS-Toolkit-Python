@@ -2,6 +2,10 @@
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
 ## v0.2.5:
+IPFS_DataTransmission: got BufferSender and ListenToBuffers working again
+Examples: corrected docstrings
+
+## v0.2.5:
 ipfshttpclient2: bugfix correcting unintended IDE import rearrangement
 IPFS_DataTransmission: made encryption & decryption callbacks private attributes 
 

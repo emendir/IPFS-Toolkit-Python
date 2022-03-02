@@ -1,8 +1,8 @@
 """
-This script demonstrates, together with Demo-Conversation-Starter,
-the usage of the IPFS_DataTransmission.Conversation class.
+This script demonstrates, together with Demo-Conversation-Simple-Starter,
+the basic usage of the IPFS_DataTransmission.Conversation class.
 
-Run this script, run Demo-Conversation-Sender.py on another computer
+Run this script, run Demo-Conversation-Simple-Sender.py on another computer
 after reading the instructions in that script,
 and of course make sure IPFS is running on both computers first.
 """

@@ -1,8 +1,9 @@
 """
-This script demonstrates, together with Demo-File-Receiver,
-private peer-to-peer file transmission with the IPFS DataTransmission library.
+This script demonstrates, together with Demo-File-Encrypted-Receiver,
+private and encrypted peer-to-peer file transmission
+with the IPFS DataTransmission library.
 
-Run Demo-File-Receiver.py on another computer,
+Run Demo-File-Encrypted-Receiver.py on another computer,
 make sure IPFS is running on both computers first,
 paste the other's IPFS ID in the peerID variable below and specify a file to upload,
 and then run this script.

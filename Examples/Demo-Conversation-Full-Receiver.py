@@ -1,14 +1,13 @@
-"""
-This script demonstrates, together with Demo-Conversation-Starter,
-the usage of the IPFS_DataTransmission.Conversation class.
+import IPFS_DataTransmission
+import time
+-Full"""
+This script demonstrates, together with Demo-Conversation-Full-Starter,
+the advanced usage of the IPFS_DataTransmission.Conversation class.
 
-Run this script, run Demo-Conversation-Sender.py on another computer
+Run this script, run Demo-Conversation-Full-Sender.py on another computer
 after reading the instructions in that script,
 and of course make sure IPFS is running on both computers first.
 """
-
-import time
-import IPFS_DataTransmission
 
 
 def NewConvHandler(conversation_name, peerID):

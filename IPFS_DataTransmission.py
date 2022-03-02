@@ -1166,8 +1166,7 @@ def ListenToBuffersOnPort(eventhandler, port=0, buffer_size=def_buffer_size, mon
 
 
 def ListenToBuffers(eventhandler, proto, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None):
-    listener = Listener(eventhandler, 0, buffer_size,
-                        monitoring_interval, status_eventhandler)
+    listener = ListenerTCP(eventhandler, 0, buffer_size)
     CreateListeningConnection(proto, listener.port)
     return listener
 
@@ -1261,7 +1260,7 @@ class ListenerTCP(threading.Thread):
                     print("received null data")
                 # break
             if len(data) > 0:
-                ev = Thread(target=self.eventhandler, args=(data, ip_addr))
+                ev = Thread(target=self.eventhandler, args=(data, ))
                 ev.start()
 
         conn.close()

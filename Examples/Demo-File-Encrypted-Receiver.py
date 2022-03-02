@@ -1,8 +1,9 @@
 """
-This script demonstrates, together with Demo-File-Starter,
-private peer-to-peer file transmission with the IPFS DataTransmission library.
+This script demonstrates, together with Demo-File-Encrypted-Starter,
+private and encrypted peer-to-peer file transmission
+with the IPFS DataTransmission library.
 
-Run this script, run Demo-File-Sender.py on another computer
+Run this script, run Demo-File-Encrypted-Sender.py on another computer
 after reading the instructions in that script,
 and of course make sure IPFS is running on both computers first.
 """
