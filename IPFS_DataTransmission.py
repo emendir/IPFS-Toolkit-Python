@@ -314,7 +314,7 @@ def StartConversation(conversation_name,
         3. others_req_listener:str: the name of the ther peer's conversation listener object
         4. file_eventhandler:function (filepath:str, metadata:bytearray): function to be called when a file is receive over this conversation
         5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
-        6. encryption_callback:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
+        6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
         7. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         8. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
     Returns:
@@ -400,8 +400,8 @@ class Conversation:
     _transmission_send_timeout_sec = transmission_send_timeout_sec
     _transmission_request_max_retries = transmission_request_max_retries
     listener = None
-    encryption_callback = None
-    decryption_callback = None
+    __encryption_callback = None
+    __decryption_callback = None
 
     def __init__(self):
         self.started = Event()
@@ -444,7 +444,7 @@ class Conversation:
             3. others_req_listener:str: the name of the ther peer's conversation listener object
             4. file_eventhandler:function (filepath:str, metadata:bytearray): function to be called when a file is receive over this conversation
             5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
-            6. encryption_callback:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
+            6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
             7. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
             8. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
         Returns:
@@ -459,8 +459,8 @@ class Conversation:
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
         if encryption_callbacks:
-            self.encryption_callback = encryption_callbacks[0]
-            self.decryption_callback = encryption_callbacks[1]
+            self.__encryption_callback = encryption_callbacks[0]
+            self.__decryption_callback = encryption_callbacks[1]
         self._transmission_send_timeout_sec = transmission_send_timeout_sec
         self._transmission_request_max_retries = transmission_request_max_retries
         self.peerID = peerID
@@ -511,7 +511,7 @@ class Conversation:
             3. others_trsm_listener:str: the name of the other peer's conversation listener object
             4. file_eventhandler:function (filepath:str, metadata:bytearray): function to be called when a file is receive over this conversation
             5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
-            6. encryption_callback:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
+            6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
             7. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
             8. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
         Returns:
@@ -525,8 +525,8 @@ class Conversation:
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
         if encryption_callbacks:
-            self.encryption_callback = encryption_callbacks[0]
-            self.decryption_callback = encryption_callbacks[1]
+            self.__encryption_callback = encryption_callbacks[0]
+            self.__decryption_callback = encryption_callbacks[1]
         self._transmission_send_timeout_sec = transmission_send_timeout_sec
         self._transmission_request_max_retries = transmission_request_max_retries
         self.listener = ListenForTransmissions(conversation_name,
@@ -580,10 +580,10 @@ class Conversation:
                 print(info[0])
             return
         else:   # conversation has already started
-            if self.decryption_callback:
+            if self.__decryption_callback:
                 if print_log_conversations:
                     print("Conv.Hear: decrypting message")
-                data = self.decryption_callback(data)
+                data = self.__decryption_callback(data)
             self.message_queue.put(data)
 
             if self.data_received_eventhandler:
@@ -660,10 +660,10 @@ class Conversation:
             if print_log:
                 print("Wanted to say something but conversation was not yet started")
             time.sleep(0.01)
-        if self.encryption_callback:
+        if self.__encryption_callback:
             if print_log_conversations:
                 print("Conv.Say: encrypting message")
-            data = self.encryption_callback(data)
+            data = self.__encryption_callback(data)
         return TransmitData(data, self.peerID, self.others_trsm_listener, timeout_sec, max_retries)
 
     def TransmitFile(self,
@@ -687,7 +687,7 @@ class Conversation:
             f"{self.others_trsm_listener}:files",
             metadata,
             progress_handler,
-            encryption_callbacks=(self.encryption_callback, self.decryption_callback),
+            encryption_callbacks=(self.__encryption_callback, self.__decryption_callback),
             block_size=block_size,
             transmission_send_timeout_sec=transmission_send_timeout_sec,
             transmission_request_max_retries=transmission_request_max_retries)
@@ -772,7 +772,7 @@ def TransmitFile(filepath,
         3. others_req_listener:str: the name of the other peer's file listener object
         4. metadata:bytearray: optional metadata to send to the receiver
         5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
-        6. encryption_callback:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
+        6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
         7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
         8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
@@ -824,7 +824,7 @@ def ListenForFileTransmissions(listener_name,
                             is received during an ongoing file transmission.
                             progress is a value between 0 and 1
         4. dir:str: the directory in which received files should be written
-        5. encryption_callback:Tuple(
+        5. encryption_callbacks:Tuple(
                                         function(plaintext:bytearray):bytearray,
                                         function(cipher:str):bytearray
                                     ):
@@ -855,7 +855,7 @@ class FileTransmitter:
         3. others_req_listener:str: the name of the other peer's file listener object
         4. metadata:bytearray: optional metadata to send to the receiver
         5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
-        6. encryption_callback:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
+        6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
         7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
         8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
@@ -882,7 +882,7 @@ class FileTransmitter:
             3. others_req_listener:str: the name of the other peer's file listener object
             4. metadata:bytearray: optional metadata to send to the receiver
             5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
-            6. encryption_callback:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
+            6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
             7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
             8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
             9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
