@@ -1165,8 +1165,9 @@ def ListenToBuffersOnPort(eventhandler, port=0, buffer_size=def_buffer_size, mon
     return Listener(eventhandler, port, buffer_size, monitoring_interval, status_eventhandler)
 
 
-def ListenToBuffers(eventhandler, proto, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None):
-    listener = ListenerTCP(eventhandler, 0, buffer_size)
+def ListenToBuffers(eventhandler, proto, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None, eventhandlers_on_new_threads=True):
+    listener = ListenerTCP(eventhandler, 0, buffer_size,
+                           eventhandlers_on_new_threads=eventhandlers_on_new_threads)
     CreateListeningConnection(proto, listener.port)
     return listener
 
@@ -1219,12 +1220,12 @@ class ListenerTCP(threading.Thread):
     sock = None
     last_time_recv = datetime.utcnow()
 
-    def __init__(self, eventhandler, port=0, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None):
+    def __init__(self, eventhandler, port=0, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None, eventhandlers_on_new_threads=True):
         threading.Thread.__init__(self)
         self.port = port
         self.eventhandler = eventhandler
         self.buffer_size = buffer_size
-
+        self.eventhandlers_on_new_threads = eventhandlers_on_new_threads
         self.sock = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)      # For UDP
 
@@ -1260,9 +1261,11 @@ class ListenerTCP(threading.Thread):
                     print("received null data")
                 # break
             if len(data) > 0:
-                ev = Thread(target=self.eventhandler, args=(data, ))
-                ev.start()
-
+                if self.eventhandlers_on_new_threads:
+                    ev = Thread(target=self.eventhandler, args=(data, ))
+                    ev.start()
+                else:
+                    self.eventhandler(data)
         conn.close()
         self.sock.close()
         CloseListeningConnection(str(self.port), self.port)
