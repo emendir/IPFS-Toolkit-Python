@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.2.7:
+IPFS_DataTransmission: ListenToBuffers: added eventhandlers_on_new_threads parameter to improve efficiency if needed
+
 ## v0.2.6:
 IPFS_DataTransmission: got BufferSender and ListenToBuffers working again
 Examples: corrected docstrings
