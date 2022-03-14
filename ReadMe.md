@@ -43,7 +43,7 @@ IPFS-Toolkit is made for interacting with IPFS in the Python programming languag
     https://pip.pypa.io/en/stable/installing/
 - If you want to use the source code, install the following prerequisite Python modules:  
   (depending on your python installation you may need to use `pip` instead of `pip3` in the following commands)  
-```python
+```bash
 pip3 install setuptools  
 pip3 install wheel  
 pip3 install multiaddr  
