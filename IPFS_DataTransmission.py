@@ -281,6 +281,9 @@ class TransmissionListener:
         except:
             pass
 
+    def __del__(self):
+        self.Terminate()
+
 
 def StartConversation(conversation_name,
                       peerID,
@@ -645,7 +648,8 @@ class Conversation:
         Transmits the input data (a bytearray of any length) to the other computer in this conversation.
 
         Usage:
-            success = conv.Say("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")    # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+            # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+            success = conv.Say("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")
 
         Parameters:
             bytearray data: the data to be transmitted to the receiver
@@ -692,19 +696,22 @@ class Conversation:
             transmission_send_timeout_sec=transmission_send_timeout_sec,
             transmission_request_max_retries=transmission_request_max_retries)
 
-    def Close(self):
+    def Terminate(self):
         if self.listener:
             self.listener.Terminate()
 
+    def Close(self):
+        self.Terminate()
+
     def __del__(self):
-        self.Close()
+        self.Terminate()
 
 
 class ConversationListener:
     """
     Object which listens to incoming conversation requests.
     Whenever a new conversation request is received, the specified eventhandler
-    is called which must then decide whether or not to join the conversation, 
+    is called which must then decide whether or not to join the conversation,
     and then act upon that decision.
 
     Usage Example:
@@ -752,6 +759,9 @@ class ConversationListener:
     def Terminate(self):
         self.listener.Terminate()
 
+    def __del__(self):
+        self.Terminate()
+
 
 def TransmitFile(filepath,
                  peerID,
@@ -765,7 +775,8 @@ def TransmitFile(filepath,
                  ):
     """Transmits the given file to the specified peer
     Usage:
-        transmitter = TransmitFile("text.txt", "QMHash", "my_apps_filelistener", "testmeadata".encode())
+        transmitter = TransmitFile(
+            "text.txt", "QMHash", "my_apps_filelistener", "testmeadata".encode())
     Paramaters:
         1. filepath:str: the path of the file to transmit
         2. peerID:str: the IPFS peer ID of the node to communicate with
@@ -773,7 +784,7 @@ def TransmitFile(filepath,
         4. metadata:bytearray: optional metadata to send to the receiver
         5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
         6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
-        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
+        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB)
         8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
 
@@ -847,7 +858,8 @@ def ListenForFileTransmissions(listener_name,
 class FileTransmitter:
     """Transmits the given file to the specified peer
     Usage:
-        file_transmitter = FileTransmitter("text.txt", "QMHash", "filelistener", "testmeadata".encode())
+        file_transmitter = FileTransmitter(
+            "text.txt", "QMHash", "filelistener", "testmeadata".encode())
         file_transmitter.Start()
     Paramaters:
         1. filepath:str: the path of the file to transmit
@@ -856,7 +868,7 @@ class FileTransmitter:
         4. metadata:bytearray: optional metadata to send to the receiver
         5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
         6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
-        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
+        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB)
         8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
     Returns:
@@ -883,7 +895,7 @@ class FileTransmitter:
             4. metadata:bytearray: optional metadata to send to the receiver
             5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
             6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
-            7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
+            7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB)
             8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
             9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
         Returns:
@@ -972,6 +984,10 @@ class FileTransmitter:
         info = SplitBy255(data)
         if info[0].decode('utf-8') == "ready":
             self.StartTransmission()
+
+    def __del__(self):
+        if self.conversation:
+            self.conversation.Close()
 
 
 class FileTransmissionReceiver:
@@ -1064,6 +1080,9 @@ class FileTransmissionReceiver:
                 self.eventhandler(self.conv.peerID, filepath, self.metadata)
             else:
                 self.eventhandler(self.conv.peerID, filepath)
+
+    def __del__(self):
+        self.conv.Close()
 
 
 # ----------IPFS Technicalitites-------------------------------------------
@@ -1161,20 +1180,20 @@ def CloseListeningConnection(protocol, port):
         protocol=f"/x/{protocol}", targetaddress=f"/ip4/127.0.0.1/tcp/{port}")
 
 
-def ListenToBuffersOnPort(eventhandler, port=0, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None):
-    return Listener(eventhandler, port, buffer_size, monitoring_interval, status_eventhandler)
-
-
-def ListenToBuffers(eventhandler, proto, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None, eventhandlers_on_new_threads=True):
-    listener = ListenerTCP(eventhandler, 0, buffer_size,
-                           eventhandlers_on_new_threads=eventhandlers_on_new_threads)
-    CreateListeningConnection(proto, listener.port)
-    return listener
-
-
-def SendBufferToPort(buffer, addr, port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(buffer, (addr, port))
+def ListenToBuffers(eventhandler,
+                    proto,
+                    buffer_size=def_buffer_size,
+                    monitoring_interval=2,
+                    status_eventhandler=None,
+                    eventhandlers_on_new_threads=True):
+    return BufferReceiver(
+        eventhandler,
+        proto,
+        buffer_size=buffer_size,
+        monitoring_interval=monitoring_interval,
+        status_eventhandler=status_eventhandler,
+        eventhandlers_on_new_threads=eventhandlers_on_new_threads
+    )
 
 
 class BufferSender():
@@ -1191,6 +1210,44 @@ class BufferSender():
             self.sock = CreateSendingConnection(self.peerID, self.proto)
             self.sock.send(data)
 
+    def Terminate(self):
+        CloseSendingConnection(self.peerID, self.proto)
+
+    def __del__(self):
+        self.Terminate()
+
+
+class BufferReceiver():
+    def __init__(self,
+                 eventhandler,
+                 proto,
+                 buffer_size=def_buffer_size,
+                 monitoring_interval=2,
+                 status_eventhandler=None,
+                 eventhandlers_on_new_threads=True):
+        self.proto = proto
+        self.listener = ListenerTCP(
+            eventhandler,
+            0,
+            buffer_size=buffer_size,
+            monitoring_interval=monitoring_interval,
+            status_eventhandler=status_eventhandler,
+            eventhandlers_on_new_threads=eventhandlers_on_new_threads
+        )
+        CreateListeningConnection(proto, self.listener.port)
+
+    def Terminate(self):
+        CloseListeningConnection(self.proto, self.listener.port)
+        self.listener.Terminate()
+
+    def __del__(self):
+        self.Terminate()
+
+
+def SendBufferToPort(buffer, addr, port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(buffer, (addr, port))
+
 
 class ListenerTCP(threading.Thread):
     """
@@ -1202,7 +1259,8 @@ class ListenerTCP(threading.Thread):
             print("Received data from  " + sender_peerID)
             print(data.decode("utf-8"))
 
-        listener = Listener(eventhandler, 0, 2048)   # start listening to incoming buffers on an automatically assigned port (that's what the 0 means)
+        # start listening to incoming buffers on an automatically assigned port (that's what the 0 means)
+        listener = Listener(eventhandler, 0, 2048)
         port = listener.port    # retrieve the automatically assigned port
 
         # Once finished and listening on that port should be stopped:
@@ -1220,14 +1278,20 @@ class ListenerTCP(threading.Thread):
     sock = None
     last_time_recv = datetime.utcnow()
 
-    def __init__(self, eventhandler, port=0, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None, eventhandlers_on_new_threads=True):
+    def __init__(self,
+                 eventhandler,
+                 port=0,
+                 buffer_size=def_buffer_size,
+                 monitoring_interval=2,
+                 status_eventhandler=None,
+                 eventhandlers_on_new_threads=True):
         threading.Thread.__init__(self)
         self.port = port
         self.eventhandler = eventhandler
         self.buffer_size = buffer_size
         self.eventhandlers_on_new_threads = eventhandlers_on_new_threads
         self.sock = socket.socket(
-            socket.AF_INET, socket.SOCK_STREAM)      # For UDP
+            socket.AF_INET, socket.SOCK_STREAM)
 
         self.sock.bind(("127.0.0.1", self.port))
         # in case it had been 0 (requesting automatic port assiggnent)
@@ -1268,7 +1332,6 @@ class ListenerTCP(threading.Thread):
                     self.eventhandler(data)
         conn.close()
         self.sock.close()
-        CloseListeningConnection(str(self.port), self.port)
         if print_log_connections:
             print("Closed listener.")
 
@@ -1291,8 +1354,11 @@ class ListenerTCP(threading.Thread):
         if print_log_connections:
             print("terminating listener")
         self.terminate = True   # marking the terminate flag as true
+        # SendBufferToPort("end".encode(), "127.0.0.1", self.port)
         self.sock.close()
-        # SendBufferToPort(bytearray([0]),"",self.port) # to make the listener's buffer receiving while loop move forwards so that it realises it has o stop
+
+    def __del__(self):
+        self.Terminate()
 
 
 class Listener2TCP(threading.Thread):
@@ -1563,6 +1629,10 @@ class Listener2(threading.Thread):
         self.terminate = True   # marking the terminate flag as true
         # self.sock.close()
         # SendBufferToPort(bytearray([0]),"127.0.0.1",self.port) # to make the listener's buffer receiving while loop move forwards so that it realises it has o stop
+
+
+def ListenToBuffersOnPort(eventhandler, port=0, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None):
+    return Listener(eventhandler, port, buffer_size, monitoring_interval, status_eventhandler)
 
 
 def AddIntegrityByteToBuffer(buffer):
