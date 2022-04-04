@@ -4,6 +4,7 @@ To use it you must have IPFS running on your computer.
 Configure IPFS to enable all this:
 ipfs config --json Experimental.Libp2pStreamMounting true
 """
+import shutil
 from queue import Queue
 import socket
 import threading
@@ -645,7 +646,8 @@ class Conversation:
         Transmits the input data (a bytearray of any length) to the other computer in this conversation.
 
         Usage:
-            success = conv.Say("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")    # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+            # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
+            success = conv.Say("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")
 
         Parameters:
             bytearray data: the data to be transmitted to the receiver
@@ -704,7 +706,7 @@ class ConversationListener:
     """
     Object which listens to incoming conversation requests.
     Whenever a new conversation request is received, the specified eventhandler
-    is called which must then decide whether or not to join the conversation, 
+    is called which must then decide whether or not to join the conversation,
     and then act upon that decision.
 
     Usage Example:
@@ -765,7 +767,8 @@ def TransmitFile(filepath,
                  ):
     """Transmits the given file to the specified peer
     Usage:
-        transmitter = TransmitFile("text.txt", "QMHash", "my_apps_filelistener", "testmeadata".encode())
+        transmitter = TransmitFile(
+            "text.txt", "QMHash", "my_apps_filelistener", "testmeadata".encode())
     Paramaters:
         1. filepath:str: the path of the file to transmit
         2. peerID:str: the IPFS peer ID of the node to communicate with
@@ -773,7 +776,7 @@ def TransmitFile(filepath,
         4. metadata:bytearray: optional metadata to send to the receiver
         5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
         6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
-        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
+        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB)
         8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
 
@@ -847,7 +850,8 @@ def ListenForFileTransmissions(listener_name,
 class FileTransmitter:
     """Transmits the given file to the specified peer
     Usage:
-        file_transmitter = FileTransmitter("text.txt", "QMHash", "filelistener", "testmeadata".encode())
+        file_transmitter = FileTransmitter(
+            "text.txt", "QMHash", "filelistener", "testmeadata".encode())
         file_transmitter.Start()
     Paramaters:
         1. filepath:str: the path of the file to transmit
@@ -856,7 +860,7 @@ class FileTransmitter:
         4. metadata:bytearray: optional metadata to send to the receiver
         5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
         6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
-        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
+        7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB)
         8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
     Returns:
@@ -883,7 +887,7 @@ class FileTransmitter:
             4. metadata:bytearray: optional metadata to send to the receiver
             5. progress_handler:function(progress:float): eventhandler to send progress (fraction twix 0-1) every for sending/receiving files
             6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
-            7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB) 
+            7. block_size:int: the FileTransmitter sends the file in chunks. This is the siize of those chunks in bytes (default 1MiB)
             8. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
             9. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
         Returns:
@@ -1013,7 +1017,7 @@ class FileTransmissionReceiver:
                 self.filesize = FromB255No0s(filesize)
                 self.filename = filename.decode('utf-8')
                 self.metadata = metadata
-                self.writer = open(os.path.join(self.dir, self.filename), "wb")
+                self.writer = open(os.path.join(self.dir, self.filename + ".PART"), "wb")
                 self.transmission_started = True
                 self.conv.Say("ready".encode())
                 self.writtenbytes = 0
@@ -1052,6 +1056,8 @@ class FileTransmissionReceiver:
 
     def Finish(self):
         self.writer.close()
+        shutil.move(os.path.join(self.dir, self.filename + ".PART"),
+                    os.path.join(self.dir, self.filename))
         if print_log:
             print("FileReception: " + self.filename
                   + ": Transmission finished.")
