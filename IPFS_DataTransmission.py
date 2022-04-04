@@ -4,6 +4,7 @@ To use it you must have IPFS running on your computer.
 Configure IPFS to enable all this:
 ipfs config --json Experimental.Libp2pStreamMounting true
 """
+import shutil
 from queue import Queue
 import socket
 import threading
@@ -1029,7 +1030,7 @@ class FileTransmissionReceiver:
                 self.filesize = FromB255No0s(filesize)
                 self.filename = filename.decode('utf-8')
                 self.metadata = metadata
-                self.writer = open(os.path.join(self.dir, self.filename), "wb")
+                self.writer = open(os.path.join(self.dir, self.filename + ".PART"), "wb")
                 self.transmission_started = True
                 self.conv.Say("ready".encode())
                 self.writtenbytes = 0
@@ -1068,6 +1069,8 @@ class FileTransmissionReceiver:
 
     def Finish(self):
         self.writer.close()
+        shutil.move(os.path.join(self.dir, self.filename + ".PART"),
+                    os.path.join(self.dir, self.filename))
         if print_log:
             print("FileReception: " + self.filename
                   + ": Transmission finished.")
