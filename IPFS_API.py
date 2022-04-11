@@ -188,7 +188,7 @@ def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
         string lifetime: Time duration that the record will be valid for.
                                 Default: 24h.    
     """
-    cid = PublishFile(path)
+    cid = Publish(path)
     UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
     return cid
 
