@@ -4,6 +4,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+import tempfile
 import sys
 from subprocess import Popen, PIPE
 import subprocess
@@ -18,6 +19,7 @@ from requests.exceptions import ConnectionError
 import traceback
 import IPFS_LNS
 import logging
+from base64 import urlsafe_b64decode
 from threading import Thread
 print_log = False
 
@@ -52,11 +54,32 @@ def Start():
                 return "IPFS not running"
 
 
-# Publishes the input text to specified the IPFS PubSub topic
-def PublishToTopic(topic, text):
-    http_client.pubsub.publish(topic, text)
+# Publishes the input data to specified the IPFS PubSub topic
+def PublishToTopic(topic, data):
+    """Publishes te specified data to the specified IPFS-PubSub topic.
+    Parameters:
+        topic: str: the name of the IPFS PubSub topic to publish to
+        data: string or bytes/bytearray: either the filepath of a file whose
+            content should be published to the pubsub topic,
+            or the raw data to be published as a string or bytearray.
+            When using an older version of IPFS < v0.11.0 however,
+            only plai data as a string is accepted.
+    """
+    if int(http_client.version()["Version"].split(".")[1]) < 11:
+        return http_client.pubsub.publish_old(topic, data)
 
-# Listens to the specified IPFS PubSub topic and passes received text to the input eventhandler function
+    if isinstance(data, str) and not os.path.exists(data):
+        data = data.encode()
+    if isinstance(data, bytes) or isinstance(data, bytearray):
+        with tempfile.NamedTemporaryFile() as tp:
+            tp.write(data)
+            tp.flush()
+            http_client.pubsub.publish(topic, tp.name)
+    else:
+        http_client.pubsub.publish(topic, data)
+
+
+# Listens to the specified IPFS PubSub topic and passes received data to the input eventhandler function
 
 
 class PubsubListener():
@@ -75,17 +98,46 @@ class PubsubListener():
         """blocks the calling thread"""
         while not self.terminate:
             try:
-                #sub = http_client.pubsub.subscribe(self.topic)
-                with http_client.pubsub.subscribe(self.topic) as self.sub:
-                    for text in self.sub:
-                        if self.terminate:
-                            self.__listening = False
-                            return
-                        _thread.start_new_thread(
-                            self.eventhandler, (str(base64.b64decode(str(text).split('\'')[7]), "utf-8"),))
+                if int(http_client.version()["Version"].split(".")[1]) >= 11:
+                    with http_client.pubsub.subscribe(self.topic) as self.sub:
+                        for message in self.sub:
+                            if self.terminate:
+                                self.__listening = False
+                                return
+                            data = {
+                                "senderID": message["from"],
+                                "data": self.__DecodeBase64URL(message["data"]),
+                                # "topicIDs": [print(x) for x in message["topicIDs"]],
+                                # "seqno": self.__DecodeBase64URL(message["seqno"])
+
+                            }
+
+                            _thread.start_new_thread(
+                                self.eventhandler, (data,))
+                else:
+                    with http_client.pubsub.subscribe_old(self.topic) as self.sub:
+                        for message in self.sub:
+                            if self.terminate:
+                                self.__listening = False
+                                return
+                            data = str(base64.b64decode(
+                                str(message).split('\'')[7]), "utf-8")
+                            _thread.start_new_thread(
+                                self.eventhandler, (data,))
             except ConnectionError as e:
                 print(f"IPFS API Pubsub: restarting sub {self.topic}")
         self.__listening = False
+
+    def __DecodeBase64URL(self, data: str):
+        """Performs the URL-Safe multibase decoding required by the new pubsub function (since IFPS v0.11.0) on strings"""
+        # print(data)
+        data = str(data)[1:].encode()
+        missing_padding = len(data) % 4
+        if missing_padding:
+            data += b'=' * (4 - missing_padding)
+        # print(data.decode())
+        # print(urlsafe_b64decode(data))
+        return urlsafe_b64decode(data)
 
     def Listen(self):
         self.terminate = False
@@ -99,6 +151,15 @@ class PubsubListener():
 
 def SubscribeToTopic(topic, eventhandler):
     """
+    Listens to the specified IPFS PubSub topic, calling the eventhandler
+    whenever a message is received, passing the message data and its sender
+    to the evventhandler.
+    Parameters:
+        topic: str: the name of the IPFS PubSub topic to publish to
+        eventhandler: function(dict): the function to be executed whenever a message is received.
+                            The eventhandler parameter is a dict with the keys 'data' and 'senderID',
+                            except when using an older version of IPFS < v0.11.0,
+                            in which case only the message is passed as a string.
     Returns a PubsubListener object which can  be terminated with the .Terminate() method (and restarted with the .Listen() method)
     """
     return PubsubListener(topic, eventhandler)
@@ -174,7 +235,7 @@ def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: s
                                 Uses the same syntax as the lifetime option.
                                 (caution: experimental).
         string lifetime: Time duration that the record will be valid for.
-                                Default: 24h.    
+                                Default: 24h.
     """
     http_client.name.publish(ipfs_path=cid, key=name, ttl=ttl, lifetime=lifetime)
 
@@ -186,7 +247,7 @@ def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
                                 Uses the same syntax as the lifetime option.
                                 (caution: experimental).
         string lifetime: Time duration that the record will be valid for.
-                                Default: 24h.    
+                                Default: 24h.
     """
     cid = Publish(path)
     UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
