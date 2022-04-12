@@ -1,6 +1,8 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## 0.2.11
+IPFS_API: Bugfix in UpdateIPNS_Record
 ## v0.2.10:
 IPFS_FileTransmission: add _.PART_ file extension to files currently being received
 
