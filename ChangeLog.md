@@ -1,6 +1,7 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
-
+## v0.3.1
+IPFS_API: ForwardFromPortToPeer now returns a boolean indicating whether or not it successfully connected to the specified port.
 ## v0.3.0
 IPFS_API: PubSub (IPFS_API.PublishToTopic & IPFS_API.SubscribeToTopic) is now compatible with IPFS v0.11.0! As described in the [IPFS changelog](https://github.com/ipfs/go-ipfs/releases/tag/v0.11.0), the official PubSub's publish function now accepts files instead of plain data. IPFS_API.PublishToTopic however accepts plain (as strings or bytearrays) as well as filepaths, saving the data to temporary files to publish so that the user doesn't have to bother with it. Also new is that (when using IPFS >= v0.11.0) SubscribToTopic passes a dictionary that includes the message data (as bytes) as well as its sender as the parameter to its eventhandler, instead of just the message data as a string.
 When using a version of IPFS below v0.11.0, the behaviour of the (IPFS_API.PublishToTopic & IPFS_API.SubscribeToTopic) remains as it was in the older versions of IPFS-Toolkit (v0.2.X).
