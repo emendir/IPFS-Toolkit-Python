@@ -1083,14 +1083,10 @@ def CreateSendingConnection(peerID: str, protocol: str, port=None):
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if port == None:
-        for prt in sending_ports:
-            try:
-                IPFS_API.ForwardFromPortToPeer(protocol, prt, peerID)
+        for prt in sending_ports:   # trying ports until we find a free one
+            if IPFS_API.ForwardFromPortToPeer(protocol, prt, peerID):
                 sock.connect(("127.0.0.1", prt))
-
                 return sock
-            except:
-                pass
 
         print("failed to find free port for sending connection")
     else:
