@@ -12,20 +12,26 @@ import _thread
 import os
 import os.path
 import threading
-import base64
-import ipfshttpclient2 as ipfshttpclient
-from requests.exceptions import ConnectionError
 # import multiprocessing
 import traceback
 import IPFS_LNS
 import logging
-from base64 import urlsafe_b64decode
 from threading import Thread
-print_log = False
+try:
+    import base64
+    import ipfshttpclient2 as ipfshttpclient
+    from requests.exceptions import ConnectionError
+    from base64 import urlsafe_b64decode
+    http_client = ipfshttpclient.client.Client()
+    LIBERROR = False
+except:
+    LIBERROR = True
+    http_client = None
+    ipfshttpclient = None
+print_log = True
 
 autostart = True
 started = False
-http_client = ipfshttpclient.client.Client()
 # List for keeping track of subscriptions to IPFS topics, so that subscriptions can be ended
 subscriptions = list([])
 
@@ -33,6 +39,9 @@ subscriptions = list([])
 def Start():
     try:
         global started
+        from IPFS_CLI import RunCommand, ipfs_cmd
+        Thread(target=RunCommand, args=[ipfs_cmd, "daemon", "--enable-pubsub-experiment"])
+
         http_client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
         started = True
         logging.info("Started IPFS_API, connected to daemon")
@@ -219,10 +228,10 @@ def CatFile(ID):
     return http_client.cat(ID)
 
 
-def CreateIPNS_Record(name: str):
-    result = http_client.key.gen(key_name=name, type="rsa")
+def CreateIPNS_Record(name: str, type: str = "rsa", size: int = 2048):
+    result = http_client.key.gen(key_name=name, type=type, size=size)
     print(result)
-    if(type(result) == list):
+    if isinstance(result, list):
         return result[-1].get("Id")
     else:
         return result.get("Id")
@@ -254,17 +263,16 @@ def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
     return cid
 
 
-def DownloadIPNS_Record(name, path="", nocache=False):
-    return DownloadFile(ResolveIPNS_Key(name, nocache=nocache), path)
-
-
 def ResolveIPNS_Key(ipns_id, nocache=False):
     return http_client.name.resolve(name=ipns_id, nocache=nocache).get("Path")
 
 
+def DownloadIPNS_Record(name, path="", nocache=False):
+    return DownloadFile(ResolveIPNS_Key(name, nocache=nocache), path)
+
+
 def CatIPNS_Record(name, nocache=False):
-    ipfs_path = http_client.name.resolve(name=name, nocache=nocache).get("Path")
-    return CatFile(ipfs_path)
+    return CatFile(ResolveIPNS_Key(name, nocache=nocache))
 
 # Returns a list of the multiaddresses of all connected peers
 
@@ -274,7 +282,7 @@ def ListPeerMaddresses():
     proc.wait()
     peers = []
     for line in proc.stdout:
-        peers.append(line.decode('utf-8'))
+        peers.append(line.decode('utf-8').strip("\n"))
 
     return peers
 
@@ -299,6 +307,7 @@ myid = MyID
 
 
 def ListenOnPortTCP(protocol, port):
+    print("IPFS_API: WARNING: deprecated. Use ListenOnPort() instead.")
     http_client.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
@@ -311,9 +320,6 @@ def ListenOnPort(protocol, port):
     http_client.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
-listenonportUDP = ListenOnPort
-ListenUDP = ListenOnPort
-listenudp = ListenOnPort
 listenonport = ListenOnPort
 Listen = ListenOnPort
 listen = ListenOnPort
@@ -345,4 +351,9 @@ def CheckPeerConnection(id, name=""):
 
 
 if autostart:
-    Start()
+    if not LIBERROR:    # if all modules needed for the ipfs_http_client library were loaded
+        Start()
+    if not started:
+        from IPFS_CLI import *
+        if not IsDaemonRunning():
+            RunDaemon()
