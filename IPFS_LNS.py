@@ -11,11 +11,20 @@ import IPFS_API
 ipfs_dir = os.path.join(appdirs.user_data_dir(), "IPFS")
 lns_dir = os.path.join(appdirs.user_data_dir(), "IPFS", "LNS")
 
-if not os.path.exists(ipfs_dir):
-    os.makedirs(ipfs_dir)
+try:
+    if not os.path.exists(ipfs_dir):
+        os.makedirs(ipfs_dir)
 
-if not os.path.exists(lns_dir):
-    os.makedirs(lns_dir)
+    if not os.path.exists(lns_dir):
+        os.makedirs(lns_dir)
+except PermissionError as e:    # in a buildozer project execution fails here
+    ipfs_dir = os.path.join("AppData", "IPFS")
+    lns_dir = os.path.join("AppData", "IPFS", "LNS")
+    if not os.path.exists(ipfs_dir):
+        os.makedirs(ipfs_dir)
+
+    if not os.path.exists(lns_dir):
+        os.makedirs(lns_dir)
 
 
 class Node:
