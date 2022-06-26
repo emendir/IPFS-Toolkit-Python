@@ -3,7 +3,6 @@ from threading import Thread
 import tempfile
 from subprocess import Popen, PIPE
 from datetime import datetime
-from PyQt5.QtWidgets import QMessageBox, QInputDialog
 
 import stat
 # import urllib.request
