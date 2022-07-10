@@ -1,6 +1,6 @@
 import IPFS_DataTransmission
 import time
--Full"""
+"""
 This script demonstrates, together with Demo-Conversation-Full-Starter,
 the advanced usage of the IPFS_DataTransmission.Conversation class.
 
