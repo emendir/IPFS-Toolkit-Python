@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.3.5
+IPFS_DataTransmission: debugged Conversation.ListenForFile
+
 ## v0.3.2
 IPFS_CLI: added IPFS_CLI as a fallback API to IPFS in case the ipfshttpcient2 API fails to load.
 
