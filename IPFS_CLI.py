@@ -21,7 +21,6 @@ def RunCommand(cmd):
     if isinstance(cmd, str):
         cmd = cmd.split(" ")
     try:
-        print(cmd)
         proc = Popen(cmd, stdout=PIPE)
     except:
         return None
@@ -343,7 +342,6 @@ def ForwardFromPortToPeer(protocol: str, port, peerID):
     if isinstance(cmd, str):
         cmd = cmd.split(" ")
     try:
-        print(cmd)
         proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
     except:
         return None

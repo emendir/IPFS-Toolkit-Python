@@ -26,8 +26,8 @@ except:
 # -------------- Settings ---------------------------------------------------------------------------------------------------
 print_log = False  # whether or not to print debug in output terminal
 print_log_connections = False
-print_log_transmissions = True
-print_log_conversations = True
+print_log_transmissions = False
+print_log_conversations = False
 print_log_files = True
 
 if not print_log:
@@ -425,7 +425,8 @@ class Conversation:
               file_progress_callback=None,
               encryption_callbacks=None,
               transmission_send_timeout_sec=transmission_send_timeout_sec,
-              transmission_request_max_retries=transmission_request_max_retries
+              transmission_request_max_retries=transmission_request_max_retries,
+              dir="."
               ):
         """Starts a conversation object with which peers can send data transmissions to each other.
         Code blocks until the other peer joins the conversation or timeout is reached
@@ -451,6 +452,7 @@ class Conversation:
             6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
             7. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
             8. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
+            9. dir:str: the path where received files should be downloaded to
         Returns:
             bool success: whether or not the conversation with the peer was successfully started
         """
@@ -476,8 +478,9 @@ class Conversation:
         self.file_receiver = ListenForFileTransmissions(
             f"{conversation_name}:files",
             self.FileReceived,
-            self.file_progress_callback,
-            encryption_callbacks
+            progress_handler=self.file_progress_callback,
+            dir=dir,
+            encryption_callbacks=encryption_callbacks
         )
         # self.listener = ListenForTransmissions(conversation_name, self.hear_eventhandler)
         data = bytearray("I want to start a conversation".encode(
@@ -504,7 +507,8 @@ class Conversation:
              file_progress_callback=None,
              encryption_callbacks=None,
              transmission_send_timeout_sec=transmission_send_timeout_sec,
-             transmission_request_max_retries=transmission_request_max_retries):
+             transmission_request_max_retries=transmission_request_max_retries,
+             dir="."):
         """
         Joins a conversation which another peer started, given their peer ID
         and conversation's transmission-listener's name.
@@ -518,6 +522,7 @@ class Conversation:
             6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
             7. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
             8. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
+            9. dir:str: the path where received files should be downloaded to
         Returns:
             bool success: whether or not the conversation with the peer was successfully joined
         """
@@ -538,9 +543,11 @@ class Conversation:
                                                )
         self.file_receiver = ListenForFileTransmissions(
             f"{conversation_name}:files", self.FileReceived,
-            self.file_progress_callback,
-            encryption_callbacks
+            progress_handler=self.file_progress_callback,
+            dir=dir,
+            encryption_callbacks=encryption_callbacks
         )
+
         self.others_trsm_listener = others_trsm_listener
         self.peerID = peerID
         data = bytearray("I'm listening".encode(
@@ -619,8 +626,9 @@ class Conversation:
             return
 
     def FileReceived(self, peer, filepath, metadata):
+        if print_log_conversations:
+            print(f"{self.conversation_name}: Received file: ", filepath)
         self.file_queue.put(filepath)
-        print(filepath)
         if self.file_eventhandler:
             _thread.start_new_thread(self.file_eventhandler, (self, filepath, metadata))
 
@@ -686,6 +694,8 @@ class Conversation:
             if print_log:
                 print("Wanted to say something but conversation was not yet started")
             time.sleep(0.01)
+        if print_log_conversations:
+            print("Transmitting file to ", f"{self.others_trsm_listener}:files")
         return TransmitFile(
             filepath,
             self.peerID,
@@ -845,7 +855,7 @@ def ListenForFileTransmissions(listener_name,
     def RequestHandler(conv_name, peerID):
         ft = FileTransmissionReceiver()
         conv = Conversation()
-        ft.Setup(conv, eventhandler, progress_handler, dir)
+        ft.Setup(conv, eventhandler, progress_handler=progress_handler, dir=dir)
         conv.Join(conv_name,
                   peerID,
                   conv_name,
