@@ -625,7 +625,7 @@ class Conversation:
     def FileReceived(self, peer, filepath, metadata):
         if print_log_conversations:
             print(f"{self.conversation_name}: Received file: ", filepath)
-        self.file_queue.put(filepath)
+        self.file_queue.put({'filepath': filepath, 'metadata': metadata})
         if self.file_eventhandler:
             _thread.start_new_thread(self.file_eventhandler, (self, filepath, metadata))
 
