@@ -28,7 +28,11 @@ def NewConvHandler(conversation_name, peerID):
     conv = IPFS_DataTransmission.Conversation()
     conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived, OnFileReceived)
     print("Waiting for file...")
-    file = conv.ListenForFile(5)
+    data = conv.ListenForFile(60)
+    if data:
+        file = data['filepath']
+        metadata = data['metadata']
+    print("Received file:", file, metadata)
     data = conv.Listen()
     print("Peer said:", data)
     conv.Say("Hi back".encode("utf-8"))
