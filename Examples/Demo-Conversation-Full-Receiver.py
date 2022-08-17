@@ -26,7 +26,7 @@ def NewConvHandler(conversation_name, peerID):
         print("Received file", filepath)
 
     conv = IPFS_DataTransmission.Conversation()
-    conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived, OnFileReceived)
+    conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived, OnFileReceived, dir="/home/ubuntu-vm/Desktop")
     print("Waiting for file...")
     data = conv.ListenForFile(60)
     if data:

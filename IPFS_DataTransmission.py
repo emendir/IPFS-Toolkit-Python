@@ -294,7 +294,8 @@ def StartConversation(conversation_name,
                       file_progress_callback=None,
                       encryption_callbacks=None,
                       timeout_sec=transmission_send_timeout_sec,
-                      max_retries=transmission_request_max_retries):
+                      max_retries=transmission_request_max_retries,
+                      dir="."):
     """
     Starts a conversation object with which 2 peers can repetatively make
     data transmissions to each other asynchronously and bidirectionally.
@@ -321,6 +322,7 @@ def StartConversation(conversation_name,
         6. encryption_callbacks:Tuple(function(plaintext:bytearray):bytearray, function(cipher:str):bytearray): encryption and decryption functions
         7. transmission_send_timeout_sec:int: (low level) data transmission - connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
         8. transmission_request_max_retries:int: (low level) data transmission - how often the transmission should be reattempted when the timeout is reached
+        9. dir:str: the path where received files should be downloaded to
     Returns:
         A Conversation object through which messages and files can be sent
     """
@@ -333,7 +335,8 @@ def StartConversation(conversation_name,
                file_progress_callback=file_progress_callback,
                encryption_callbacks=encryption_callbacks,
                transmission_send_timeout_sec=transmission_send_timeout_sec,
-               transmission_request_max_retries=transmission_request_max_retries
+               transmission_request_max_retries=transmission_request_max_retries,
+               dir=dir
                )
     return conv
 
