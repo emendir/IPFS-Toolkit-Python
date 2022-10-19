@@ -53,7 +53,12 @@ sending_ports = [x for x in range(20001, 20500)]
 # -------------- User Functions ----------------------------------------------------------------------------------------------
 
 
-def TransmitData(data: bytes, peerID: str, req_lis_name: str, timeout_sec: int = transmission_send_timeout_sec, max_retries: int = transmission_request_max_retries):
+def TransmitData(
+        data: bytes,
+        peerID: str,
+        req_lis_name: str,
+        timeout_sec: int = transmission_send_timeout_sec,
+        max_retries: int = transmission_request_max_retries):
     """
     Transmits the input data (a bytearray of any length) to the computer with the specified IPFS peer ID.
 
