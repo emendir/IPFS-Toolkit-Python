@@ -24,7 +24,8 @@ try:
     from base64 import urlsafe_b64decode
     http_client = ipfshttpclient.client.Client()
     LIBERROR = False
-except:
+except Exception as e:
+    print(str(e))
     LIBERROR = True
     http_client = None
     ipfshttpclient = None
@@ -348,6 +349,25 @@ def CheckPeerConnection(id, name=""):
     if not contact:
         contact = IPFS_LNS.AddContact(id, name)
     return contact.CheckConnection()
+
+
+def FindProviders(cid):
+    """Returns a list of the IDs of the peers who provide the file
+    with the given CID  (including onesself).
+    E.g. to check if this computer hosts a file with a certain CID:
+    def DoWeHaveFile(cid:str):
+        IPFS_API.MyID() in IPFS_API.FindProviders(cid)
+    """
+    responses = http_client.dht.findprovs(cid)
+    peers = []
+    for response in responses:
+        if not isinstance(response, ipfshttpclient.client.base.ResponseBase):
+            continue
+        if response['Type'] == 4:
+            for resp in response['Responses']:
+                if resp['ID'] and resp['ID'] not in peers:
+                    peers.append(resp['ID'])
+    return peers
 
 
 if autostart:
