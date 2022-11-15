@@ -8,12 +8,13 @@ paste the other's IPFS ID in the peerID variable below,
 and then run this script.
 """
 
+import threading
 import time
 import IPFS_DataTransmission
 import IPFS_API
 
 
-# replace QmHash with your peer's IPFS ID
+# insert your peer's IPFS ID here
 peerID = ""
 # replace with the path of a file you would like to send
 file = ""
@@ -52,4 +53,4 @@ if data:
     print("Received data: ", data)
 else:
     print("Received no more messages after waiting 5 seconds.")
-conv.Close()
+conv.Terminate()

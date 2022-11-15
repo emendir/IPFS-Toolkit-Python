@@ -9,7 +9,6 @@ from queue import Queue
 import socket
 import threading
 from threading import Thread, Event
-import _thread
 from datetime import datetime
 import time
 import traceback
@@ -177,7 +176,8 @@ class TransmissionListener:
     def __init__(self, listener_name, eventhandler):
         self.listener_name = listener_name
         self.eventhandler = eventhandler
-        self.listener = Thread(target=self.Listen, args=())
+        self.listener = Thread(target=self.Listen, args=(),
+                               name=f"DataTransmissionListener-{listener_name}")
         self.listener.start()
 
     def ReceiveTransmissionRequests(self, data):
@@ -212,7 +212,7 @@ class TransmissionListener:
             sock.listen()
 
             listener = Thread(target=self.ReceiveTransmission, args=(
-                peerID, sock, our_port, self.eventhandler))
+                peerID, sock, our_port, self.eventhandler), name=f"DataTransmissionReceiver-{our_port}")
             listener.start()
             return our_port
 
@@ -243,7 +243,8 @@ class TransmissionListener:
         data = recv_timeout(conn)
         conn.send("Finished!".encode())
         # conn.close()
-        _thread.start_new_thread(eventhandler, (data, peerID))
+        Thread(target=eventhandler, args=(data, peerID),
+               name="TransmissionListener.ReceivedTransmission").start()
         CloseListeningConnection(str(our_port), our_port)
         sock.close()
 
@@ -414,6 +415,7 @@ class Conversation:
     listener = None
     __encryption_callback = None
     __decryption_callback = None
+    _terminate = False
 
     def __init__(self):
         self.started = Event()
@@ -465,7 +467,7 @@ class Conversation:
             bool success: whether or not the conversation with the peer was successfully started
         """
         if peerID == IPFS_API.MyID():
-            return
+            return False
         if(print_log_conversations):
             print(conversation_name + ": Starting conversation")
         self.conversation_name = conversation_name
@@ -483,7 +485,7 @@ class Conversation:
         self.listener = ListenForTransmissions(conversation_name,
                                                self.Hear
                                                )
-        self.file_receiver = ListenForFileTransmissions(
+        self.file_listener = ListenForFileTransmissions(
             f"{conversation_name}:files",
             self.FileReceived,
             progress_handler=self.file_progress_callback,
@@ -549,7 +551,7 @@ class Conversation:
         self.listener = ListenForTransmissions(conversation_name,
                                                self.Hear,
                                                )
-        self.file_receiver = ListenForFileTransmissions(
+        self.file_listener = ListenForFileTransmissions(
             f"{conversation_name}:files", self.FileReceived,
             progress_handler=self.file_progress_callback,
             dir=dir,
@@ -578,6 +580,8 @@ class Conversation:
         Forwards it to the user's data_received_eventhandler if the conversation has already started,
         otherwise processes the converation initiation codes.
         """
+        if self._terminate:
+            return
         # print("HEAR", data)
         if not data:
             print("CONV.HEAR: RECEIVED NONE")
@@ -608,9 +612,11 @@ class Conversation:
             if self.data_received_eventhandler:
                 # if the data_received_eventhandler has 2 parameters
                 if len(signature(self.data_received_eventhandler).parameters) == 2:
-                    Thread(target=self.data_received_eventhandler, args=(self, data)).start()
+                    Thread(target=self.data_received_eventhandler,
+                           args=(self, data), name="Converstion.data_received_eventhandler").start()
                 else:
-                    Thread(target=self.data_received_eventhandler, args=(self, data, arg3)).start()
+                    Thread(target=self.data_received_eventhandler, args=(
+                        self, data, arg3), name="Converstion.data_received_eventhandler").start()
 
     def Listen(self, timeout=None):
         """Waits until the conversation peer sends a message,
@@ -618,6 +624,8 @@ class Conversation:
         Can be used as an alternative to specifying an data_received_eventhandler
             to process received messages, or in parallel.
         """
+        if self._terminate:
+            return
         if not timeout:
             data = self.message_queue.get()
         else:
@@ -638,7 +646,8 @@ class Conversation:
             print(f"{self.conversation_name}: Received file: ", filepath)
         self.file_queue.put({'filepath': filepath, 'metadata': metadata})
         if self.file_eventhandler:
-            _thread.start_new_thread(self.file_eventhandler, (self, filepath, metadata))
+            Thread(target=self.file_eventhandler, args=(self, filepath, metadata),
+                   name='Conversation.file_eventhandler').start()
 
     def ListenForFile(self, timeout=None):
         if not timeout:
@@ -716,8 +725,14 @@ class Conversation:
             transmission_request_max_retries=transmission_request_max_retries)
 
     def Terminate(self):
+        self._terminate = True
         if self.listener:
             self.listener.Terminate()
+        if self.file_listener:
+            self.file_listener.Terminate()
+
+    def Close(self):
+        self.Terminate()
 
     def Close(self):
         self.Terminate()
@@ -989,12 +1004,14 @@ class FileTransmitter:
     def CallProgressCallBack(self, progress):
         if self.progress_handler:
             if len(signature(self.progress_handler).parameters) == 1:
-                _thread.start_new_thread(self.progress_handler, (progress,))
+                Thread(target=self.progress_handler, args=(progress,),
+                       name='Conversation.progress_handler').start()
             elif len(signature(self.progress_handler).parameters) == 2:
-                _thread.start_new_thread(self.progress_handler, (self.filename, progress))
+                Thread(target=self.progress_handler, args=(self.filename, progress),
+                       name='Conversation.progress_handler').start()
             elif len(signature(self.progress_handler).parameters) == 3:
-                _thread.start_new_thread(self.progress_handler,
-                                         (self.filename, self.filesize, progress))
+                Thread(target=self.progress_handler,
+                       args=(self.filename, self.filesize, progress), name='Conversation.progress_handler').start()
 
     def Hear(self, conv, data):
         if print_log_files:
@@ -1056,8 +1073,8 @@ class FileTransmissionReceiver:
                     print("FileReception: " + self.filename
                           + ": ready to receive file")
                 if self.progress_handler:
-                    _thread.start_new_thread(self.progress_handler,
-                                             (self.conv.peerID, self.filename, self.filesize, 0))
+                    Thread(target=self.progress_handler, args=(self.conv.peerID, self.filename,
+                           self.filesize, 0), name='FileTransmissionReceiver.progress_handler').start()
 
                 if(self.filesize == 0):
                     self.Finish()
@@ -1071,8 +1088,8 @@ class FileTransmissionReceiver:
             self.writtenbytes += len(data)
 
             if self.progress_handler:
-                _thread.start_new_thread(self.progress_handler,
-                                         (self.conv.peerID, self.filename, self.filesize, self.writtenbytes/self.filesize))
+                Thread(target=self.progress_handler,
+                       args=(self.conv.peerID, self.filename, self.filesize, self.writtenbytes/self.filesize), name='FileTransmissionReceiver.progress').start()
 
             if print_log_files:
                 print("FileTransmission: " + self.filename
@@ -1102,8 +1119,8 @@ class FileTransmissionReceiver:
             else:
                 self.eventhandler(self.conv.peerID, filepath)
 
-    def __del__(self):
-        self.conv.Close()
+    def Terminate(self):
+        self.conv.Terminate()
 
 
 # ----------IPFS Technicalitites-------------------------------------------
@@ -1304,6 +1321,7 @@ class ListenerTCP(threading.Thread):
                  eventhandlers_on_new_threads=True):
         threading.Thread.__init__(self)
         self.port = port
+        self.name = f"TCPListener-{port}"
         self.eventhandler = eventhandler
         self.buffer_size = buffer_size
         self.eventhandlers_on_new_threads = eventhandlers_on_new_threads
@@ -1318,8 +1336,8 @@ class ListenerTCP(threading.Thread):
             self.status_eventhandler = status_eventhandler
             self.monitoring_interval = monitoring_interval
             self.last_time_recv = datetime.utcnow()
-            self.status_monitor_thread = _thread.start_new_thread(
-                self.StatusMonitor, ())
+            self.status_monitor_thread = Thread(
+                target=self.StatusMonitor, args=(), name='ListenerTP.status_monitor').start()
 
         self.start()
 
@@ -1343,7 +1361,8 @@ class ListenerTCP(threading.Thread):
                 # break
             if len(data) > 0:
                 if self.eventhandlers_on_new_threads:
-                    ev = Thread(target=self.eventhandler, args=(data, ))
+                    ev = Thread(target=self.eventhandler, args=(
+                        data, ), name="TCPListener-eventhandler")
                     ev.start()
                 else:
                     self.eventhandler(data)
@@ -1409,6 +1428,7 @@ class Listener2TCP(threading.Thread):
     def __init__(self, eventhandler, port=0, buffer_size=def_buffer_size):
         threading.Thread.__init__(self)
         self.port = port
+        self.name = f"TCPListener-{port}"
         self.eventhandler = eventhandler
         self.buffer_size = buffer_size
 
@@ -1442,7 +1462,8 @@ class Listener2TCP(threading.Thread):
             if print_log_connections:
                 print("Received data")
             if len(data) > 0:
-                ev = Thread(target=self.eventhandler, args=(data, ip_addr))
+                ev = Thread(target=self.eventhandler, args=(
+                    data, ip_addr), name="TCPListener-eventhandler")
                 ev.start()
         conn.close()
 
@@ -1493,6 +1514,7 @@ class Listener(threading.Thread):
     def __init__(self, eventhandler, port=0, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None):
         threading.Thread.__init__(self)
         self.port = port
+        self.name = f"Listener-{port}"
         self.eventhandler = eventhandler
         self.buffer_size = buffer_size
 
@@ -1507,8 +1529,8 @@ class Listener(threading.Thread):
             self.status_eventhandler = status_eventhandler
             self.monitoring_interval = monitoring_interval
             self.last_time_recv = datetime.utcnow()
-            self.status_monitor_thread = _thread.start_new_thread(
-                self.StatusMonitor, ())
+            self.status_monitor_thread = Thread(
+                target=self.StatusMonitor, args=(), name='Listener.status_monitor').start()
 
         self.start()
 
@@ -1531,7 +1553,8 @@ class Listener(threading.Thread):
             if len(data) > 0:
                 if print_log_connections:
                     print("received buffer")
-                ev = Thread(target=self.eventhandler, args=(data, ip_addr))
+                ev = Thread(target=self.eventhandler, args=(
+                    data, ip_addr), name="Listener-eventhandler")
                 ev.start()
             else:
                 if print_log_connections:
@@ -1597,6 +1620,7 @@ class Listener2(threading.Thread):
     def __init__(self, eventhandler, port=0, buffer_size=def_buffer_size):
         threading.Thread.__init__(self)
         self.port = port
+        self.name = f"Listener2-{port}"
         self.eventhandler = eventhandler
         self.buffer_size = buffer_size
 
@@ -1628,7 +1652,8 @@ class Listener2(threading.Thread):
             if print_log_connections:
                 print("Received data")
             if len(data) > 0:
-                ev = Thread(target=self.eventhandler, args=(data, ip_addr))
+                ev = Thread(target=self.eventhandler, args=(
+                    data, ip_addr), name="Listener2-eventhandler")
                 ev.start()
 
         # _thread.start_new_thread(eventhandler, (data, peerID))

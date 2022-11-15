@@ -12,8 +12,8 @@ and then run this script.
 import IPFS_DataTransmission
 import IPFS_API
 
-# replace QmHash with your peer's IPFS ID
-peerID = "QmHash"
+# insert your peer's IPFS ID here
+peerID = ""
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
 IPFS_API.FindPeer(peerID)

@@ -15,7 +15,6 @@ def NewConvHandler(conversation_name, peerID):
     print("Joining a new conversation:", conversation_name)
 
     def OnMessageReceived(conversation, message):
-        return
         """Eventhandler for when the other peer says something in the conversation."""
         print(f"Received message on {conversation.conversation_name}:", message.decode(
             "utf-8"))
@@ -26,7 +25,8 @@ def NewConvHandler(conversation_name, peerID):
         print("Received file", filepath)
 
     conv = IPFS_DataTransmission.Conversation()
-    conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived, OnFileReceived, dir="/home/ubuntu-vm/Desktop")
+    conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived,
+              OnFileReceived, dir="/home/ubuntu-vm/Desktop")
     print("Waiting for file...")
     data = conv.ListenForFile(60)
     if data:
@@ -44,8 +44,7 @@ conv_lis = IPFS_DataTransmission.ListenForConversations(
     "general_listener", NewConvHandler)
 print("Set up listener")
 # endless loop to stop program from terminating
-while True:
-    time.sleep(1)
+input()
 
 # when you no longer need to listen for incoming conversations, clean up resources:
 conv_lis.Terminate()

@@ -15,7 +15,7 @@ from Cryptem import Crypt
 
 crypt = Crypt("mypassword")
 
-# replace QmHash with your peer's IPFS ID
+# insert your peer's IPFS ID here
 peerID = ""
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
