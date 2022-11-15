@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.3.9 (2022-11-15)
+IPFS_DataTransmission: fixed thread termination bug in Conversation (up to this point not all threads belonging to Conversation would be stopped when calling Conversation.Terminate(), leaving unused background threads open)
+
 ## v0.3.8
 IPFS_API.FindProviders(cid): newly added function which returns a list of peers who provide the file with the given CID (including onesself)
 

@@ -7,6 +7,7 @@ after reading the instructions in that script,
 and of course make sure IPFS is running on both computers first.
 """
 
+import threading
 import time
 
 import IPFS_DataTransmission
@@ -15,7 +16,7 @@ import IPFS_DataTransmission
 # --OPTIONAL--
 def ReceivingFileProgress(peer, file, filesize, progress):
     """Eventhandler which reports progress updates while receiving a file."""
-    print(f"Receiving a file '{file}' from {peer}. {progress}")
+    print(f"Receiving a file '{file}' from {peer}. {round(progress*100)}%")
 # ------------
 
 
@@ -30,9 +31,6 @@ def OnDataReceived(peer, file, metadata):
 file_receiver = IPFS_DataTransmission.ListenForFileTransmissions(
     "my_apps_filelistener", OnDataReceived, ReceivingFileProgress)
 
-# endless loop to stop program from terminating
-while(True):
-    time.sleep(1)
-
+a = input("Press any key to exit...")
 # when you no longer need to listen for incoming files, clean up resources:
 file_receiver.Terminate()

@@ -13,7 +13,7 @@ import IPFS_DataTransmission
 import IPFS_API
 
 
-# replace QmHash with your peer's IPFS ID
+# insert your peer's IPFS ID here
 peerID = ""
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
@@ -24,14 +24,14 @@ def OnMessageReceived(conversation, message):
     """Eventhandler for when the other peer says something in the conversation."""
     print(f"Received message on {conversation.conversation_name}:", message.decode(
         "utf-8"))
-    if message.decode() == "Bye!":
-        conv.Say("Wait!".encode('utf-8'))
-        conv.Say("This is so cool!".encode('utf-8'))
-        conv.Say("Whatever then...".encode('utf-8'))
+    if message.decode() == "Seeya!":
+        conversation.Say("Wait!".encode('utf-8'))
+        # conversation.Say("This is so cool!".encode('utf-8'))
+        # conversation.Say("Whatever then...".encode('utf-8'))
 
-        conv.Say("Bye!".encode('utf-8'))
-        data = conv.Listen(timeout=5)
-        conv.Close()
+        conversation.Say("Bye!".encode('utf-8'))
+        data = conversation.Listen(timeout=5)
+        conversation.Close()
 
 
 # Starting a conversation with name "test-con",
@@ -44,5 +44,5 @@ print("Peer joined conversation.")
 time.sleep(1)
 conv.Say("Hello there!".encode('utf-8'))
 
-while True:
-    time.sleep(1)
+time.sleep(30)
+conv.Terminate()
