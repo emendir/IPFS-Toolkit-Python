@@ -7,6 +7,7 @@ after reading the instructions in that script,
 and of course make sure IPFS is running on both computers first.
 """
 
+import threading
 import time
 import IPFS_DataTransmission
 
@@ -19,9 +20,12 @@ def NewConvHandler(conversation_name, peerID):
         """Eventhandler for when the other peer says something in the conversation."""
         print(f"Received message on {conversation.conversation_name}:", message.decode(
             "utf-8"))
+        if message.decode("utf-8") == "Hello there!":
+            conversation.Say("Seeya!".encode())
         if message.decode("utf-8") == "Bye!":
             conversation.Close()
-        conv.Say("Bye!".encode("utf-8"))
+        else:
+            conversation.Say("I dare say!".encode("utf-8"))
 
     conv = IPFS_DataTransmission.Conversation()
     conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived)
@@ -34,8 +38,7 @@ conv_lis = IPFS_DataTransmission.ListenForConversations(
     "general_listener", NewConvHandler)
 print("Set up listener")
 # endless loop to stop program from terminating
-while True:
-    time.sleep(1)
+input()
 
 # when you no longer need to listen for incoming conversations, clean up resources:
 conv_lis.Terminate()
