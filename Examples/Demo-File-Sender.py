@@ -8,12 +8,13 @@ paste the other's IPFS ID in the peerID variable below and specify a file to upl
 and then run this script.
 """
 
+import time
 import IPFS_DataTransmission
 import IPFS_API
 import os
 
-# replace QmHash with your peer's IPFS ID
-peerID = "QmHash"
+# insert your peer's IPFS ID here
+peerID = ""
 
 # insert the path of the file to transmit here
 filepath = ""
