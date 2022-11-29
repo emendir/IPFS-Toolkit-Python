@@ -48,7 +48,7 @@ print("Listening for reply...")
 data = conv.Listen()
 print("Peer replied: ", data)
 conv.Say("Bye!".encode('utf-8'))
-data = conv.Listen(timeout=5)
+data = conv.Listen(timeout=200)
 if data:
     print("Received data: ", data)
 else:
