@@ -327,12 +327,8 @@ listen = ListenOnPort
 
 
 def ForwardFromPortToPeer(protocol: str, port, peerID):
-    try:
-        http_client.p2p.forward("/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
-                                str(port), "/p2p/" + peerID)
-        return True     # signal success
-    except:
-        return False    # signal failure
+    http_client.p2p.forward("/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
+                            str(port), "/p2p/" + peerID)
 
 
 def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):

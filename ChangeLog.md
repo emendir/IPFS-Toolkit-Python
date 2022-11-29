@@ -1,6 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.4.0
+- IPFS_DataTransmission: All functions now throw exceptions on failure instead of quietly returning False
+- IPFS_API: ForwardFromPortToPeer now throws exceptions on failure instead of quietly returning False
+
 ## v0.3.9 (2022-11-15)
 IPFS_DataTransmission: fixed thread termination bug in Conversation (up to this point not all threads belonging to Conversation would be stopped when calling Conversation.Terminate(), leaving unused background threads open)
 

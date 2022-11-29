@@ -28,7 +28,7 @@ def NewConvHandler(conversation_name, peerID):
     conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived,
               OnFileReceived, dir="/home/ubuntu-vm/Desktop")
     print("Waiting for file...")
-    data = conv.ListenForFile(60)
+    data = conv.ListenForFile(200)
     if data:
         file = data['filepath']
         metadata = data['metadata']
