@@ -23,10 +23,12 @@ def NewConvHandler(conversation_name, peerID):
 
     def OnFileReceived(conversation, filepath, metadata):
         print("Received file", filepath)
+    def ProgressHandler(progress):
+        print(str(round(progress*100))+"%")
 
     conv = IPFS_DataTransmission.Conversation()
     conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived,
-              OnFileReceived, dir="/home/ubuntu-vm/Desktop")
+              OnFileReceived, file_progress_callback=ProgressHandler, dir="/home/ubuntu-vm/Desktop")
     print("Waiting for file...")
     data = conv.ListenForFile(200)
     if data:
