@@ -5,7 +5,7 @@ Configure IPFS to enable all this:
 ipfs config --json Experimental.Libp2pStreamMounting true
 """
 import shutil
-from queue import Queue
+from queue import Queue, Empty as QueueEmpty
 import socket
 import threading
 from threading import Thread, Event
@@ -65,7 +65,8 @@ def TransmitData(
 
     Usage:
         # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
-        success = TransmitData("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")
+        success = TransmitData("data to transmit".encode(
+            "utf-8"), "Qm123456789", "applicationNo2")
 
     Parameters:
         data:bytearray: the data to be transmitted to the receiver
@@ -328,7 +329,8 @@ def StartConversation(conversation_name,
         def OnReceive(conversation, data):
             print(data.decode("utf-8"))
 
-        conversation = StartConversation("test", "QmHash", "conv listener", OnReceive)
+        conversation = StartConversation(
+            "test", "QmHash", "conv listener", OnReceive)
         conversation.Say("Hello there!".encode())
 
         # The other peer must have a conversation listener named "conv listener" running, e.g. via:
@@ -378,7 +380,8 @@ def ListenForConversations(conv_name, eventhandler):
             # create Conversation object
             conv = IPFS_DataTransmission.Conversation()
             # join the conversation with the other peer
-            conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived)
+            conv.Join(conversation_name, peerID,
+                      conversation_name, OnMessageReceived)
             print("joined")
 
             # Start communicating with other peer
@@ -422,6 +425,7 @@ class Conversation:
                 (can be used as an alternative to the event handler which is
                 optionally specified in the Start() or Join() methods)
     """
+    peerID = ""
     # file_progress_callback = None
     data_received_eventhandler = None
     file_eventhandler = None
@@ -432,6 +436,8 @@ class Conversation:
     __encryption_callback = None
     __decryption_callback = None
     _terminate = False
+
+    last_coms_time = None
 
     def __init__(self):
         self.started = Event()
@@ -518,6 +524,7 @@ class Conversation:
                      self._transmission_send_timeout_sec,
                      self._transmission_request_max_retries
                      )
+        self.last_coms_time = datetime.utcnow()
         if print_log_conversations:
             print(conversation_name + ": sent conversation request")
         self.started.wait()
@@ -579,6 +586,7 @@ class Conversation:
             'utf-8')) + bytearray([255]) + bytearray(conversation_name.encode('utf-8'))
         self.conversation_started = True
         TransmitData(data, peerID, others_trsm_listener)
+        self.last_coms_time = datetime.utcnow()
         if print_log_conversations:
             print(conversation_name + ": Joined conversation "
                   + others_trsm_listener)
@@ -596,6 +604,7 @@ class Conversation:
         if not data:
             print("CONV.HEAR: RECEIVED NONE")
             return
+        self.last_coms_time = datetime.utcnow()
 
         if not self.conversation_started:
             info = SplitBy255(data)
@@ -658,6 +667,8 @@ class Conversation:
             self.Listen()
 
     def FileReceived(self, peer, filepath, metadata):
+        self.last_coms_time = datetime.utcnow()
+
         if print_log_conversations:
             print(f"{self.conversation_name}: Received file: ", filepath)
         self.file_queue.put({'filepath': filepath, 'metadata': metadata})
@@ -665,27 +676,77 @@ class Conversation:
             Thread(target=self.file_eventhandler, args=(self, filepath, metadata),
                    name='Conversation.file_eventhandler').start()
 
-    def ListenForFile(self, timeout=None, timeout_exception=False):
+    def ListenForFile(self, abs_timeout=None, no_coms_timeout=None, timeout_exception=False):
         """
         Parameters:
-            int timeout: how many seconds to wait until giving up and
-               returning None or raising an exception
+            int abs_timeout: how many seconds to wait for file reception to 
+                finish until giving up and returning None or raising an exception
+            int no_coms_timeout: how many seconds of no signal from peer
+                until giving up and returning None or raising an exception
             bool timeout_exception: whether to raise an exception or
                quietly return None when timeout is reached.
         """
-        if not timeout:
+        start_time = datetime.utcnow()
+        if not (abs_timeout or no_coms_timeout):    # if no timeouts are specified
             data = self.file_queue.get()
-        else:
-            try:
-                data = self.file_queue.get(timeout=timeout)
-            except:  # timeout reached
-                raise ListenTimeout("Didn't receive any files.")
+        else:   # timeouts are specified
+            while True:
+                # calculate timeouts relative to current time
+                if no_coms_timeout:
+                    # time left till next coms timeout check
+                    _no_coms_timeout = no_coms_timeout - \
+                        (datetime.utcnow() - self.last_coms_time).total_seconds()
+                if abs_timeout:
+                    # time left till absolute timeout would be reached
+                    _abs_timeout = abs_timeout - \
+                        (datetime.utcnow() - start_time).total_seconds()
+
+                # Choose the timeout we need to wait for
+                timeout = None
+                if not abs_timeout:
+                    timeout = _no_coms_timeout
+                elif not no_coms_timeout:
+                    timeout = _abs_timeout
+                else:
+                    timeout = min(_no_coms_timeout, _abs_timeout)
+                try:
+                    data = self.file_queue.get(timeout=timeout)
+                    break
+                except QueueEmpty:  # qeue timeout reached
+                    # check if any of the user's timeouts were reached
+                    if abs_timeout and (datetime.utcnow() - start_time).total_seconds() > abs_timeout:
+                        raise ListenTimeout("Didn't receive any files.")
+                    elif (datetime.utcnow() - self.last_coms_time).total_seconds() > no_coms_timeout:
+                        raise CommunicationTimeout(
+                            "Communication timeout reached while waiting for file.")
         if data:
             return data
         else:
             if print_log_conversations:
                 print("Conv.FileListen: received nothign restarting Event Wait")
             self.ListenForFile(timeout)
+
+    def OnFileProgressReceived(peerID: str, filename: str, filesize: str, progress):
+        self.last_coms_time = datetime.utcnow()
+
+        if self.progress_handler:
+            # run callback on a new thread, specifying only as many parameters as the callback wants
+            Thread(target=CallProgressCallBack,
+                   args=(self.progress_handler,
+                         peerID,
+                         filename,
+                         filesize,
+                         progress),
+                   name='Conversation.progress_handler'
+                   ).start()
+
+            # if len(signature(self.progress_handler).parameters) == 1:
+            #     self.file_progress_callback(progress)
+            # elif len(signature(self.progress_handler).parameters) == 2:
+            #     self.file_progress_callback(filename, progress)
+            # elif len(signature(self.progress_handler).parameters) == 3:
+            #     self.file_progress_callback(
+            #         filename, filesize, progress)
 
     def Say(self,
             data,
@@ -697,7 +758,8 @@ class Conversation:
 
         Usage:
             # transmits "data to transmit" to the computer with the Peer ID "Qm123456789", for the IPFS_DataTransmission listener called "applicationNo2" at a buffersize of 1024 bytes
-            success = conv.Say("data to transmit".encode("utf-8"), "Qm123456789", "applicationNo2")
+            success = conv.Say("data to transmit".encode(
+                "utf-8"), "Qm123456789", "applicationNo2")
 
         Parameters:
             bytearray data: the data to be transmitted to the receiver
@@ -716,7 +778,10 @@ class Conversation:
             if print_log_conversations:
                 print("Conv.Say: encrypting message")
             data = self.__encryption_callback(data)
-        return TransmitData(data, self.peerID, self.others_trsm_listener, timeout_sec, max_retries)
+        TransmitData(data, self.peerID, self.others_trsm_listener,
+                     timeout_sec, max_retries)
+        self.last_coms_time = datetime.utcnow()
+        return True
 
     def TransmitFile(self,
                      filepath,
@@ -736,6 +801,7 @@ class Conversation:
         if print_log_conversations:
             print("Transmitting file to ",
                   f"{self.others_trsm_listener}:files")
+
         return TransmitFile(
             filepath,
             self.peerID,
@@ -780,7 +846,8 @@ class ConversationListener:
             # create Conversation object
             conv = IPFS_DataTransmission.Conversation()
             # join the conversation with the other peer
-            conv.Join(conversation_name, peerID, conversation_name, OnMessageReceived)
+            conv.Join(conversation_name, peerID,
+                      conversation_name, OnMessageReceived)
             print("joined")
 
             # Start communicating with other peer
@@ -1029,15 +1096,24 @@ class FileTransmitter:
 
     def CallProgressCallBack(self, progress):
         if self.progress_handler:
-            if len(signature(self.progress_handler).parameters) == 1:
-                Thread(target=self.progress_handler, args=(progress,),
-                       name='Conversation.progress_handler').start()
-            elif len(signature(self.progress_handler).parameters) == 2:
-                Thread(target=self.progress_handler, args=(self.filename, progress),
-                       name='Conversation.progress_handler').start()
-            elif len(signature(self.progress_handler).parameters) == 3:
-                Thread(target=self.progress_handler,
-                       args=(self.filename, self.filesize, progress), name='Conversation.progress_handler').start()
+            # run callback on a new thread, specifying only as many parameters as the callback wants
+            Thread(target=CallProgressCallBack,
+                   args=(self.progress_handler,
+                         self.peerID,
+                         self.filename,
+                         self.filesize,
+                         progress),
+                   name='Conversation.progress_handler'
+                   ).start()
+            # if len(signature(self.progress_handler).parameters) == 1:
+            #     Thread(target=self.progress_handler, args=(progress,),
+            #            name='Conversation.progress_handler').start()
+            # elif len(signature(self.progress_handler).parameters) == 2:
+            #     Thread(target=self.progress_handler, args=(self.filename, progress),
+            #            name='Conversation.progress_handler').start()
+            # elif len(signature(self.progress_handler).parameters) == 3:
+            #     Thread(target=self.progress_handler,
+            #            args=(self.filename, self.filesize, progress), name='Conversation.progress_handler').start()
 
     def Hear(self, conv, data):
         if print_log_files:
@@ -1100,8 +1176,16 @@ class FileTransmissionReceiver:
                     print("FileReception: " + self.filename
                           + ": ready to receive file")
                 if self.progress_handler:
-                    Thread(target=self.progress_handler, args=(self.conv.peerID, self.filename,
-                           self.filesize, 0), name='FileTransmissionReceiver.progress_handler').start()
+                    # run callback on a new thread, specifying only as many parameters as the callback wants
+                    Thread(target=CallProgressCallBack,
+                           args=(self.progress_handler,
+                                 self.conv.peerID,
+                                 self.filename,
+                                 self.filesize,
+                                 0
+                                 ),
+                           name='FileTransmissionReceiver.progress'
+                           ).start()
 
                 if(self.filesize == 0):
                     self.Finish()
@@ -1115,8 +1199,16 @@ class FileTransmissionReceiver:
             self.writtenbytes += len(data)
 
             if self.progress_handler:
-                Thread(target=self.progress_handler,
-                       args=(self.conv.peerID, self.filename, self.filesize, self.writtenbytes / self.filesize), name='FileTransmissionReceiver.progress').start()
+                # run callback on a new thread, specifying only as many parameters as the callback wants
+                Thread(target=CallProgressCallBack,
+                       args=(self.progress_handler,
+                             self.conv.peerID,
+                             self.filename,
+                             self.filesize,
+                             self.writtenbytes / self.filesize
+                             ),
+                       name='FileTransmissionReceiver.progress'
+                       ).start()
 
             if print_log_files:
                 print("FileTransmission: " + self.filename
@@ -1126,7 +1218,8 @@ class FileTransmissionReceiver:
                 self.Finish()
             elif self.writtenbytes > self.filesize:
                 self.writer.close()
-                raise UnreadableReply("Something weird happened, filesize is larger than expected.")
+                raise UnreadableReply(
+                    "Something weird happened, filesize is larger than expected.")
 
     def Finish(self):
         self.writer.close()
@@ -1147,6 +1240,20 @@ class FileTransmissionReceiver:
 
     def Terminate(self):
         self.conv.Terminate()
+
+
+def CallProgressCallBack(callback, peerID, filename, filesize, progress):
+    """Calls the specified callback function with part of all of the rest of
+    the parameters, depending on how many parameters the callback takes.
+    The callback can take between 1 and 4 parameters"""
+    if len(signature(callback).parameters) == 1:
+        callback(progress)
+    elif len(signature(callback).parameters) == 2:
+        callback(filename, progress)
+    elif len(signature(callback).parameters) == 3:
+        callback(filename, filesize, progress)
+    elif len(signature(callback).parameters) == 4:
+        callback(peerID, filename, filesize, progress)
 
 
 # ----------IPFS Technicalitites-------------------------------------------

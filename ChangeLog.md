@@ -4,6 +4,8 @@ This library is still under development and is currently being tested in various
 ## v0.4.0
 - IPFS_DataTransmission: All functions now throw exceptions on failure instead of quietly returning False
 - IPFS_API: ForwardFromPortToPeer now throws exceptions on failure instead of quietly returning False
+- IPFS_DataTransmission.Converstion.ListenForFile: two timeout parameters: abs_timeout, no_coms_timeout
+- IPFS_DataTransmission.FileTransmissionReceiver: progress handler now also supports 1-4 parameters
 
 ## v0.3.9 (2022-11-15)
 IPFS_DataTransmission: fixed thread termination bug in Conversation (up to this point not all threads belonging to Conversation would be stopped when calling Conversation.Terminate(), leaving unused background threads open)
