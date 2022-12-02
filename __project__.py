@@ -1,2 +1,2 @@
 project_name = "IPFS-Toolkit"
-version = "0.3.9"
+version = "0.4.0"

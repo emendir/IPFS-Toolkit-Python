@@ -4,6 +4,7 @@ To use it you must have IPFS running on your computer.
 Configure IPFS to enable all this:
 ipfs config --json Experimental.Libp2pStreamMounting true
 """
+from pdb import set_trace as debug
 import shutil
 from queue import Queue, Empty as QueueEmpty
 import socket
@@ -511,7 +512,7 @@ class Conversation:
         self.file_listener = ListenForFileTransmissions(
             f"{conversation_name}:files",
             self.FileReceived,
-            progress_handler=self.file_progress_callback,
+            progress_handler=self.OnFileProgressReceived,
             dir=dir,
             encryption_callbacks=encryption_callbacks
         )
@@ -575,7 +576,7 @@ class Conversation:
                                                )
         self.file_listener = ListenForFileTransmissions(
             f"{conversation_name}:files", self.FileReceived,
-            progress_handler=self.file_progress_callback,
+            progress_handler=self.OnFileProgressReceived,
             dir=dir,
             encryption_callbacks=encryption_callbacks
         )
@@ -726,13 +727,12 @@ class Conversation:
                 print("Conv.FileListen: received nothign restarting Event Wait")
             self.ListenForFile(timeout)
 
-    def OnFileProgressReceived(peerID: str, filename: str, filesize: str, progress):
+    def OnFileProgressReceived(self, peerID: str, filename: str, filesize: str, progress):
         self.last_coms_time = datetime.utcnow()
-
-        if self.progress_handler:
+        if self.file_progress_callback:
             # run callback on a new thread, specifying only as many parameters as the callback wants
             Thread(target=CallProgressCallBack,
-                   args=(self.progress_handler,
+                   args=(self.file_progress_callback,
                          peerID,
                          filename,
                          filesize,
@@ -802,12 +802,24 @@ class Conversation:
             print("Transmitting file to ",
                   f"{self.others_trsm_listener}:files")
 
+        def ProgressHandler(peerID: str, filename: str, filesize: str, progress):
+            self.last_coms_time = datetime.utcnow()
+            if progress_handler:
+                # run callback on a new thread, specifying only as many parameters as the callback wants
+                Thread(target=CallProgressCallBack,
+                       args=(progress_handler,
+                             peerID,
+                             filename,
+                             filesize,
+                             progress),
+                       name='Conversation.progress_handler'
+                       ).start()
         return TransmitFile(
             filepath,
             self.peerID,
             f"{self.others_trsm_listener}:files",
             metadata,
-            progress_handler,
+            ProgressHandler,
             encryption_callbacks=(self.__encryption_callback,
                                   self.__decryption_callback),
             block_size=block_size,
