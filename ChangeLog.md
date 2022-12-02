@@ -1,11 +1,12 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
-## v0.4.0
+## v0.4.0 (2022-12-02)
 - IPFS_DataTransmission: All functions now throw exceptions on failure instead of quietly returning False
 - IPFS_API: ForwardFromPortToPeer now throws exceptions on failure instead of quietly returning False
-- IPFS_DataTransmission.Converstion.ListenForFile: two timeout parameters: abs_timeout, no_coms_timeout
-- IPFS_DataTransmission.FileTransmissionReceiver: progress handler now also supports 1-4 parameters
+- IPFS_DataTransmission.Conversation.ListenForFile: two timeout parameters: abs_timeout, no_coms_timeout
+- IPFS_DataTransmission.Conversation.TransmitFile: progress callback now supports 1-4 parameters
+- IPFS_DataTransmission.FileTransmissionReceiver: progress callback now supports 1-4 parameters
 
 ## v0.3.9 (2022-11-15)
 IPFS_DataTransmission: fixed thread termination bug in Conversation (up to this point not all threads belonging to Conversation would be stopped when calling Conversation.Terminate(), leaving unused background threads open)

@@ -1,10 +1,6 @@
 FileTransmission:
   abortion
 
-Error System
-
-Test that Conversation and Conversation.FileTransmission use transmission timeouts and max_retries specified in initialisation paramaters
-
 include encryption parameters in TransmitData?
 add more realistic encryption scenario to Encryption example
 
