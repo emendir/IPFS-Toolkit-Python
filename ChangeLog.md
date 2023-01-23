@@ -1,6 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+
+## v0.4.1 (2023-01-23)
+- IFPS_API: added Download(cid, path) function which can download IPFS file and folders. The DownloadFile(ID, path) function is now deprecated.
+
 ## v0.4.0 (2022-12-02)
 - IPFS_DataTransmission: All functions now throw exceptions on failure instead of quietly returning False
 - IPFS_API: ForwardFromPortToPeer now throws exceptions on failure instead of quietly returning False
