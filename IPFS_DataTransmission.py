@@ -99,8 +99,8 @@ def TransmitData(
                 print("Sent transmission request to " + str(req_lis_name))
 
             # reply = sock.recv(def_buffer_size)
-            reply = recv_all(sock, timeout_sec)
-            # recv_all
+            reply = recv_timeout(sock, timeout_sec)
+            # recv_timeout
             sock.close()
             del sock
             CloseSendingConnection(peerID, req_lis_name)
@@ -258,7 +258,7 @@ class TransmissionListener:
         conn, addr = sock.accept()
         if print_log_transmissions:
             print("received connection response fro actual transmission")
-        data = recv_all(conn)
+        data = recv_timeout(conn)
         conn.send("Finished!".encode())
         # conn.close()
         Thread(target=eventhandler, args=(data, peerID),
@@ -280,7 +280,7 @@ class TransmissionListener:
         self.socket.listen()
         while True:
             conn, addr = self.socket.accept()
-            data = recv_all(conn)
+            data = recv_timeout(conn)
             if self.terminate:
                 # conn.sendall(b"Righto.")
                 conn.close()
@@ -300,7 +300,7 @@ class TransmissionListener:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect(("127.0.0.1", self.port))
             sock.sendall("close".encode())
-            # recv_all(sock)
+            # recv_timeout(sock)
             sock.close()
             del sock
         except:
@@ -1601,7 +1601,7 @@ def SplitBy255(bytes):
     return result
 
 
-def recv_all(the_socket, timeout=2):
+def recv_timeout(the_socket, timeout=2):
     # make socket non blocking
     the_socket.setblocking(0)
 

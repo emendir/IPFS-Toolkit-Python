@@ -4,6 +4,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+import shutil
 import tempfile
 import sys
 from subprocess import Popen, PIPE
@@ -217,12 +218,27 @@ def Unpin(cid: str):
 
 
 def DownloadFile(ID, path=""):
+        print("IPFS_API: WARNING: deprecated. Use Download() instead.")
     data = http_client.cat(ID)
     if path != "":
         file = open(path, "wb")
         file.write(data)
         file.close()
     return data
+
+
+def Download(cid, path=""):
+    # create temporary download directory
+    tempdir = tempfile.mkdtemp()
+
+    # download and save file/folder to temporary directory
+    http_client.get(cid=cid, target=tempdir)
+
+    # move file/folder from temporary directory to desired path
+    shutil.move(os.path.join(tempdir, cid), path)
+
+    # cleanup temporary directory
+    shutil.rmtree(tempdir)
 
 
 def CatFile(ID):
@@ -269,7 +285,7 @@ def ResolveIPNS_Key(ipns_id, nocache=False):
 
 
 def DownloadIPNS_Record(name, path="", nocache=False):
-    return DownloadFile(ResolveIPNS_Key(name, nocache=nocache), path)
+    return Download(ResolveIPNS_Key(name, nocache=nocache), path)
 
 
 def CatIPNS_Record(name, nocache=False):
