@@ -218,7 +218,7 @@ def Unpin(cid: str):
 
 
 def DownloadFile(ID, path=""):
-        print("IPFS_API: WARNING: deprecated. Use Download() instead.")
+    print("IPFS_API: WARNING: deprecated. Use Download() instead.")
     data = http_client.cat(ID)
     if path != "":
         file = open(path, "wb")

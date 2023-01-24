@@ -6,6 +6,10 @@ DataTransmission: Terminate properly on error
 include encryption parameters in TransmitData?
 add more realistic encryption scenario to Encryption example
 
-IPFS_CLI: docs
 
 make parameter names more consistent (e.g. ID, cid , peerID)
+
+# Documentation
+IPFS_CLI: docs
+proper docstrings everywhere
+API reference
