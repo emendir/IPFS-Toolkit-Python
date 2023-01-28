@@ -13,3 +13,5 @@ make parameter names more consistent (e.g. ID, cid , peerID)
 IPFS_CLI: docs
 proper docstrings everywhere
 API reference
+
+rename IPFS_API.CatFile to IPFS_API.ReadFile

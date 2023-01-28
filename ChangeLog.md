@@ -1,7 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
-## v0.4.2 (2023-01-24)
+## v0.4.4 (2023-01-28)
+- IPFS_API.TopicPeers(): new function to get the number of peers we are connected to on a pubsub topic
+
+## v0.4.3 (2023-01-24)
 bugfix
 
 ## v0.4.2 (2023-01-23)
