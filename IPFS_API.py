@@ -22,7 +22,7 @@ try:
     import base64
     import ipfshttpclient2 as ipfshttpclient
     from requests.exceptions import ConnectionError
-    from base64 import urlsafe_b64decode
+    from base64 import urlsafe_b64decode, urlsafe_b64encode
     http_client = ipfshttpclient.client.Client()
     LIBERROR = False
 except Exception as e:
@@ -117,10 +117,7 @@ class PubsubListener():
                                 return
                             data = {
                                 "senderID": message["from"],
-                                "data": self.__DecodeBase64URL(message["data"]),
-                                # "topicIDs": [print(x) for x in message["topicIDs"]],
-                                # "seqno": self.__DecodeBase64URL(message["seqno"])
-
+                                "data": _DecodeBase64URL(message["data"]),
                             }
 
                             _thread.start_new_thread(
@@ -138,17 +135,6 @@ class PubsubListener():
             except ConnectionError as e:
                 print(f"IPFS API Pubsub: restarting sub {self.topic}")
         self.__listening = False
-
-    def __DecodeBase64URL(self, data: str):
-        """Performs the URL-Safe multibase decoding required by the new pubsub function (since IFPS v0.11.0) on strings"""
-        # print(data)
-        data = str(data)[1:].encode()
-        missing_padding = len(data) % 4
-        if missing_padding:
-            data += b'=' * (4 - missing_padding)
-        # print(data.decode())
-        # print(urlsafe_b64decode(data))
-        return urlsafe_b64decode(data)
 
     def Listen(self):
         self.terminate = False
@@ -184,6 +170,13 @@ def UnSubscribeFromTopic(topic, eventhandler):
             break
         index = index + 1
     subscriptions.pop(index)    # remove the subscription from the list of subscriptions
+
+
+def TopicPeers(topic: str):
+    """
+    Returns the list of peers we are connected to on the specified pubsub topic
+    """
+    return http_client.pubsub.peers(topic=_EncodeBase64URL(topic.encode()))["Strings"]
 
 
 def UploadFile(filename: str):
@@ -380,6 +373,28 @@ def FindProviders(cid):
                 if resp['ID'] and resp['ID'] not in peers:
                     peers.append(resp['ID'])
     return peers
+
+
+def _DecodeBase64URL(data: str):
+    """Performs the URL-Safe multibase decoding required by some functions (since IFPS v0.11.0) on strings"""
+    if isinstance(data, bytes):
+        data = data.decode()
+    data = str(data)[1:].encode()
+    missing_padding = len(data) % 4
+    if missing_padding:
+        data += b'=' * (4 - missing_padding)
+    return urlsafe_b64decode(data)
+
+
+def _EncodeBase64URL(data: bytearray):
+    """Performs the URL-Safe multibase encoding required by some functions (since IFPS v0.11.0) on strings"""
+    if isinstance(data, str):
+        data = data.encode()
+    data = urlsafe_b64encode(data)
+    while data[-1] == 61 and data[-1]:
+        data = data[:-1]
+    data = b'u'+data
+    return data
 
 
 if autostart:
