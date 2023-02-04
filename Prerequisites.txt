@@ -1,4 +1,4 @@
-To use the IPFS_DataTransmission, the following software must be installed on your computer:
+To use the ipfs_datatransmission, the following software must be installed on your computer:
 - IPFS (Desktop or CLI, doesn't matter.
     https://docs.ipfs.io/install/
 - Enable "Libp2pStreamMounting" in IPFS:

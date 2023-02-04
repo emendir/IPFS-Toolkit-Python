@@ -148,7 +148,7 @@ class Section(base.SectionBase):
 
     @base.returns_no_item
     def publish_old(self, topic: str, payload: str, **kwargs: base.CommonArgs):
-        """Publish a message to a given pubsub topic
+        """publish a message to a given pubsub topic
         This function is the old version of publish which has been broken since IPFS v0.11.0.
         It has been replaced by 
 

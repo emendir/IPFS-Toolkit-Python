@@ -8,17 +8,17 @@ paste the other's IPFS ID in the peerID variable below,
 and then run this script.
 """
 import time
-import IPFS_DataTransmission
+import ipfs_datatransmission
 
 # insert your peer's IPFS ID here
 peerID = ""
 
 
-def OnBufferReceived(data):
+def on_buffer_received(data):
     print(data)
 
 
-sender = IPFS_DataTransmission.BufferSender(peerID, "buffertest")
+sender = ipfs_datatransmission.BufferSender(peerID, "buffertest")
 while True:
     time.sleep(1)
-    sender.SendBuffer("Hello there!".encode())
+    sender.send_buffer("Hello there!".encode())

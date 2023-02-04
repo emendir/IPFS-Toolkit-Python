@@ -10,17 +10,17 @@ and of course make sure IPFS is running on both computers first.
 
 import threading
 import time
-import IPFS_DataTransmission
+import ipfs_datatransmission
 
 
-def OnReceive(data, PeerID):
+def on_receive(data, PeerID):
     """Eventhandler to handle received data"""
     print("Received data transmission!")
     print(data.decode("utf-8"))
 
 
 # starting to listen for incoming data transmissions
-listener = IPFS_DataTransmission.ListenForTransmissions("test application", OnReceive)
+listener = ipfs_datatransmission.listen_for_transmissions("test application", on_receive)
 
 a = input("Press any key to exit...")
-listener.Terminate()
+listener.terminate()

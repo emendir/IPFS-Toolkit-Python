@@ -298,7 +298,7 @@ class Base(base.ClientBase):
 			A filepath, path-object, file descriptor or open file object the
 			file or directory to add
 		recursive
-			Upload files in subdirectories, if *file* refers to a directory?
+			upload files in subdirectories, if *file* refers to a directory?
 		pattern
 			A :mod:`glob` pattern,
 			compiled regular expression object or arbitrary matcher used to limit
@@ -324,7 +324,7 @@ class Base(base.ClientBase):
 		chunker
 			The chunking algorithm to use
 		pin
-			Pin this object when adding
+			pin this object when adding
 		raw_leaves
 			Use raw blocks for leaf nodes. (experimental). (Default: ``True``
 			when *nocopy* is True, or ``False`` otherwise)

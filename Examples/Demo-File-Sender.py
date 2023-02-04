@@ -8,9 +8,8 @@ paste the other's IPFS ID in the peerID variable below and specify a file to upl
 and then run this script.
 """
 
-import time
-import IPFS_DataTransmission
-import IPFS_API
+import ipfs_datatransmission
+import ipfs_api
 import os
 
 # insert your peer's IPFS ID here
@@ -23,18 +22,18 @@ filepath = ""
 metadata = os.path.basename(filepath).encode()
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
-IPFS_API.FindPeer(peerID)
+ipfs_api.find_peer(peerID)
 
 
 # --OPTIONAL--
-def ProgressUpdate(progress):
+def progress_update(progress):
     print(f"sending file ... {round(progress*100)}%")
 # ------------
 
 
 # Transmit the file. The object ft can be referenced for example to check transmission progress
-ft = IPFS_DataTransmission.TransmitFile(
-    filepath, peerID, "my_apps_filelistener", metadata, ProgressUpdate)
+ft = ipfs_datatransmission.transmit_file(
+    filepath, peerID, "my_apps_filelistener", metadata, progress_update)
 if ft:
     print("Started Transmission")
 else:

@@ -2,7 +2,7 @@ import json
 from threading import Thread
 import tempfile
 from subprocess import Popen, PIPE
-from datetime import datetime
+# from datetime import datetime
 
 import stat
 # import urllib.request
@@ -10,14 +10,15 @@ import tarfile
 import os
 import shutil
 import platform
-import IPFS_LNS
+import ipfs_lns
+from base64 import urlsafe_b64decode
 android_distros = ["lineageos", "android"]
 
 ipfs_url = "https://github.com/ipfs/go-ipfs/releases/download/v0.12.2/go-ipfs_v0.12.2_linux-arm64.tar.gz"
 ipfs_zip_path = "go-ipfs_v0.12.2_linux-arm64.tar.gz"
 
 
-def RunCommand(cmd):
+def run_command(cmd):
     if isinstance(cmd, str):
         cmd = cmd.split(" ")
     try:
@@ -32,17 +33,16 @@ def RunCommand(cmd):
 
 
 ipfs_cmd = "ipfs"
-if not RunCommand([ipfs_cmd]):
-    if bool(RunCommand("./ipfs")):
+if not run_command([ipfs_cmd]):
+    if bool(run_command("./ipfs")):
         ipfs_cmd = "./ipfs"
 
 
-def IsDaemonRunning():
+def is_daemon_running():
     try:
         proc = Popen([ipfs_cmd, "swarm", "peers"], stdout=PIPE, stderr=PIPE)
 
         proc.wait()
-        text = ""
         if proc.stderr.readline():
             return False
         else:
@@ -51,23 +51,23 @@ def IsDaemonRunning():
         return
 
 
-def RunDaemon():
+def run_daemon():
     try:
         proc = Popen([ipfs_cmd, "daemon", "--enable-pubsub-experiment"],
                      stdout=PIPE, stdin=PIPE)
         while True:
             data = proc.stdout.read1().decode()
-            if data.strip("\n") == "Daemon is ready" or IsDaemonRunning():
+            if data.strip("\n") == "Daemon is ready" or is_daemon_running():
                 return True
     except:
         return
 
 
-def DownloadIPFS_Binary(downloading_callback=None):
+def download_ipfs_binary(downloading_callback=None):
     global found_ipfs
     global ipfs_cmd
-    if not RunCommand([ipfs_cmd]):
-        if bool(RunCommand("./ipfs")):
+    if not run_command([ipfs_cmd]):
+        if bool(run_command("./ipfs")):
             ipfs_cmd = "./ipfs"
         else:
             if downloading_callback:
@@ -91,36 +91,36 @@ def DownloadIPFS_Binary(downloading_callback=None):
             with tarfile.open(ipfs_zip_path, "r:gz") as tar:
                 safe_tar_extract(tar)
 
-            result = RunCommand("go-ipfs/install.sh")
+            result = run_command("go-ipfs/install.sh")
             if "cannot install" in result and "ipfs" in os.listdir("go-ipfs"):
                 shutil.copy("go-ipfs/ipfs", "ipfs")
                 st = os.stat("ipfs")
                 os.chmod("ipfs", st.st_mode | stat.S_IEXEC)
                 ipfs_cmd = "./ipfs"
-    found_ipfs = bool(RunCommand([ipfs_cmd]))
+    found_ipfs = bool(run_command([ipfs_cmd]))
     if found_ipfs:
         # init ipfs
-        if not RunCommand([ipfs_cmd, "id"]):
-            RunCommand([ipfs_cmd, "init"])
+        if not run_command([ipfs_cmd, "id"]):
+            run_command([ipfs_cmd, "init"])
         # configure ipfs
-        RunCommand(
+        run_command(
             [ipfs_cmd, "config", "--json Experimental.Libp2pStreamMounting", "true"])
         # run ipfs
-        RunDaemon()
+        run_daemon()
 
 
-found_ipfs = bool(RunCommand([ipfs_cmd]))
+found_ipfs = bool(run_command([ipfs_cmd]))
 
 
 if found_ipfs:
-    if not RunCommand([ipfs_cmd, "id"]):
-        RunCommand([ipfs_cmd, "init"])
+    if not run_command([ipfs_cmd, "id"]):
+        run_command([ipfs_cmd, "init"])
 
 
 # Publishes the input data to specified the IPFS PubSub topic
 
 
-def PublishToTopic(topic, data):
+def publish_to_topic(topic, data):
     """Publishes te specified data to the specified IPFS-PubSub topic.
     Parameters:
         topic: str: the name of the IPFS PubSub topic to publish to
@@ -136,9 +136,9 @@ def PublishToTopic(topic, data):
         with tempfile.NamedTemporaryFile() as tp:
             tp.write(data)
             tp.flush()
-            RunCommand([ipfs_cmd, "pubsub", "pub", topic, tp.name])
+            run_command([ipfs_cmd, "pubsub", "pub", topic, tp.name])
     else:
-        RunCommand([ipfs_cmd, "pubsub", "pub", topic, data])
+        run_command([ipfs_cmd, "pubsub", "pub", topic, data])
 
 
 # Listens to the specified IPFS PubSub topic and passes received data to the input eventhandler function
@@ -148,20 +148,20 @@ def PublishToTopic(topic, data):
 
 
 class PubsubListener():
-    terminate = False
+    _terminate = False
     __listening = False
 
     def __init__(self, topic, eventhandler):
         self.topic = topic
         self.eventhandler = eventhandler
-        self.Listen()
+        self.listen()
 
     def _listen(self):
         if self.__listening:
             return
         self.__listening = True
         """blocks the calling thread"""
-        while not self.terminate:
+        while not self._terminate:
             proc = Popen([ipfs_cmd, "pubsub", "sub", self.topic],
                          stdout=PIPE, stdin=PIPE)
             while True:
@@ -169,7 +169,7 @@ class PubsubListener():
                 Thread(target=self.eventhandler, args=(data,)).start()
         self.__listening = False
 
-    def __DecodeBase64URL(self, data: str):
+    def __decode_base64_url(self, data: str):
         """Performs the URL-Safe multibase decoding required by the new pubsub function (since IFPS v0.11.0) on strings"""
         # print(data)
         data = str(data)[1:].encode()
@@ -180,17 +180,17 @@ class PubsubListener():
         # print(urlsafe_b64decode(data))
         return urlsafe_b64decode(data)
 
-    def Listen(self):
-        self.terminate = False
+    def listen(self):
+        self._terminate = False
         thr = Thread(target=self._listen, args=())
         thr.start()
 
-    def Terminate(self):
+    def terminate(self):
         """May let one more pubsub message through"""
-        self.terminate = True
+        self._terminate = True
 
 
-def SubscribeToTopic(topic, eventhandler):
+def subscribe_to_topic(topic, eventhandler):
     """
     Listens to the specified IPFS PubSub topic, calling the eventhandler
     whenever a message is received, passing the message data and its sender
@@ -201,12 +201,12 @@ def SubscribeToTopic(topic, eventhandler):
                             The eventhandler parameter is a dict with the keys 'data' and 'senderID',
                             except when using an older version of IPFS < v0.11.0,
                             in which case only the message is passed as a string.
-    Returns a PubsubListener object which can  be terminated with the .Terminate() method (and restarted with the .Listen() method)
+    Returns a PubsubListener object which can  be terminated with the .terminate() method (and restarted with the .listen() method)
     """
     return PubsubListener(topic, eventhandler)
 
 
-def UnSubscribeFromTopic(topic, eventhandler):
+def unsubscribe_from_topic(topic, eventhandler):
     index = 0
     for subscription in subscriptions:
         if(subscription[0] == topic and subscription[1] == eventhandler):
@@ -217,45 +217,45 @@ def UnSubscribeFromTopic(topic, eventhandler):
     subscriptions.pop(index)
 
 
-def Publish(path: str):
+def publish(path: str):
     """
-    Upload a file or a directory to IPFS.
+    upload a file or a directory to IPFS.
     Returns the Hash of the uploaded file.
     """
-    result = RunCommand([ipfs_cmd, "add", "-r", path]).split("\n")
+    result = run_command([ipfs_cmd, "add", "-r", path]).split("\n")
     while result[-1] == "":
         result.pop(-1)
     return result[-1].split(" ")[1]
 # Downloads the file with the specified ID and saves it with the specified path
 
 
-def Pin(cid: str):
-    RunCommand([ipfs_cmd, "pin", "add", cid])
+def pin(cid: str):
+    run_command([ipfs_cmd, "pin", "add", cid])
 
 
-def Unpin(cid: str):
-    RunCommand([ipfs_cmd, "pin", "rm", cid])
+def unpin(cid: str):
+    run_command([ipfs_cmd, "pin", "rm", cid])
 
 
-def DownloadFile(CID, path=""):
+def download_file(CID, path=""):
     path_option = ""
     if path:
         path_option = f"-o={path}"
-    RunCommand([ipfs_cmd, "get", CID,  path_option])
+    run_command([ipfs_cmd, "get", CID,  path_option])
 
 
-def CatFile(CID):
-    return RunCommand([ipfs_cmd, "cat", CID])
+def read_file(CID):
+    return run_command([ipfs_cmd, "cat", CID])
 
 
-def CreateIPNS_Record(name: str, type: str = "rsa", size: int = 2048):
+def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
 
-    result = RunCommand(
+    result = run_command(
         [ipfs_cmd, "key", "gen", f"--type={type}", f"--size={str(size)}", name])
     return result.strip("\n")
 
 
-def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
+def update_ipns_record_from_hash(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
     """
     Parameters:
         string ttl: Time duration this record should be cached for.
@@ -264,11 +264,11 @@ def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: s
         string lifetime: Time duration that the record will be valid for.
                                 Default: 24h.
     """
-    RunCommand([ipfs_cmd, "name", "publish",
-               f"--key={name}", f"--ttl={ttl}", f"--lifetime={lifetime}", f"/ipfs/{cid}"])
+    run_command([ipfs_cmd, "name", "publish",
+                 f"--key={name}", f"--ttl={ttl}", f"--lifetime={lifetime}", f"/ipfs/{cid}"])
 
 
-def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
+def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
     """
     Parameters:
         string ttl: Time duration this record should be cached for.
@@ -277,26 +277,26 @@ def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
         string lifetime: Time duration that the record will be valid for.
                                 Default: 24h.
     """
-    cid = Publish(path)
-    UpdateIPNS_RecordFromHash(name, cid, ttl=ttl, lifetime=lifetime)
+    cid = publish(path)
+    update_ipns_record_from_hash(name, cid, ttl=ttl, lifetime=lifetime)
     return cid
 
 
-def DownloadIPNS_Record(name, path="", nocache=False):
-    return DownloadFile(ResolveIPNS_Key(name, nocache=nocache), path)
+def download_ipns_record(name, path="", nocache=False):
+    return download_file(resolve_ipns_key(name, nocache=nocache), path)
 
 
-def ResolveIPNS_Key(ipns_id, nocache=False):
-    return RunCommand([ipfs_cmd, "name", "resolve", f"--nocache={nocache}", f"{ipns_id}"]).strip("\n")
+def resolve_ipns_key(ipns_id, nocache=False):
+    return run_command([ipfs_cmd, "name", "resolve", f"--nocache={nocache}", f"{ipns_id}"]).strip("\n")
 
 
-def CatIPNS_Record(name, nocache=False):
-    return CatFile(ResolveIPNS_Key(name, nocache=nocache))
+def read_ipns_record(name, nocache=False):
+    return read_file(resolve_ipns_key(name, nocache=nocache))
 
 # Returns a list of the multiaddresses of all connected peers
 
 
-def ListPeerMaddresses():
+def list_peer_maddresses():
     proc = Popen(['ipfs', 'swarm', 'peers'], stdout=PIPE)
     proc.wait()
     peers = []
@@ -308,39 +308,38 @@ def ListPeerMaddresses():
 # Returns the multiaddresses of input the peer ID
 
 
-def FindPeer(ID: str):
-    response = RunCommand([ipfs_cmd, "dht", "findpeer", ID])
+def find_peer(ID: str):
+    response = run_command([ipfs_cmd, "dht", "findpeer", ID])
     return {"Responses": [{"ID": ID, "Addrs": response.split("\n")}]}
 
 # Returns the IPFS ID of the currently running IPFS node
 
 
-def MyID():
-    return json.loads(RunCommand([ipfs_cmd, "id"])).get("ID")
+def my_id():
+    return json.loads(run_command([ipfs_cmd, "id"])).get("ID")
 
 
-myid = MyID
+myid = my_id
 
 
-def ListenOnPort(protocol, port):
-    RunCommand([ipfs_cmd, "p2p", "listen", "/x/" +
-               protocol, "/ip4/127.0.0.1/tcp/" + str(port)])
+def listen_on_port(protocol, port):
+    run_command([ipfs_cmd, "p2p", "listen", "/x/" +
+                 protocol, "/ip4/127.0.0.1/tcp/" + str(port)])
 
 
-ListenUDP = ListenOnPort
-listenudp = ListenOnPort
-listenonport = ListenOnPort
-Listen = ListenOnPort
-listen = ListenOnPort
+ListenUDP = listen_on_port
+listenudp = listen_on_port
+listenonport = listen_on_port
+listen = listen_on_port
+listen = listen_on_port
 
 
-def ForwardFromPortToPeer(protocol: str, port, peerID):
-    # result = RunCommand([ipfs_cmd, "p2p", "forward", "/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
+def forward_from_port_to_peer(protocol: str, port, peerID):
+    # result = run_command([ipfs_cmd, "p2p", "forward", "/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
     #                     str(port), "/p2p/" + peerID])
     cmd = [ipfs_cmd, "p2p", "forward", "/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
            str(port), "/p2p/" + peerID]
-    if isinstance(cmd, str):
-        cmd = cmd.split(" ")
+
     try:
         proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
     except:
@@ -355,7 +354,7 @@ def ForwardFromPortToPeer(protocol: str, port, peerID):
         return True     # signal success
 
 
-def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
+def close_port_forwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
     cmd = [ipfs_cmd, "p2p", "close"]
     if all:
         cmd.append("--all")
@@ -366,19 +365,19 @@ def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: 
             cmd.append(f"--listen-address={listenaddress}")
         if targetaddress:
             cmd.append(f"--target-address={targetaddress}")
-    RunCommand(cmd)
+    run_command(cmd)
 
 
-def CheckPeerConnection(id, name=""):
+def check_peer_connection(id, name=""):
     """
-    Tries to connect to the specified peer, and stores its multiaddresses in IPFS_LNS.
+    Tries to connect to the specified peer, and stores its multiaddresses in ipfs_lns.
     Paramaters:
-        id: the IPFS PeerID or the IPFS_LNS name  of the computer to connect to
+        id: the IPFS PeerID or the ipfs_lns name  of the computer to connect to
         name: (optional) the human readable name of the computer to connect to (not critical, you can put in whatever you like)"""
-    contact = IPFS_LNS.GetContact(id)
+    contact = ipfs_lns.get_contact(id)
     if not contact:
-        contact = IPFS_LNS.AddContact(id, name)
-    return contact.CheckConnection()
+        contact = ipfs_lns.add_contact(id, name)
+    return contact.check_connection()
 
 
 def safe_tar_extract(tar, path=".", members=None, *, numeric_owner=False):
