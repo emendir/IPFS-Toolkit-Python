@@ -4,6 +4,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+from termcolor import colored
 import shutil
 import tempfile
 # import sys
@@ -314,26 +315,13 @@ def my_id():
     return http_client.id().get("ID")
 
 
-myid = my_id
-
-
 def listen_on_port_tcp(protocol, port):
     print("ipfs_api: WARNING: deprecated. Use listen_on_port() instead.")
     http_client.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
-listenonportTCP = listen_on_port_tcp
-ListenTCP = listen_on_port_tcp
-listentcp = listen_on_port_tcp
-
-
 def listen_on_port(protocol, port):
     http_client.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
-
-
-listenonport = listen_on_port
-listen = listen_on_port
-listen = listen_on_port
 
 
 def forward_from_port_to_peer(protocol: str, port, peerID):
@@ -405,3 +393,141 @@ if autostart:
         from ipfs_cli import *
         if not is_daemon_running():
             run_daemon()
+
+
+"""Deprecated naming of Functions:"""
+
+
+def Start():
+    print(colored("DEPRECATED: This function (start) has been renamed to Start to accord with PEP 8 naming conventions.", "yellow"))
+    return start()
+
+
+def PublishToTopic(topic, data):
+    print(colored("DEPRECATED: This function (PublishToTopic) has been renamed to publish_to_topic to accord with PEP 8 naming conventions.", "yellow"))
+    return publish_to_topic(topic, data)
+
+
+def SubscribeToTopic(topic, eventhandler):
+    print(colored("DEPRECATED: This function (SubscribeToTopic) has been renamed to subscribe_to_topic to accord with PEP 8 naming conventions.", "yellow"))
+    return subscribe_to_topic(topic, eventhandler)
+
+
+def UnsubscribeFromTopic(topic, eventhandler):
+    print(colored("DEPRECATED: This function (UnsubscribeFromTopic) has been renamed to unsubscribe_from_topic to accord with PEP 8 naming conventions.", "yellow"))
+    return unsubscribe_from_topic(topic, eventhandler)
+
+
+def TopicPeers(topic: str):
+    print(colored("DEPRECATED: This function (TopicPeers) has been renamed to topic_peers to accord with PEP 8 naming conventions.", "yellow"))
+    return topic_peers(topic)
+
+
+def UploadFile(filename: str):
+    print(colored("DEPRECATED: This function (UploadFile) has been renamed to upload_file to accord with PEP 8 naming conventions.", "yellow"))
+    return upload_file(filename)
+
+
+def Upload(filename: str):
+    print(colored("DEPRECATED: This function (Upload) has been renamed to upload to accord with PEP 8 naming conventions.", "yellow"))
+    return upload(filename)
+
+
+def Publish(path: str):
+    print(colored("DEPRECATED: This function (Publish) has been renamed to publish to accord with PEP 8 naming conventions.", "yellow"))
+    return publish(path)
+
+
+def Pin(cid: str):
+    print(colored("DEPRECATED: This function (Pin) has been renamed to pin to accord with PEP 8 naming conventions.", "yellow"))
+    return pin(cid)
+
+
+def Unpin(cid: str):
+    print(colored("DEPRECATED: This function (Unpin) has been renamed to unpin to accord with PEP 8 naming conventions.", "yellow"))
+    return unpin(cid)
+
+
+def Download_file(ID, path=""):
+    print(colored("DEPRECATED: This function (Download_file) has been renamed to download_file to accord with PEP 8 naming conventions.", "yellow"))
+    return download_file(ID, path)
+
+
+def Download(cid, path=""):
+    print(colored("DEPRECATED: This function (Download) has been renamed to download to accord with PEP 8 naming conventions.", "yellow"))
+    return download(cid, path)
+
+
+def CatFile(ID):
+    print(colored("DEPRECATED: This function (CatFile) has been renamed to read_file to accord with PEP 8 naming conventions.", "yellow"))
+    return read_file(ID)
+
+
+def CreateIPNS_Record(name: str, type: str = "rsa", size: int = 2048):
+    print(colored("DEPRECATED: This function (CreateIPNS_Record) has been renamed to create_ipns_record to accord with PEP 8 naming conventions.", "yellow"))
+    return create_ipns_record(name, type, size)
+
+
+def UpdateIPNS_RecordFromHash(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
+    print(colored("DEPRECATED: This function (UpdateIPNS_RecordFromHash) has been renamed to update_ipns_record_from_hash to accord with PEP 8 naming conventions.", "yellow"))
+    return update_ipns_record_from_hash(name, cid, ttl, lifetime)
+
+
+def UpdateIPNS_Record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
+    print(colored("DEPRECATED: This function (UpdateIPNS_Record) has been renamed to update_ipns_record to accord with PEP 8 naming conventions.", "yellow"))
+    return update_ipns_record(name, path, ttl, lifetime)
+
+
+def ResolveIPNS_Key(ipns_id, nocache=False):
+    print(colored("DEPRECATED: This function (ResolveIPNS_Key) has been renamed to resolve_ipns_key to accord with PEP 8 naming conventions.", "yellow"))
+    return resolve_ipns_key(ipns_id, nocache)
+
+
+def DownloadIPNS_Record(name, path="", nocache=False):
+    print(colored("DEPRECATED: This function (DownloadIPNS_Record) has been renamed to download_ipns_record to accord with PEP 8 naming conventions.", "yellow"))
+    return download_ipns_record(name, path, nocache)
+
+
+def CatIPNS_Record(name, nocache=False):
+    print(colored("DEPRECATED: This function (CatIPNS_Record) has been renamed to read_ipns_record to accord with PEP 8 naming conventions.", "yellow"))
+    return read_ipns_record(name, nocache)
+
+
+def ListPeerMaddresses():
+    print(colored("DEPRECATED: This function (ListPeerMaddresses) has been renamed to list_peer_maddresses to accord with PEP 8 naming conventions.", "yellow"))
+    return list_peer_maddresses()
+
+
+def FindPeer(ID: str):
+    print(colored("DEPRECATED: This function (FindPeer) has been renamed to find_peer to accord with PEP 8 naming conventions.", "yellow"))
+    return find_peer(ID)
+
+
+def MyID():
+    print(colored("DEPRECATED: This function (MyID) has been renamed to my_id to accord with PEP 8 naming conventions.", "yellow"))
+    return my_id()
+
+
+def ListenOnPort(protocol, port):
+    print(colored("DEPRECATED: This function (ListenOnPort) has been renamed to listen_on_port to accord with PEP 8 naming conventions.", "yellow"))
+    return listen_on_port(protocol, port)
+
+
+def ForwardFromPortToPeer(protocol: str, port, peerID):
+    print(colored("DEPRECATED: This function (ForwardFromPortToPeer) has been renamed to forward_from_port_to_peer to accord with PEP 8 naming conventions.", "yellow"))
+    return forward_from_port_to_peer(protocol, port, peerID)
+
+
+def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
+    print(colored("DEPRECATED: This function (ClosePortForwarding) has been renamed to close_port_forwarding to accord with PEP 8 naming conventions.", "yellow"))
+    return close_port_forwarding(all, protocol, listenaddress, targetaddress)
+
+
+def CheckPeerConnection(id, name=""):
+    print(colored("DEPRECATED: This function (CheckPeerConnection) has been renamed to check_peer_connection to accord with PEP 8 naming conventions.", "yellow"))
+    return check_peer_connection(id, name)
+
+
+def FindProviders(cid):
+    print(colored("DEPRECATED: This function (FindProviders) has been renamed to find_providers to accord with PEP 8 naming conventions.", "yellow"))
+    return find_providers(cid)
