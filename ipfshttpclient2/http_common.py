@@ -429,7 +429,7 @@ class ClientSyncBase(ty.Generic[S], metaclass=abc.ABCMeta):
 		self._session = self._make_session()
 	
 	def close_session(self) -> None:
-		"""Close a session opened by
+		"""close a session opened by
 		:meth:`~ipfshttpclient.http.HTTPClient.open_session`.
 		
 		If there is no session currently open (ie: it was already closed), then

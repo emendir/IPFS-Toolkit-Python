@@ -1,17 +1,17 @@
 FileTransmission:
   abortion
 
-DataTransmission: Terminate properly on error
+DataTransmission: terminate properly on error
 
-include encryption parameters in TransmitData?
+include encryption parameters in transmit_data?
 add more realistic encryption scenario to Encryption example
 
 
 make parameter names more consistent (e.g. ID, cid , peerID)
 
 # Documentation
-IPFS_CLI: docs
+ipfs_cli: docs
 proper docstrings everywhere
 API reference
 
-rename IPFS_API.CatFile to IPFS_API.ReadFile
+rename ipfs_api.read_file to ipfs_api.ReadFile

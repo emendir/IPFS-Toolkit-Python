@@ -5,7 +5,7 @@ import json
 # import ipfshttpclient2 as ipfshttpclient
 from subprocess import Popen, PIPE
 from threading import Thread
-import IPFS_API
+import ipfs_api
 
 # ipfs = ipfshttpclient.client.Client()
 ipfs_dir = os.path.join(appdirs.user_data_dir(), "IPFS")
@@ -17,7 +17,7 @@ try:
 
     if not os.path.exists(lns_dir):
         os.makedirs(lns_dir)
-except PermissionError as e:    # in a buildozer project execution fails here
+except PermissionError:    # in a buildozer project execution fails here
     ipfs_dir = os.path.join("AppData", "IPFS")
     lns_dir = os.path.join("AppData", "IPFS", "LNS")
     if not os.path.exists(ipfs_dir):
@@ -39,11 +39,11 @@ class Node:
             self.name = name
             self.known_multiaddrs = known_multiaddrs
 
-    def ToSerial(self):
+    def to_serial(self):
         return json.dumps([self.id, self.name, self.known_multiaddrs])
 
-    def RememberMultiaddrs(self):
-        multiaddrs = IPFS_API.FindPeer(self.id).get("Responses")[0].get("Addrs")
+    def remember_multiaddrs(self):
+        multiaddrs = ipfs_api.find_peer(self.id).get("Responses")[0].get("Addrs")
         edited = False
 
         for addr in multiaddrs:
@@ -59,19 +59,19 @@ class Node:
                     self.known_multiaddrs.insert(0, [addr, 1])
                     edited = True
         if edited:
-            SaveContacts()
+            save_contacts()
 
-    def TryToConnect(self):
+    def try_to_connect(self):
         """Tries to connect to this IPFS peer using 'ipfs dht findpeer ...'
         and 'ipfs swarm connect ...' with remembered multiaddresses.
         Note: Can take a long time time run. You generally want to use
-        CheckConnection() instead of TryToConnect(), that function runs this
+        check_connection() instead of try_to_connect(), that function runs this
         function if it is not already running"""
         # first trying 'ipfs dht findpeer ...'
         try:
-            response = IPFS_API.FindPeer(self.id)
+            response = ipfs_api.find_peer(self.id)
             if(len(response.get("Responses")[0].get("Addrs")) > 0):  # if connections succeeds
-                self.RememberMultiaddrs()
+                self.remember_multiaddrs()
                 return True
         except:
             # second trying 'ipfs swarm connect' with all of this peer's previously used multiaddresses
@@ -82,24 +82,24 @@ class Node:
                 proc.wait()
 
                 if proc.stdout.readline()[-8:-1].decode() == 'success':
-                    self.RememberMultiaddrs()
+                    self.remember_multiaddrs()
                     return True
             # if we still haven't found him, try 'ipfs dht findpeer ' one more time
             try:
-                response = IPFS_API.FindPeer(self.id)
+                response = ipfs_api.find_peer(self.id)
                 if(len(response.get("Responses")[0].get("Addrs")) > 0):
-                    self.RememberMultiaddrs()
+                    self.remember_multiaddrs()
                     return True
                 else:
                     return False
             except:
                 return False
 
-    def CheckConnection(self):
+    def check_connection(self):
         """Starts a new thread to try to connect to this peer,
         if that thread isn't already running."""
         if not self.connection_checker or not self.connection_checker.is_alive():
-            self.connection_checker = Thread(target=self.TryToConnect, args=())
+            self.connection_checker = Thread(target=self.try_to_connect, args=())
             self.connection_checker.start()
 
 
@@ -116,39 +116,39 @@ except:
     filereader.close()
 
 
-def SaveContacts():
+def save_contacts():
     """Saves the list of contacts to the config file"""
     filereader = open(os.path.join(lns_dir, "config"), "w+")
     for contact in contacts:
-        filereader.write(contact.ToSerial() + "\n")
+        filereader.write(contact.to_serial() + "\n")
     filereader.close()
 
 
-def LookUpContact(name):
+def lookup_contact(name):
     for contact in contacts:
         if contact.name == name:
             return contact.id
 
 
-lookupcontact = LookUpContact
-LookupContact = LookUpContact
-lookupContact = LookUpContact
+lookupcontact = lookup_contact
+LookupContact = lookup_contact
+lookupContact = lookup_contact
 
 
-def AddContact(id, name):
+def add_contact(id, name):
     if name == "":
         name = id
     newcontact = Node(id, name)
     contacts.append(newcontact)
-    SaveContacts()
+    save_contacts()
     return newcontact
 
 
-addcontact = AddContact
-addContact = AddContact
+addcontact = add_contact
+addContact = add_contact
 
 
-def GetContact(id):
+def get_contact(id):
     """Parameters:
         id: either the name or IPFS ID of the contact to retrieve"""
     for contact in contacts:
@@ -156,10 +156,10 @@ def GetContact(id):
             return contact
 
 
-def RemoveContact(id, name):
+def remove_contact(id, name):
     for contact in contacts:
         if contact.id == id and contact.name == name:
             contacts.remove(contact)
             break
 
-    SaveContacts()
+    save_contacts()

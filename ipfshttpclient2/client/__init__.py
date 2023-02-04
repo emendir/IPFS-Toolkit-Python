@@ -208,7 +208,7 @@ class Client(files.Base, miscellaneous.Base):
 		self.close()
 	
 	def close(self):
-		"""Close any currently open client session and free any associated
+		"""close any currently open client session and free any associated
 		resources.
 		
 		If there was no session currently open this method does nothing. An open

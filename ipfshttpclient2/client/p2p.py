@@ -71,7 +71,7 @@ class Section(base.SectionBase):
 
         .. code-block:: python
 
-            # Close listening and forwarding connections of protocol '/x/testproto' and port 8888.
+            # close listening and forwarding connections of protocol '/x/testproto' and port 8888.
             >>> client.p2p.close(protocol='/x/testproto', port='8888')
             []
 

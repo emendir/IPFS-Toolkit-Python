@@ -302,7 +302,7 @@ class GlobMatcher(Matcher[AnyStr], ty.Generic[AnyStr]):
 			else:
 				return idx_path == len(labels)
 		
-		# Start of recursion – move to next label and recurse this method too
+		# start of recursion – move to next label and recurse this method too
 		#
 		# If the path is then matched by our inferior self return success,
 		# otherwise retry with the next path label until all labels have been

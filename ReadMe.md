@@ -9,7 +9,7 @@ It includes a programmer-friendly wrapper called __IPFS-API__ for the official I
 - __ipfshttpclient2__: a modified version of the official ipfshttpclient module that has been expanded to include the ipfs.p2p functions
 
 ## Other:
-- __Examples__: a folder of scripts demonstrating how to work with IPFS_DataTransmission
+- __Examples__: a folder of scripts demonstrating how to work with ipfs_datatransmission
 
 
 # Getting started with IPFS-Toolkit:
@@ -17,7 +17,7 @@ It includes a programmer-friendly wrapper called __IPFS-API__ for the official I
 2. Read the _Modules Contained in IPFS-Toolkit_ section below to learn what this package contains and how it works. 
 3. For IPFS-DataTransmission: Read and try out the demo scripts in the Examples folder.
 
-## Setup
+## setup
 ### Installation
 `pip install IPFS-Toolkit`
 
@@ -58,73 +58,73 @@ pip3 install zmq
 
 # Modules Contained in IPFS-Toolkit
 ## IPFS-API
-`import IPFS_API`
+`import ipfs_api`
 
 This has a simplified and more user-friendly yet limited API for interacting with IPFS compared to the ipfshttpclient.
 
 Usage examples:  
 ```python
-print(IPFS_API.MyID()) # print your IPFS peer ID  
-cid = IPFS_API.Publish('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable  
+print(ipfs_api.my_id()) # print your IPFS peer ID  
+cid = ipfs_api.publish('./SomeFileOrDir') # upload file or directory to IPFS and store it's CID in a variable  
 
 # Managing IPNS keys  
-IPFS_API.CreateIPNS_Record('MyWebsite') # generate a pair of IPNS name keys  
-IPFS_API.UpdateIPNS_Record('MyWebsite', './SomeFileOrDir') # upload file to IPFS & publish   
-IPFS_API.UpdateIPNS_RecordFromHash('MyWebsite', cid) # publish IPFS content to IPNS key  
+ipfs_api.create_ipns_record('MyWebsite') # generate a pair of IPNS name keys  
+ipfs_api.update_ipns_record('MyWebsite', './SomeFileOrDir') # upload file to IPFS & publish   
+ipfs_api.update_ipns_record_from_hash('MyWebsite', cid) # publish IPFS content to IPNS key  
 
 # IPFS PubSub  
-IPFS_API.SubscribeToTopic("test", print) # print is the eventhandler  
-IPFS_API.PublishToTopic("test", "Hello there!")
+ipfs_api.subscribe_to_topic("test", print) # print is the eventhandler  
+ipfs_api.publish_to_topic("test", "Hello there!")
 ```
 #### HTTP API access:
 This allows you to access the official IPFS API (the same as the command line ipfs utility) through ipfshttpclients' `client` object. At this stage of development it is incomplete.
 
 Examples:
 ```Python
-import IPFS_API
-IPFS_API.http_client.add("helloworld.txt")
-IPFS_API.dht.findpeer("QMHash")
-print(IPFS_API.swarm.peers())
+import ipfs_api
+ipfs_api.http_client.add("helloworld.txt")
+ipfs_api.dht.findpeer("QMHash")
+print(ipfs_api.swarm.peers())
 ```
 
 ## IPFS-Datatransmission
-`import IPFS_DataTransmission`
+`import ipfs_datatransmission`
 
 A Python module for limitless, easy, private peer-to-peer data transmission other over the IPFS Network.
 
 This module has three main pairs functions for use by the user:
 - __Simple Data Transmission:__
-    - `TransmitData(data, peerID, listener_name)`
-    - `ListenForTransmissions(listener_name,` eventhandler)
+    - `transmit_data(data, peerID, listener_name)`
+    - `listen_for_transmissions(listener_name,` eventhandler)
 - __File Transmission:__
-    - `TransmitFile(data, peerID, listener_name)`
-    - `ListenForFileTransmissions(listener_name, eventhandler)`
+    - `transmit_file(data, peerID, listener_name)`
+    - `listen_for_file_transmissions(listener_name, eventhandler)`
 - __Conversations (Ping-Pong Data & File Transmission):__
-    - `StartConversation(data, peerID, listener_name)`
-    - `ListenForConversations(listener_name, eventhandler)`
+    - `start_conversation(data, peerID, listener_name)`
+    - `listen_for_conversations(listener_name, eventhandler)`
 
 See the _Examples_ folder for the different ways of using these functions. They are designed in a way that makes them easy to use for simple applications but feature-rich for more demanding ones, such as encryption integration and access to low-level protocol settings.
 
 ### Listener Functions:
-The listener functions (ListenForTransmissions, ListenForFileTransmissions and ListenForConversations) produce Listener objects () that run on their own threads waiting for incoming data transmission or conversation requests. When another computer wants to send the first computer somthing, the other computer sends a transmission request which the Listener object receives and reacts to by creating a Transmission reception object () which runs on its own separate thread to receive the transmission, or in the case of the conversation listener, calls its user-defined eventhandler so that the conversation can be joined or ignored.
+The listener functions (listen_for_transmissions, listen_for_file_transmissions and listen_for_conversations) produce Listener objects () that run on their own threads waiting for incoming data transmission or conversation requests. When another computer wants to send the first computer somthing, the other computer sends a transmission request which the Listener object receives and reacts to by creating a Transmission reception object () which runs on its own separate thread to receive the transmission, or in the case of the conversation listener, calls its user-defined eventhandler so that the conversation can be joined or ignored.
 This system of receiving data transmissions/conversations allows a computer to receive multiple transmission addressed to the same listener simultaneously.
-Multiple Listeners of the same type (the types being DataTransmission, FileTransmission, or Conversation) can be run simultaneously and independently, for example by different programs. Those different listeners (instances of ListenForTransmissions) must me named to distinguish them from each other for addressing purposes. This name is the "listener_name" parameter in the listener functions. The name is chosen by the user when creating the listener (e.g. when calling ListenForTransmission()), and must be provided when starting a transmission (e.g. when calling TransmitData()).
+Multiple Listeners of the same type (the types being DataTransmission, FileTransmission, or Conversation) can be run simultaneously and independently, for example by different programs. Those different listeners (instances of listen_for_transmissions) must me named to distinguish them from each other for addressing purposes. This name is the "listener_name" parameter in the listener functions. The name is chosen by the user when creating the listener (e.g. when calling ListenForTransmission()), and must be provided when starting a transmission (e.g. when calling transmit_data()).
 
 ## IPFS-LNS:
-`import IPFS_LNS`
+`import ipfs_lns`
 
 IPFS-LNS (IPFS Local Name System) allows you to store IPFS nodes' peer IDs and names in a database stored on your local machine. IPFS-LNS also stores a list of multiaddresses (essentially IP addresses) that the peer has been known to use, as long as you use IPFS-LNS to connect or check the connection to that peer. Every time you try to connect to the peer, IPFS-LNS tries to specifically connect to the peer using the known multiaddresses from previous connections, which can dramatically increase the speed of doing so compared to searching the whole IPFS network for the peer.
 
 
 Basic usage:  
 ```python
-import IPFS_API  
+import ipfs_api  
 
 # check connection to peer of peerID "QmHash" and whom we call "Bob", add him to our list of known peers ("contacts") if he is not already added  
-IPFS_API.CheckPeerConnection("QmHash", "Bob") 
+ipfs_api.check_peer_connection("QmHash", "Bob") 
 
-import IPFS_LNS
-peerID = IPFS_LNS.LookUpContact("Bob") # get the contact 'Bob's IPFS peer ID
+import ipfs_lns
+peerID = ipfs_lns.lookup_contact("Bob") # get the contact 'Bob's IPFS peer ID
 ```
 # IPFS Technicalities:
 How does IPFS-DataTransmission use IPFS to to send data to another computer? After all, IPFS is a file system and made for sharing and storing files, creating a content addressed internet. Does it really provide the functionality for two computers to communicate directly which each other?  

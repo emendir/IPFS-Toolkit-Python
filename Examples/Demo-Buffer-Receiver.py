@@ -7,13 +7,13 @@ after reading the instruct ions in that script,
 and of course make sure IPFS is running on both computers first.
 """
 import time
-import IPFS_DataTransmission
+import ipfs_datatransmission
 
 
-def OnBufferReceived(data):
+def on_buffer_received(data):
     print(data)
 
 
-listener = IPFS_DataTransmission.ListenToBuffers(OnBufferReceived, "buffertest")
+listener = ipfs_datatransmission.listen_to_buffers(on_buffer_received, "buffertest")
 while True:
     time.sleep(1)

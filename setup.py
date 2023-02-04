@@ -26,7 +26,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-    py_modules=['IPFS_API', 'IPFS_DataTransmission', 'IPFS_LNS', 'IPFS_CLI', 'Errors'],
+    py_modules=['ipfs_api', 'ipfs_datatransmission', 'ipfs_lns', 'ipfs_cli', 'errors'],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
     install_requires=['multiaddr', 'appdirs', 'idna', 'httpcore', 'httpx', 'requests', 'varint'],
