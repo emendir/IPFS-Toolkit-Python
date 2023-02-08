@@ -120,7 +120,7 @@ if found_ipfs:
 # Publishes the input data to specified the IPFS PubSub topic
 
 
-def publish_to_topic(topic, data):
+def pubsub_publish(topic, data):
     """Publishes te specified data to the specified IPFS-PubSub topic.
     Parameters:
         topic: str: the name of the IPFS PubSub topic to publish to
@@ -190,7 +190,7 @@ class PubsubListener():
         self._terminate = True
 
 
-def subscribe_to_topic(topic, eventhandler):
+def pubsub_subscribe(topic, eventhandler):
     """
     Listens to the specified IPFS PubSub topic, calling the eventhandler
     whenever a message is received, passing the message data and its sender
@@ -206,7 +206,7 @@ def subscribe_to_topic(topic, eventhandler):
     return PubsubListener(topic, eventhandler)
 
 
-def unsubscribe_from_topic(topic, eventhandler):
+def pubsub_unsubscribe(topic, eventhandler):
     index = 0
     for subscription in subscriptions:
         if(subscription[0] == topic and subscription[1] == eventhandler):
@@ -237,14 +237,14 @@ def unpin(cid: str):
     run_command([ipfs_cmd, "pin", "rm", cid])
 
 
-def download_file(CID, path=""):
+def download(CID, path=""):
     path_option = ""
     if path:
         path_option = f"-o={path}"
     run_command([ipfs_cmd, "get", CID,  path_option])
 
 
-def read_file(CID):
+def read(CID):
     return run_command([ipfs_cmd, "cat", CID])
 
 
@@ -283,7 +283,7 @@ def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h")
 
 
 def download_ipns_record(name, path="", nocache=False):
-    return download_file(resolve_ipns_key(name, nocache=nocache), path)
+    return download(resolve_ipns_key(name, nocache=nocache), path)
 
 
 def resolve_ipns_key(ipns_id, nocache=False):
@@ -291,12 +291,12 @@ def resolve_ipns_key(ipns_id, nocache=False):
 
 
 def read_ipns_record(name, nocache=False):
-    return read_file(resolve_ipns_key(name, nocache=nocache))
+    return read(resolve_ipns_key(name, nocache=nocache))
 
 # Returns a list of the multiaddresses of all connected peers
 
 
-def list_peer_maddresses():
+def list_peer_multiaddrs():
     proc = Popen(['ipfs', 'swarm', 'peers'], stdout=PIPE)
     proc.wait()
     peers = []
