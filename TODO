@@ -14,4 +14,4 @@ ipfs_cli: docs
 proper docstrings everywhere
 API reference
 
-rename ipfs_api.read_file to ipfs_api.ReadFile
+rename ipfs_api.read to ipfs_api.ReadFile

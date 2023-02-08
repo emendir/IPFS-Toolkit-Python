@@ -73,8 +73,8 @@ ipfs_api.update_ipns_record('MyWebsite', './SomeFileOrDir') # upload file to IPF
 ipfs_api.update_ipns_record_from_hash('MyWebsite', cid) # publish IPFS content to IPNS key  
 
 # IPFS PubSub  
-ipfs_api.subscribe_to_topic("test", print) # print is the eventhandler  
-ipfs_api.publish_to_topic("test", "Hello there!")
+ipfs_api.pubsub_subscribe("test", print) # print is the eventhandler  
+ipfs_api.pubsub_publish("test", "Hello there!")
 ```
 #### HTTP API access:
 This allows you to access the official IPFS API (the same as the command line ipfs utility) through ipfshttpclients' `client` object. At this stage of development it is incomplete.
