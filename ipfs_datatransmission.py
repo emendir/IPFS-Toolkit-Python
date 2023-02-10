@@ -16,10 +16,6 @@ import traceback
 import os
 # import inspect
 from inspect import signature
-from errors import (InvalidPeer,
-                    CommunicationTimeout, UnreadableReply, ListenTimeout,
-                    # DataTransmissionError, PeerNotFound,
-                    IPFS_Error)
 try:
     import ipfs_api
 except:
@@ -834,9 +830,6 @@ class Conversation:
         if self.file_listener:
             self.file_listener.terminate()
 
-    def close(self):
-        self.terminate()
-
     def __del__(self):
         self.terminate()
 
@@ -1545,8 +1538,18 @@ class ListenerTCP(threading.Thread):
         self.terminate()
 
 
-def listen_to_buffers_on_port(eventhandler, port=0, buffer_size=def_buffer_size, monitoring_interval=2, status_eventhandler=None):
-    return BufferReceiver(eventhandler, port, buffer_size, monitoring_interval, status_eventhandler)
+def listen_to_buffers_on_port(eventhandler,
+                              port=0,
+                              buffer_size=def_buffer_size,
+                              monitoring_interval=2,
+                              status_eventhandler=None):
+    return BufferReceiver(
+        eventhandler,
+        port,
+        buffer_size,
+        monitoring_interval,
+        status_eventhandler
+    )
 
 
 def add_integritybyte_to_buffer(buffer):
@@ -1634,3 +1637,67 @@ def recv_timeout(the_socket, timeout=2):
 
     # print("RECEIVED", type(total_data), total_data)
     return total_data
+
+
+class DataTransmissionError(Exception):
+    def __init__(self, message: str = "Failed to transmit the requested data to the specified peer."):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class PeerNotFound(Exception):
+    def __init__(self, message: str = "Could not find the specified peer on the IPFS network. Perhaps try again."):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class InvalidPeer(Exception):
+    def __init__(self, message: str = "The specified IPFS peer ID is invalid."):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class CommunicationTimeout(Exception):
+    def __init__(self, message: str):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class ListenTimeout(Exception):
+    def __init__(self, message: str):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class UnreadableReply(Exception):
+    def __init__(self, message: str = "Received data that we couldn't read."):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class IPFS_Error(Exception):
+    def __init__(self, message: str):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class Error(Exception):
+    def __init__(self, message: str):
+        self.message = message
+
+    def __str__(self):
+        return self.message
