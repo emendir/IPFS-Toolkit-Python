@@ -29,5 +29,6 @@ setuptools.setup(
     py_modules=['ipfs_api', 'ipfs_datatransmission', 'ipfs_lns', 'ipfs_cli', 'errors'],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
-    install_requires=['multiaddr', 'appdirs', 'idna', 'httpcore', 'httpx', 'requests', 'varint'],
+    install_requires=['multiaddr', 'appdirs', 'idna',
+                      'httpcore', 'httpx', 'requests', 'varint', 'termcolor'],
 )
