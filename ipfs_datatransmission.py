@@ -91,13 +91,22 @@ def transmit_data(
             if print_log_transmissions:
                 print("Sending transmission request to " + str(req_lis_name))
             sock = create_sending_connection(peerID, req_lis_name)
-            sock.sendall(request_data)
+            # sock.sendall(request_data)
+            send_all(sock, request_data)
             if print_log_transmissions:
                 print("Sent transmission request to " + str(req_lis_name))
 
-            # reply = sock.recv(def_buffer_size)
-            reply = recv_timeout(sock, timeout_sec)
-            # recv_timeout
+            sock.settimeout(def_buffer_size)
+            try:
+                reply = sock.recv(def_buffer_size)
+            except socket.timeout:
+                sock.close()
+                close_sending_connection(peerID, req_lis_name)
+                raise CommunicationTimeout(
+                    "Received no response from peer while sending transmission request.")
+
+            # reply = recv_all(sock, timeout_sec)
+            # recv_all
             sock.close()
             del sock
             close_sending_connection(peerID, req_lis_name)
@@ -124,7 +133,8 @@ def transmit_data(
 
     their_trsm_port = SendTransmissionRequest()
     sock = create_sending_connection(peerID, their_trsm_port)
-    sock.sendall(data)  # transmit Data
+    # sock.sendall(data)  # transmit Data
+    send_all(sock, data)
     if print_log_transmissions:
         print("Sent Transmission Data", data)
     response = sock.recv(def_buffer_size)
@@ -255,7 +265,7 @@ class TransmissionListener:
         conn, addr = sock.accept()
         if print_log_transmissions:
             print("received connection response fro actual transmission")
-        data = recv_timeout(conn)
+        data = recv_all(conn)
         conn.send("Finished!".encode())
         # conn.close()
         Thread(target=eventhandler, args=(data, peerID),
@@ -277,7 +287,7 @@ class TransmissionListener:
         self.socket.listen()
         while True:
             conn, addr = self.socket.accept()
-            data = recv_timeout(conn)
+            data = recv_all(conn)
             if self._terminate:
                 # conn.sendall(b"Righto.")
                 conn.close()
@@ -296,8 +306,10 @@ class TransmissionListener:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect(("127.0.0.1", self.port))
-            sock.sendall("close".encode())
-            # recv_timeout(sock)
+            # sock.sendall("close".encode())
+            send_all(sock, "close".encode())
+
+            # recv_all(sock)
             sock.close()
             del sock
         except:
@@ -829,6 +841,9 @@ class Conversation:
             self.listener.terminate()
         if self.file_listener:
             self.file_listener.terminate()
+
+    def close(self):
+        self.terminate()
 
     def __del__(self):
         self.terminate()
@@ -1603,9 +1618,40 @@ def split_by_255(bytes):
     return result
 
 
-def recv_timeout(the_socket, timeout=2):
+def send_all(sock, data, buffer_size=def_buffer_size):
+    """
+    Divides data into packets,
+    ensuring that the number of packets is more than one
+    and that the size of the last packet is less than buffer_size - 1
+    so that it can be identified as the end of the string of data packets.
+    """
+    assert len(data) > 1
+
+    buffers = []
+    while len(data) > 0:
+        if len(data) > buffer_size:
+            buffers.append(data[:buffer_size])
+            data = data[buffer_size:]
+        else:
+            buffers.append(data)
+            data = bytearray([])
+
+    if len(buffers) == 1 or len(buffers[-1]) == buffer_size:
+        buffers.append(bytearray([buffers[-1][-1]]))
+        buffers[-2] = buffers[-2][:len(buffers[-2])-1]
+    if len(buffers[-1]) == buffer_size-1:
+        buffers.append(bytearray([buffers[-1][-1]]))
+        buffers[-2] = bytearray([buffers[-3][-1]]) + buffers[-2][:buffer_size-2]
+        buffers[-3] = buffers[-3][:buffer_size-1]
+
+    for buffer in buffers:
+        sock.send(buffer)
+        time.sleep(0.1)  # break to allow tcp receiver to distinguish between buffers
+
+
+def recv_all(sock, timeout=2):
     # make socket non blocking
-    the_socket.setblocking(0)
+    sock.setblocking(0)
 
     # total data partwise in an array
     total_data = bytearray()
@@ -1624,17 +1670,23 @@ def recv_timeout(the_socket, timeout=2):
 
         # recv something
         try:
-            data = the_socket.recv(def_buffer_size)
+            data = sock.recv(def_buffer_size)
             if data:
+                print(data)
+                # if we've received the last packet:
+                if total_data and len(data) < def_buffer_size-1:
+                    print("Recognised end")
+                    return total_data + data
                 total_data += data
                 # change the beginning time for measurement
                 begin = time.time()
+
             # else:
             #     # sleep for sometime to indicate a gap
             #     time.sleep(0.1)
         except:
             pass
-
+    print("Timeout reached")
     # print("RECEIVED", type(total_data), total_data)
     return total_data
 
