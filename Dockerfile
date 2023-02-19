@@ -4,9 +4,8 @@ COPY ipfshttpclient2 /opt/IPFS-Toolkit/ipfshttpclient2
 COPY ReadMe.md /opt/IPFS-Toolkit/
 COPY tests/docker_script.py /opt/IPFS-Toolkit
 RUN python3 -m pip install /opt/IPFS-Toolkit
-RUN /opt/init_ipfs.sh
 # CMD /opt/init_ipfs.sh;python3 -c "from threading import Event;a = Event();a.wait()"
-CMD python3 /opt/IPFS-Toolkit/docker_script.py
+CMD /opt/init_ipfs.sh;python3 /opt/IPFS-Toolkit/docker_script.py
 
 
 # docker build -t emendir/ipfs-toolkit .

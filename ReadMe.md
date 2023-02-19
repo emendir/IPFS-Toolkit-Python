@@ -1,15 +1,26 @@
 A library for working with IPFS in Python.  
-It includes a programmer-friendly wrapper called __IPFS-API__ for the official IPFS Python API (ipfshttpclient), a module called __IPFS-DataTransmission__ for direct P2P data transmission between two IPFS-Nodes and a module called __IPFS-LNS__ for remembering the multiaddrs of known IPFS nodes ("contacts") to speed up connection times.
+It includes a programmer-friendly API called __ipfs_api__ for easy usage of some of the more common IPFS features, a module called __ipfs_datatransmission__ for direct P2P data transmission between two IPFS-Nodes and a module called __ipfs_lns__ for remembering the multiaddressess of known IPFS nodes ("contacts") to speed up connection times.
+
+Under the hood these modules use a slightly updated version ipfshttpclient, a no-longer-maintained python package for interacting with IPFS via its HTTP-API. The modified package can be accesses as ipfs_api.ipfshttpclient2 to gain full access to all supported ipfs interactivity. In environments where interaction with the IPFS via HTTP is not possible, this package automatically uses __ipfs_cli__ as a fallback, a module that provides all the functionality of ipfs_api by communicating to ipfs via its command-line interface. 
+
 
 # Package Contents:
 ## Modules:
-- __IPFS_API__: a wrapper for the module ipfshttpclient2 that makes it easier to work with IPFS in Python
-- __IPFS_DataTransmission__: a Python module that enables P2P data transmission between IPFS nodes
-- __IPFS_LNS__: a Python module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)
+- __ipfs_api__: a wrapper for the module ipfshttpclient2 that makes it easier to work with IPFS in Python
+- __ipfs_datatransmission__: a Python module that enables P2P data transmission between IPFS nodes
+- __ipfs_lns__: a Python module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)
 - __ipfshttpclient2__: a modified version of the official ipfshttpclient module that has been expanded to include the ipfs.p2p functions
 
 ## Other:
 - __Examples__: a folder of scripts demonstrating how to work with ipfs_datatransmission
+
+
+# Development Updates:
+This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
+## Renaming
+With version 0.5.0, all functions and class methods have been renamed from PascalCase to snake_case to comply with the standard PEP8 naming conventions. 
+## IPFS-DataTransmission Protocol Updates
+With version 0.5.0, the basic communication protocol on which all of the features of the ipfs_datatransmission module are built has been improved to bring a massive increase in the speed of connection establishment. Unfortunately, this update lacks backward compatibility, which means that if you have built a project that uses ipfs_datatransmission, instances of your program running v0.4.X and v0.5.X of IPFS-Toolkit won't be able to communicate with each other.
 
 
 # Getting started with IPFS-Toolkit:
@@ -17,7 +28,7 @@ It includes a programmer-friendly wrapper called __IPFS-API__ for the official I
 2. Read the _Modules Contained in IPFS-Toolkit_ section below to learn what this package contains and how it works. 
 3. For IPFS-DataTransmission: Read and try out the demo scripts in the Examples folder.
 
-## setup
+## Setup
 ### Installation
 `pip install IPFS-Toolkit`
 
@@ -77,14 +88,14 @@ ipfs_api.pubsub_subscribe("test", print) # print is the eventhandler
 ipfs_api.pubsub_publish("test", "Hello there!")
 ```
 #### HTTP API access:
-This allows you to access the official IPFS API (the same as the command line ipfs utility) through ipfshttpclients' `client` object. At this stage of development it is incomplete.
+This allows you to almost full access the IPFS API through a naming structure similar to its CLI through ipfshttpclient's `client` object. At this stage of development it is incomplete.
 
 Examples:
 ```Python
 import ipfs_api
 ipfs_api.http_client.add("helloworld.txt")
-ipfs_api.dht.findpeer("QMHash")
-print(ipfs_api.swarm.peers())
+ipfs_api.http_client.dht.findpeer("QMHash")
+ipfs_api.http_client.swarm.peers()
 ```
 
 ## IPFS-Datatransmission

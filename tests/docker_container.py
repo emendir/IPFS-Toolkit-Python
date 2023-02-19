@@ -33,6 +33,11 @@ class DockerContainer():
         self.container_name = container_name
         self.container_id = result.stdout.strip("\n")
 
+        self.ipfs_id = ""
+        while self.ipfs_id == "":
+            time.sleep(5)
+            self.ipfs_id = self.run_shell_command("ipfs id -f=\"<id>\"")
+
     def run_python_code(self, python_code):
         command = f"docker exec {self.container_id} /usr/bin/python3 -c \"{python_code}\""
         result = subprocess.run(

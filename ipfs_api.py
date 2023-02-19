@@ -30,7 +30,7 @@ except Exception as e:
     LIBERROR = True
     http_client = None
     ipfshttpclient = None
-print_log = True
+print_log = False
 
 autostart = True
 started = False
@@ -317,16 +317,6 @@ def pubsub_subscribe(topic, eventhandler):
     return PubsubListener(topic, eventhandler)
 
 
-def pubsub_unsubscribe(topic, eventhandler):
-    index = 0
-    for subscription in subscriptions:
-        if(subscription[0] == topic and subscription[1] == eventhandler):
-            subscription[2].terminate()
-            break
-        index = index + 1
-    subscriptions.pop(index)    # remove the subscription from the list of subscriptions
-
-
 def pubsub_peers(topic: str):
     """
     Returns the list of peers we are connected to on the specified pubsub topic
@@ -361,5 +351,6 @@ if autostart:
         start()
     if not started:
         from ipfs_cli import *
+        print("Using IPFS CLI because our HTTP client isn't working.")
         if not is_daemon_running():
             run_daemon()

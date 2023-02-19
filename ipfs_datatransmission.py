@@ -38,10 +38,9 @@ if not print_log:
 
 resend_timeout_sec = 1
 close_timeout_sec = 100
-transmission_send_timeout_sec = 3
 transmission_request_max_retries = 3
-transmission_send_timeout_sec = 5
-transmission_receive_timeout_sec = 5
+transmission_send_timeout_sec = 10
+transmission_receive_timeout_sec = 10
 
 def_buffer_size = 4096  # the communication buffer size
 # the size of the chunks into which files should be split before transmission
@@ -92,7 +91,7 @@ def transmit_data(
                 print("Sending transmission request to " + str(req_lis_name))
             sock = create_sending_connection(peerID, req_lis_name)
             # sock.sendall(request_data)
-            sock.settimeout(def_buffer_size)
+            sock.settimeout(transmission_send_timeout_sec)
             send_all(sock, request_data)
             if print_log_transmissions:
                 print("Sent transmission request to " + str(req_lis_name))
@@ -135,6 +134,7 @@ def transmit_data(
 
     their_trsm_port = SendTransmissionRequest()
     sock = create_sending_connection(peerID, their_trsm_port)
+    sock.settimeout(transmission_send_timeout_sec)
     # sock.sendall(data)  # transmit Data
     send_all(sock, data)
     if print_log_transmissions:
@@ -267,7 +267,8 @@ class TransmissionListener:
         conn, addr = sock.accept()
         if print_log_transmissions:
             print("received connection response fro actual transmission")
-        data = recv_all(conn)
+
+        data = recv_all(conn, timeout=transmission_receive_timeout_sec)
         conn.send("Finished!".encode())
         # conn.close()
         Thread(target=eventhandler, args=(data, peerID),
@@ -289,7 +290,7 @@ class TransmissionListener:
         self.socket.listen()
         while True:
             conn, addr = self.socket.accept()
-            data = recv_all(conn)
+            data = recv_all(conn, timeout=transmission_receive_timeout_sec)
             if self._terminate:
                 # conn.sendall(b"Righto.")
                 conn.close()
@@ -813,7 +814,7 @@ class Conversation:
             print("Transmitting file to ",
                   f"{self.others_trsm_listener}:files")
 
-        def progress_handler(peerID: str, filename: str, filesize: str, progress):
+        def _progress_handler(peerID: str, filename: str, filesize: str, progress):
             self.last_coms_time = datetime.utcnow()
             if progress_handler:
                 # run callback on a new thread, specifying only as many parameters as the callback wants
@@ -830,7 +831,7 @@ class Conversation:
             self.peerID,
             f"{self.others_trsm_listener}:files",
             metadata,
-            progress_handler,
+            _progress_handler,
             encryption_callbacks=(self.__encryption_callback,
                                   self.__decryption_callback),
             block_size=block_size,

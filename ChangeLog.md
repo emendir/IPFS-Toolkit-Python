@@ -1,6 +1,12 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.0 (2023-02-) (not backward-compatible)
+### Renaming
+With version 0.5.0, all functions and class methods have been renamed from PascalCase to snake_case to comply with the standard PEP8 naming conventions. 
+### IPFS-DataTransmission Protocol Updates
+With version 0.5.0, the basic communication protocol on which all of the features of the ipfs_datatransmission module are built has been improved to bring a massive increase in the speed of connection establishment. Unfortunately, this update lacks backward compatibility, which means that if you have built a project that uses ipfs_datatransmission, instances of your program running v0.4.X and v0.5.X of IPFS-Toolkit won't be able to communicate with each other.
+
 ## v0.4.4 (2023-01-28)
 - ipfs_api.topic_peers(): new function to get the number of peers we are connected to on a pubsub topic
 
