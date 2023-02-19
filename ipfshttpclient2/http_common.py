@@ -148,7 +148,11 @@ class StreamDecodeIteratorSync(ty.Generic[T_co]):
 	def close(self) -> None:
 		# Clean up any open iterators first
 		if self._response_iter is not None:
-			self._response_iter.close()
+			try:
+				self._response_iter.close()
+			except:
+				pass
+		
 		if self._parser_iter is not None:
 			self._parser_iter.close()
 		self._response_iter = None

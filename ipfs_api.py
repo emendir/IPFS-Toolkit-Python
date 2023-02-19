@@ -9,7 +9,6 @@ import tempfile
 # import sys
 from subprocess import Popen, PIPE
 # import subprocess
-import _thread
 import os
 import os.path
 # import threading
@@ -43,7 +42,8 @@ def start():
         global http_client
         global started
         from ipfs_cli import run_command, ipfs_cmd
-        Thread(target=run_command, args=[ipfs_cmd, "daemon", "--enable-pubsub-experiment"])
+        Thread(target=run_command, args=[
+               ipfs_cmd, "daemon", "--enable-pubsub-experiment"])
 
         http_client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
         started = True
@@ -122,7 +122,8 @@ def update_ipns_record_from_hash(name: str, cid: str, ttl: str = "24h", lifetime
         string lifetime: Time duration that the record will be valid for.
                                 Default: 24h.
     """
-    http_client.name.publish(ipfs_path=cid, key=name, ttl=ttl, lifetime=lifetime)
+    http_client.name.publish(ipfs_path=cid, key=name,
+                             ttl=ttl, lifetime=lifetime)
 
 
 def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
@@ -226,6 +227,7 @@ def find_providers(cid):
 class PubsubListener():
     _terminate = False
     __listening = False
+    sub = None
 
     def __init__(self, topic, eventhandler):
         self.topic = topic
@@ -250,8 +252,11 @@ class PubsubListener():
                                 "data": _decode_base64_url(message["data"]),
                             }
 
-                            _thread.start_new_thread(
-                                self.eventhandler, (data,))
+                            Thread(
+                                target=self.eventhandler,
+                                args=(data,),
+                                name="ipfs_api.PubsubListener-eventhandler"
+                            ).start()
                 else:
                     with http_client.pubsub.subscribe_old(self.topic) as self.sub:
                         for message in self.sub:
@@ -260,21 +265,27 @@ class PubsubListener():
                                 return
                             data = str(base64.b64decode(
                                 str(message).split('\'')[7]), "utf-8")
-                            _thread.start_new_thread(
-                                self.eventhandler, (data,))
-            except ConnectionError:
+                            Thread(
+                                target=self.eventhandler,
+                                args=(data,),
+                                name="ipfs_api.PubsubListener-eventhandler"
+                            ).start()
+            except:
                 pass
                 # print(f"IPFS API Pubsub: restarting sub {self.topic}")
         self.__listening = False
 
     def listen(self):
         self._terminate = False
-        thr = Thread(target=self._listen, args=())
-        thr.start()
+        self.listener_thread = Thread(target=self._listen, args=(),
+                                      name="ipfs_api.PubsubListener", daemon=True)
+        self.listener_thread.start()
 
     def terminate(self):
         """May let one more pubsub message through"""
         self._terminate = True
+        if self.sub:
+            self.sub.close()
 
 
 def pubsub_publish(topic, data):
@@ -342,7 +353,7 @@ def _encode_base64_url(data: bytearray):
     data = urlsafe_b64encode(data)
     while data[-1] == 61 and data[-1]:
         data = data[:-1]
-    data = b'u'+data
+    data = b'u' + data
     return data
 
 

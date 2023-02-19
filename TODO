@@ -2,7 +2,7 @@ FileTransmission:
   abortion
 
 DataTransmission: terminate properly on error
-
+PubsubListener: terminate faster
 include encryption parameters in transmit_data?
 add more realistic encryption scenario to Encryption example
 
