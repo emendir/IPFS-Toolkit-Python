@@ -2,21 +2,20 @@
 This script runs a docker container with which it tests various forms of
 communication.
 
-Set the 'file' variable below to the path of a file that can be transmitted
+Set the 'file_path' variable below to the path of a file_path that can be transmitted
 for testing, preferably of size 1-10MB.
 
 Make sure IPFS is running on the local host (configured with
 Libp2pStreamMounting and pubsub enabled) before running these tests.
 
 If testing is interrupted and the docker container isn't closed properly
-and you get an error reading:
+and the next time you run this script you get an error reading:
     docker: Error response from daemon: Conflict.
     The container name "/IPFS-Toolkit-Test" is already in use by container
 
-run the following command to stop all running containers:
-    docker stop $(docker ps -aq)
-And optionally to remove all containers:
-    docker rm $(docker ps -aq)
+run the following commands to stop and remove the unterminated container:
+    docker stop $(docker ps -aqf "name=^IPFS-Toolkit-Test$")
+    docker rm $(docker ps -aqf "name=^IPFS-Toolkit-Test$")
 """
 
 import time
@@ -24,6 +23,7 @@ import sys
 from termcolor import colored
 from docker_container import DockerContainer
 import os
+import threading
 if True:
     sys.path.insert(0, "..")
     import ipfs_datatransmission
@@ -32,31 +32,27 @@ if True:
 docker_peer = DockerContainer("IPFS-Toolkit-Test")
 
 # replace with the path of a file you would like to send
-file = "/mnt/Uverlin/Music/Davy Jones  - Pirates of the Caribbean.mp3"
+file_path = "/mnt/Uverlin/Music/Davy Jones  - Pirates of the Caribbean.mp3"
+# time in seconds to wait for file to transmit before calling test a failure
+FILE_SEND_TIMEOUT = 20
 
 
-peerID = ""
+def mark(success):
+    """
+    Returns a check or cross character depending on the input success.
+    If this script is run in pytest, this function runs an assert statement
+    on the input success to signal failure to pytest, cancelling the execution
+    of the rest of the calling function.
+    """
+    if __name__ == os.path.basename(__file__).strip(".py"):  # if run by pytest
+        assert success  # use the assert statement to signal failure to pytest
 
-while peerID == "":
-    time.sleep(5)
-    peerID = docker_peer.run_shell_command("ipfs id -f=\"<id>\"")
-# print(peerID)
-
-
-def test_find_peer():
-    success = False
-    for i in range(5):
-        success = ipfs_api.find_peer(peerID)
-        if success:
-            break
     if success:
         mark = colored("✓", "green")
     else:
         mark = colored("✗", "red")
-    print(mark, "ipfs_api.find_peer")
-    # docker_peer.run_shell_command("python3 /opt/IPFS-Toolkit/docker_script.py&")
-    # print(docker_peer.container_id)
-    # time.sleep(60)
+
+    return mark
 
 
 def on_message_received(conversation, message):
@@ -66,61 +62,56 @@ def on_message_received(conversation, message):
 
 
 file_progress = 0
+conv = None
+
+
+def test_find_peer():
+    success = False
+    for i in range(5):
+        success = ipfs_api.find_peer(docker_peer.ipfs_id)
+        if success:
+            break
+
+    print(mark(success), "ipfs_api.find_peer")
 
 
 def progress_handler(progress):
     global file_progress
-    file_progress = round(progress*100)
+    file_progress = round(progress * 100)
     print(colored(f"{file_progress}%", "green"))
-
-
-conv = None
 
 
 def test_create_conv():
     global conv
     # print("Setting up conversation...")
     conv = ipfs_datatransmission.start_conversation(
-        "test-con", peerID, "general_listener", on_message_received)
+        "test-con", docker_peer.ipfs_id, "general_listener", on_message_received)
 
-    if conv:
-        mark = colored("✓", "green")
-    else:
-        mark = colored("✗", "red")
-    print(mark, "ipfs_datatransmission.start_conversation")
+    success = conv != None
 
-
-file_send_timeout = 200
+    print(mark(success), "ipfs_datatransmission.start_conversation")
 
 
 def test_send_file():
-    # print("Sending file...")
-    conv.transmit_file(file, "testfile".encode(), progress_handler=progress_handler)
+    # print("Sending file_path...")
+    conv.transmit_file(file_path, "testfile".encode(),
+                       progress_handler=progress_handler)
 
-    for i in range(file_send_timeout):
+    for i in range(FILE_SEND_TIMEOUT):
         time.sleep(1)
         if file_progress == 100:
             break
     filesize = docker_peer.run_python_code(
-        f"import os;print(os.path.getsize('/opt/{os.path.basename(file)}'))")
-    # print("Result", filesize, str(os.path.getsize(file)))
-    if filesize.strip("\n") == str(os.path.getsize(file)):
-        mark = colored("✓", "green")
-        success = True
-    else:
-        mark = colored("✗", "red")
-        success = False
-    print(mark, "ipfs_datatransmission.transmit_file")
-    if file_progress == 100:
-        mark = colored("✓", "green")
-        success = True
-    else:
-        mark = colored("✗", "red")
-        success = False
-    print(mark, "ipfs_datatransmission.transmit_file - progress_handler")
+        f"import os;print(os.path.getsize('/opt/{os.path.basename(file_path)}'))")
+    # print("Result", filesize, str(os.path.getsize(file_path)))
+    success = filesize.strip("\n") == str(os.path.getsize(file_path))
+    print(mark(success), "ipfs_datatransmission.transmit_file")
+
+    success = (file_progress == 100)
+    print(mark(success), "ipfs_datatransmission.transmit_file - progress_handler")
 
 
-def test_listen():
+def _test_listen():
     conv.say("Hello there!".encode('utf-8'))
     print("Listening for reply...")
     data = conv.listen()
@@ -137,13 +128,27 @@ def test_terminate():
     conv.terminate()
 
 
+def test_thread_cleanup():
+    """
+    Shuts down the docker container and
+    tests that no unterminated threads remain running.
+    """
+    docker_peer.terminate()
+    success = len(threading.enumerate()) == 1
+    print(mark(success), "thread cleanup")
+
 # ipfs_datatransmission.print_log = True
 # ipfs_datatransmission.print_log_conversations = True
 # ipfs_datatransmission.print_log_files = True
+
 
 if __name__ == "__main__":
     test_find_peer()
     test_create_conv()
     test_send_file()
+    test_terminate()
 
-docker_peer.terminate()
+    # shutdown docker container and make sure no loose threads are hanging
+    test_thread_cleanup()
+else:
+    print(__name__)

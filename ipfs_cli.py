@@ -18,7 +18,11 @@ ipfs_url = "https://github.com/ipfs/go-ipfs/releases/download/v0.12.2/go-ipfs_v0
 ipfs_zip_path = "go-ipfs_v0.12.2_linux-arm64.tar.gz"
 
 
-def run_command(cmd):
+def run_command(cmd, as_str=True):
+    """
+    Parameters:
+        as_str: whether or not to return output decoded as string or raw bytes
+    """
     if isinstance(cmd, str):
         cmd = cmd.split(" ")
     try:
@@ -26,9 +30,15 @@ def run_command(cmd):
     except:
         return None
     proc.wait()
-    text = ""
+    if as_str:
+        text = ""
+    else:
+        text = b''
     for line in proc.stdout:
-        text += line.decode('utf-8')
+        if as_str:
+            text += line.decode('utf-8')
+        else:
+            text += line
     return text
 
 
@@ -245,7 +255,7 @@ def download(CID, path=""):
 
 
 def read(CID):
-    return run_command([ipfs_cmd, "cat", CID])
+    return run_command([ipfs_cmd, "cat", CID], as_str=False)
 
 
 def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
