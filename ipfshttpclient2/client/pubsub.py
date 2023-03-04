@@ -179,7 +179,7 @@ class Section(base.SectionBase):
         args = (topic, payload)
         return self._client.request('/pubsub/pub', args, decoder='json', **kwargs)
 
-    def subscribe(self, topic: str, discover: bool = False, **kwargs: base.CommonArgs):
+    def subscribe(self, topic: str, discover: bool = False, timeout=None, **kwargs: base.CommonArgs):
         """Subscribes to mesages on a given topic
 
         Subscribing to a topic in IPFS means anytime
@@ -226,7 +226,7 @@ class Section(base.SectionBase):
                         connection stream to the given topic.
         """
         args = (EncodeBase64Url(topic),)
-        return SubChannel(self._client.request('/pubsub/sub', args, stream=True, decoder='json'))
+        return SubChannel(self._client.request('/pubsub/sub', args, stream=True, decoder='json', timeout=timeout))
 
     def subscribe_old(self, topic: str, discover: bool = False, **kwargs: base.CommonArgs):
         """Subscribes to mesages on a given topic
@@ -275,7 +275,7 @@ class Section(base.SectionBase):
                         connection stream to the given topic.
         """
         args = (topic, discover)
-        return SubChannel(self._client.request('/pubsub/sub', args, stream=True, decoder='json'))
+        return SubChannel(self._client.request('/pubsub/sub', args, stream=True, decoder='json', timeout=timeout))
 
 
 def EncodeBase64Url(data: str):
