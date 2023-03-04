@@ -273,7 +273,7 @@ class TransmissionListener:
         # conn.close()
         Thread(target=eventhandler, args=(data, peerID),
                name="TransmissionListener.ReceivedTransmission").start()
-        close_listening_connection(str(our_port), our_port)
+        close_tcp_listening_connection(str(our_port), our_port)
         sock.close()
 
     def listen(self):
@@ -305,7 +305,7 @@ class TransmissionListener:
     def terminate(self):
         # self.socket.unbind(self.port)
         self._terminate = True
-        close_listening_connection(self.listener_name, self.port)
+        close_tcp_listening_connection(self.listener_name, self.port)
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect(("127.0.0.1", self.port))
@@ -1283,14 +1283,14 @@ connections_listen = list()
 
 
 def create_sending_connection(peerID: str, protocol: str, port=None):
-    ipfs_api.close_port_forwarding(
-        targetaddress="/p2p/" + peerID, protocol="/x/" + protocol)
+    close_sending_connection(
+        peerID=peerID, name=protocol)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if port == None:
         for prt in sending_ports:   # trying ports until we find a free one
             try:
-                ipfs_api.forward_from_port_to_peer(protocol, prt, peerID)
+                ipfs_api.create_tcp_sending_connection(protocol, prt, peerID)
                 sock.connect(("127.0.0.1", prt))
                 return sock
             except Exception as e:   # ignore errors caused by port already in use
@@ -1299,7 +1299,7 @@ def create_sending_connection(peerID: str, protocol: str, port=None):
         raise IPFS_Error("Failed to find free port for sending connection")
     else:
         try:
-            ipfs_api.forward_from_port_to_peer(protocol, port, peerID)
+            ipfs_api.create_tcp_sending_connection(protocol, port, peerID)
             sock.connect(("127.0.0.1", prt))
             return sock
         except Exception as e:
@@ -1312,16 +1312,14 @@ def create_listening_connection_tcp(protocol, port, force=True):
         bool force: whether or not already existing conflicting connections should be closed.
     """
     try:
-        ipfs_api.listen_on_port(protocol, port)
+        ipfs_api.create_tcp_listening_connection(protocol, port)
         if print_log_connections:
             print(f"listening as \"{protocol}\" on {port}")
     except:
         if force:
-            ipfs_api.close_port_forwarding(
-                listenaddress=f"/ip4/127.0.0.1/tcp/{port}")
-            ipfs_api.close_port_forwarding(protocol=f"/x/{protocol}")
+            close_tcp_listening_connection(port=port, name=protocol)
         try:
-            ipfs_api.listen_on_port(protocol, port)
+            ipfs_api.create_tcp_listening_connection(protocol, port)
         except:
             raise IPFS_Error(
                 "Error registering listening connection to IPFS: /x/" + protocol + "/ip4/127.0.0.1/tcp/" + str(port))
@@ -1335,19 +1333,18 @@ def create_listening_connection(protocol, port, force=True):
         bool force: whether or not already existing conflicting connections should be closed.
     """
     try:
-        ipfs_api.listen_on_port(protocol, port)
+        ipfs_api.create_tcp_listening_connection(protocol, port)
         if print_log_connections:
             print(f"listening fas \"{protocol}\" on {port}")
     except:
         if force:
-            ipfs_api.close_port_forwarding(
-                listenaddress=f"/ip4/127.0.0.1/udp/{port}")
-            ipfs_api.close_port_forwarding(protocol=f"/x/{protocol}")
+            close_tcp_listening_connection(port=port, name=protocol)
+
         try:
             time.sleep(0.1)
-            ipfs_api.listen_on_port(protocol, port)
+            ipfs_api.create_tcp_listening_connection(protocol, port)
             if print_log_connections:
-                print(f"listening fas \"{protocol}\" on {port}")
+                print(f"listening as \"{protocol}\" on {port}")
         except:
             raise IPFS_Error(
                 "Error registering listening connection to IPFS: /x/" + protocol + "/ip4/127.0.0.1/udp/" + str(port))
@@ -1356,18 +1353,18 @@ def create_listening_connection(protocol, port, force=True):
     return port
 
 
-def close_sending_connection(peerID, protocol):
+def close_sending_connection(peerID, name):
     try:
-        ipfs_api.close_port_forwarding(
-            targetaddress="/p2p/" + peerID, protocol=f"/x/{protocol}")
+        ipfs_api.close_tcp_sending_connection(
+            peer_id=peerID, name=name)
     except Exception as e:
         raise IPFS_Error(str(e))
 
 
-def close_listening_connection(protocol, port):
+def close_tcp_listening_connection(name, port):
     try:
-        ipfs_api.close_port_forwarding(
-            protocol=f"/x/{protocol}", targetaddress=f"/ip4/127.0.0.1/tcp/{port}")
+        ipfs_api.close_tcp_listening_connection(
+            name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))
 
@@ -1429,7 +1426,7 @@ class BufferReceiver():
         create_listening_connection(proto, self.listener.port)
 
     def terminate(self):
-        close_listening_connection(self.proto, self.listener.port)
+        close_tcp_listening_connection(self.proto, self.listener.port)
         self.listener.terminate()
 
     def __del__(self):

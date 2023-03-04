@@ -68,9 +68,11 @@ def start():
 
 
 def publish(path: str):
-    """
-    upload a file or a directory to IPFS.
-    Returns the Hash of the uploaded file.
+    """Upload a file or a directory to IPFS, returning its CID.
+    Args:
+        path (str): the path of the file to publish
+    Returns:
+        str: the IPFS content ID (CID) of the published file
     """
     result = http_client.add(path, recursive=True)
     if(type(result) == list):
@@ -79,7 +81,13 @@ def publish(path: str):
         return result.get("Hash")
 
 
-def download(cid, path=""):
+def download(cid, path="."):
+    """Get the specified IPFS content, saving it to a file.
+    Args:
+        cid (str): the IPFS content ID (cid) of the resource to get
+        path (str): (optional) the path (directory or filepath) of the saved file
+    """
+
     # create temporary download directory
     tempdir = tempfile.mkdtemp()
 
@@ -93,47 +101,70 @@ def download(cid, path=""):
     shutil.rmtree(tempdir)
 
 
-def read(ID):
-    return http_client.cat(ID)
+def read(cid):
+    """Returns the textual content of the specified IPFS resource.
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to read
+    Returns:
+        str: the content of the specified IPFS resource as text
+    """
+    return http_client.cat(cid)
 
 
 def pin(cid: str):
+    """Ensure the specified IPFS resource remains available on this IPFS node.    
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to pin
+    """
     http_client.pin.add(cid)
 
 
 def unpin(cid: str):
+    """Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.    
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to unpin
+    """
     http_client.pin.rm(cid)
 
 
 def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
+    """Create an IPNS record (eqv. IPNS key).
+    Args:
+        name (str): the name of the record/key (in the scope of this IPFS node)
+        type (str): the cryptographic algorithm behind this key's security
+        size (int): the length of the key
+    """
     result = http_client.key.gen(key_name=name, type=type, size=size)
-    print(result)
     if isinstance(result, list):
         return result[-1].get("Id")
     else:
         return result.get("Id")
 
 
-def update_ipns_record_from_hash(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
-    """
-    Parameters:
-        string ttl: Time duration this record should be cached for.
+def update_ipns_record_from_hash(record_name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
+    """Assign IPFS content to an IPNS record.
+    Args:
+        record_name (str): the name of the IPNS record (IPNS key) to be updated
+        cid (str): the IPFS content ID (CID) of the content to assign to the IPNS record
+        ttl (str): Time duration this record should be cached for.
                                 Uses the same syntax as the lifetime option.
                                 (caution: experimental).
-        string lifetime: Time duration that the record will be valid for.
+        lifetime (str): Time duration that the record will be valid for.
                                 Default: 24h.
     """
-    http_client.name.publish(ipfs_path=cid, key=name,
+    http_client.name.publish(ipfs_path=cid, key=record_name,
                              ttl=ttl, lifetime=lifetime)
 
 
 def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
-    """
-    Parameters:
-        string ttl: Time duration this record should be cached for.
+    """Publish a file to IPFS and assign it to an IPNS record.
+    Args:
+        record_name (str): the name of the IPNS record (IPNS key) to be updated
+        path (str): the path of the file to assign to the IPNS record
+        ttl (str): Time duration this record should be cached for.
                                 Uses the same syntax as the lifetime option.
                                 (caution: experimental).
-        string lifetime: Time duration that the record will be valid for.
+        lifetime (str): Time duration that the record will be valid for.
                                 Default: 24h.
     """
     cid = publish(path)
@@ -141,21 +172,44 @@ def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h")
     return cid
 
 
-def resolve_ipns_key(ipns_id, nocache=False):
-    return http_client.name.resolve(name=ipns_id, nocache=nocache).get("Path")
+def resolve_ipns_key(ipns_key, nocache=False):
+    """Get the IPFS CID of the given IPNS record (IPNS key)
+    Args:
+        ipns_key: the key of the IPNS record to lookup
+        nocache: whether or not to ignore this IPFS nodes cached memory of IPNS keys
+    Returns:
+        str: the IPFS CID associated with the IPNS key
+    """
+    return http_client.name.resolve(name=ipns_key, nocache=nocache).get("Path")
 
 
-def download_ipns_record(name, path="", nocache=False):
-    return download(resolve_ipns_key(name, nocache=nocache), path)
+def download_ipns_record(ipns_key, path="", nocache=False):
+    """Get the specified IPFS content, saving it to a file.
+    Args:
+        ipns_key (str): the key of the IPNS record to get
+        path (str): (optional) the path (directory or filepath) of the saved file
+        nocache: whether or not to ignore this IPFS nodes cached memory of IPNS keys
+    """
+    return download(resolve_ipns_key(ipns_key, nocache=nocache), path)
 
 
-def read_ipns_record(name, nocache=False):
-    return read(resolve_ipns_key(name, nocache=nocache))
-
-# Returns a list of the multiaddresses of all connected peers
+def read_ipns_record(ipns_key, nocache=False):
+    """Returns the textual content of the specified IPFS resource.
+    Args:
+        ipns_key (str): the key of the IPNS record to read
+    Returns:
+        str: the content of the specified IPFS resource as text
+    """
+    return read(resolve_ipns_key(ipns_key, nocache=nocache))
 
 
 def list_peer_multiaddrs():
+    """Returns a list of the IPFS multiaddresses of the other nodes
+    this node is connected to.
+    Returns:
+        list(str): a list of the IPFS multiaddresses of the other nodes
+        this node is connected to
+    """
     proc = Popen(['ipfs', 'swarm', 'peers'], stdout=PIPE)
     proc.wait()
     peers = []
@@ -164,42 +218,102 @@ def list_peer_multiaddrs():
 
     return peers
 
-# Returns the multiaddresses of input the peer ID
 
-
-def find_peer(ID: str):
+def find_peer(peer_id: str):
+    """Try to connect to the specified IPFS node.
+    Args:
+        peer_id (str): the IPFS peer ID of the node to connect to
+    Returns:
+        str: the multiaddress of the connected node
+    """
     try:
-        response = http_client.dht.findpeer(ID)
+        response = http_client.dht.findpeer(peer_id)
         if(len(response.get("Responses")[0].get("Addrs")) > 0):
             return response
     except:
         return None
 
 
-# Returns the IPFS ID of the currently running IPFS node
 def my_id():
+    """Returns this IPFS node's peer ID.
+    Returns:
+        str: the peer ID of this node
+    """
     return http_client.id().get("ID")
 
 
-def listen_on_port(protocol, port):
-    http_client.p2p.listen("/x/" + protocol, "/ip4/127.0.0.1/tcp/" + str(port))
+def create_tcp_listening_connection(name: str, port: int):
+    """Open a listener TCP connection for IPFS' libp2p stream-mounting (port-forwarding).
+    TCP traffic coming from another peer via this connection is forwarded
+    to the specified port on localhost.
+    Args:
+        name (str): the name of the connection (starts with /x/)
+        port (int): the local TCP port number to forward incoming traffic to
+    """
+    if name[:3] != "/x/":
+        name = "/x/" + name
+    http_client.p2p.listen(name, "/ip4/127.0.0.1/tcp/" + str(port))
 
 
-def forward_from_port_to_peer(protocol: str, port, peerID):
-    http_client.p2p.forward("/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
+def create_tcp_sending_connection(name: str, port, peerID):
+    """Open a sending TCP connection for IPFS' libp2p stream-mounting (port-forwarding).
+    TCP traffic sent to the specified port on localhost will be fowarded
+    to the specified peer via this connection.
+    Args:
+        name (str): the name of the connection (starts with /x/)
+        port (int): the local TCP port number from which to forward traffic
+    """
+    if name[:3] != "/x/":
+        name = "/x/" + name
+    http_client.p2p.forward(name, "/ip4/127.0.0.1/tcp/" +
                             str(port), "/p2p/" + peerID)
 
 
-def close_port_forwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
-    http_client.p2p.close(all, protocol, listenaddress, targetaddress)
+def close_all_tcp_connections():
+    """Close all libp2p stream-mounting (IPFS port-forwarding) connections."""
+    http_client.p2p.close(True)
+
+
+def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: str = None):
+    """Close specific sending libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local forwarded TCP port of the connection to close
+        peer_id (str): the target peer_id of the connection to close
+    """
+    if name and name[:3] != "/x/":
+        name = "/x/" + name
+    if port and isinstance(port, int):
+        listenaddress = f"/ip4/127.0.0.1/tcp/{port}"
+    else:
+        listenaddress = port
+    if peer_id and peer_id[:5] != "/p2p/":
+        targetaddress = "/p2p/" + peer_id
+    else:
+        targetaddress = peer_id
+    http_client.p2p.close(False, name, listenaddress, targetaddress)
+
+
+def close_tcp_listening_connection(name: str = None, port: str = None):
+    """Close specific listening libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local listening TCP port of the connection to close
+    """
+    if name and name[:3] != "/x/":
+        name = "/x/" + name
+    if port and isinstance(port, int):
+        targetaddress = f"/ip4/127.0.0.1/tcp/{port}"
+    else:
+        targetaddress = port
+    http_client.p2p.close(False, name, None, targetaddress)
 
 
 def check_peer_connection(id, name=""):
-    """
-    Tries to connect to the specified peer, and stores its multiaddresses in ipfs_lns.
-    Paramaters:
-        id: the IPFS PeerID or the ipfs_lns name  of the computer to connect to
-        name: (optional) the human readable name of the computer to connect to (not critical, you can put in whatever you like)"""
+    """Try to connect to the specified peer, and stores its multiaddresses in ipfs_lns.
+    Args:
+        id (str): the IPFS PeerID or the ipfs_lns name  of the computer to connect to
+        name (str): (optional) the human readable name of the computer to connect to (not critical, you can put in whatever you like)"""
     contact = ipfs_lns.get_contact(id)
     if not contact:
         contact = ipfs_lns.add_contact(id, name)
@@ -279,7 +393,8 @@ class PubsubListener():
 
     def listen(self):
         self._terminate = False
-        self.listener_thread = Thread(target=self._listen, args=(), name="ipfs_api.PubsubListener")
+        self.listener_thread = Thread(
+            target=self._listen, args=(), name="ipfs_api.PubsubListener")
         self.listener_thread.start()
 
     def terminate(self):

@@ -14,8 +14,8 @@ from ipfs_api import (
     list_peer_multiaddrs,
     find_peer,
     my_id,
-    listen_on_port,
-    forward_from_port_to_peer,
+    create_tcp_listening_connection,
+    create_tcp_sending_connection,
     close_port_forwarding,
     check_peer_connection,
     find_providers,
@@ -141,13 +141,13 @@ def MyID():
 
 
 def ListenOnPort(protocol, port):
-    print(colored("IPFS_API: DEPRECATED: This function (ListenOnPort) has been renamed to listen_on_port to accord with PEP 8 naming conventions.", "yellow"))
-    return listen_on_port(protocol, port)
+    print(colored("IPFS_API: DEPRECATED: This function (ListenOnPort) has been renamed to create_tcp_listening_connection to accord with PEP 8 naming conventions.", "yellow"))
+    return create_tcp_listening_connection(protocol, port)
 
 
 def ForwardFromPortToPeer(protocol: str, port, peerID):
-    print(colored("IPFS_API: DEPRECATED: This function (ForwardFromPortToPeer) has been renamed to forward_from_port_to_peer to accord with PEP 8 naming conventions.", "yellow"))
-    return forward_from_port_to_peer(protocol, port, peerID)
+    print(colored("IPFS_API: DEPRECATED: This function (ForwardFromPortToPeer) has been renamed to create_tcp_sending_connection to accord with PEP 8 naming conventions.", "yellow"))
+    return create_tcp_sending_connection(protocol, port, peerID)
 
 
 def ClosePortForwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):

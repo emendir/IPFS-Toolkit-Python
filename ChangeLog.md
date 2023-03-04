@@ -4,8 +4,22 @@ This library is still under development and is currently being tested in various
 ## v0.5.0 (2023-02-) (not backward-compatible)
 ### Renaming
 With version 0.5.0, all functions and class methods have been renamed from PascalCase to snake_case to comply with the standard PEP8 naming conventions. 
+### Other API Changes:
+- CatFile renamed to read_file
+- IPFS libp2p stream-mounting functions ( previously ForwardFromPortToPeer(), ListenOnPort(), ClosePortForwarding()):
+  - Renamed and Reorganised to:
+    - create_tcp_sending_connection()
+    - create_tcp_listening_connection()
+    - close_all_tcp_connections()
+    - close_tcp_sending_connection()
+    - close_tcp_listening_connection()
+  -> with clearer parameters
+
 ### IPFS-DataTransmission Protocol Updates
 With version 0.5.0, the basic communication protocol on which all of the features of the ipfs_datatransmission module are built has been improved to bring a massive increase in the speed of connection establishment. Unfortunately, this update lacks backward compatibility, which means that if you have built a project that uses ipfs_datatransmission, instances of your program running v0.4.X and v0.5.X of IPFS-Toolkit won't be able to communicate with each other.
+
+### Features:
+- ipfs_api.pubsub_subscribe: now has a timeout option. Note that it never lasted forever even without the timeout :(
 
 ## v0.4.4 (2023-01-28)
 - ipfs_api.topic_peers(): new function to get the number of peers we are connected to on a pubsub topic
@@ -21,7 +35,7 @@ bugfix
 
 ## v0.4.0 (2022-12-02)
 - ipfs_datatransmission: All functions now throw exceptions on failure instead of quietly returning False
-- ipfs_api: forward_from_port_to_peer now throws exceptions on failure instead of quietly returning False
+- ipfs_api: create_tcp_sending_connection now throws exceptions on failure instead of quietly returning False
 - ipfs_datatransmission.Conversation.listen_for_file: two timeout parameters: abs_timeout, no_coms_timeout
 - ipfs_datatransmission.Conversation.transmit_file: progress callback now supports 1-4 parameters
 - ipfs_datatransmission.FileTransmissionReceiver: progress callback now supports 1-4 parameters
@@ -45,7 +59,7 @@ ipfs_datatransmission: debugged Conversation.listen_for_file
 ipfs_cli: added ipfs_cli as a fallback API to IPFS in case the ipfshttpcient2 API fails to load.
 
 ## v0.3.1
-ipfs_api: forward_from_port_to_peer now returns a boolean indicating whether or not it successfully connected to the specified port.
+ipfs_api: create_tcp_sending_connection now returns a boolean indicating whether or not it successfully connected to the specified port.
 ## v0.3.0
 ipfs_api: PubSub (ipfs_api.publish_to_topic & ipfs_api.subscribe_to_topic) is now compatible with IPFS v0.11.0! As described in the [IPFS changelog](https://github.com/ipfs/go-ipfs/releases/tag/v0.11.0), the official PubSub's publish function now accepts files instead of plain data. ipfs_api.publish_to_topic however accepts plain (as strings or bytearrays) as well as filepaths, saving the data to temporary files to publish so that the user doesn't have to bother with it. Also new is that (when using IPFS >= v0.11.0) SubscribToTopic passes a dictionary that includes the message data (as bytes) as well as its sender as the parameter to its eventhandler, instead of just the message data as a string.
 When using a version of IPFS below v0.11.0, the behaviour of the (ipfs_api.publish_to_topic & ipfs_api.subscribe_to_topic) remains as it was in the older versions of IPFS-Toolkit (v0.2.X).
