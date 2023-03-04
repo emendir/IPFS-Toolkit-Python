@@ -175,7 +175,10 @@ class PubsubListener():
             proc = Popen([ipfs_cmd, "pubsub", "sub", self.topic],
                          stdout=PIPE, stdin=PIPE)
             while True:
-                data = proc.stdout.read1()
+                data = {
+                    "senderID": "",
+                    "data": proc.stdout.read1(),
+                }
                 Thread(target=self.eventhandler, args=(data,)).start()
         self.__listening = False
 

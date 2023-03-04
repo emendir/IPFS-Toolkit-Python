@@ -4,6 +4,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+from multiprocessing import Process
 import shutil
 import tempfile
 # import sys
@@ -228,6 +229,7 @@ class PubsubListener():
     _terminate = False
     __listening = False
     sub = None
+    _REFRESH_RATE = 5  # seconds. How often the pubsub HTTP listener ist restarted, also the maximum duration termination can take
 
     def __init__(self, topic, eventhandler):
         self.topic = topic
@@ -242,7 +244,7 @@ class PubsubListener():
         while not self._terminate:
             try:
                 if int(http_client.version()["Version"].split(".")[1]) >= 11:
-                    with http_client.pubsub.subscribe(self.topic) as self.sub:
+                    with http_client.pubsub.subscribe(self.topic, timeout=self._REFRESH_RATE) as self.sub:
                         for message in self.sub:
                             if self._terminate:
                                 self.__listening = False
@@ -277,12 +279,13 @@ class PubsubListener():
 
     def listen(self):
         self._terminate = False
-        self.listener_thread = Thread(target=self._listen, args=(),
-                                      name="ipfs_api.PubsubListener", daemon=True)
+        self.listener_thread = Thread(target=self._listen, args=(), name="ipfs_api.PubsubListener")
         self.listener_thread.start()
 
     def terminate(self):
-        """May let one more pubsub message through"""
+        """May let one more pubsub message through
+        Takes up to self._REFRESH_RATE seconds to complete.
+        """
         self._terminate = True
         if self.sub:
             self.sub.close()
