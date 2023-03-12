@@ -1,12 +1,9 @@
 from ipfs_datatransmission import (
-    resend_timeout_sec,
-    close_timeout_sec,
-    transmission_send_timeout_sec,
-    transmission_request_max_retries,
-    transmission_send_timeout_sec,
-    transmission_receive_timeout_sec,
-    def_buffer_size,
-    def_block_size,
+    TRANSM_SEND_TIMEOUT_SEC,
+    TRANSM_REQ_MAX_RETRIES,
+    TRANSM_RECV_TIMEOUT_SEC,
+    BUFFER_SIZE,
+    BLOCK_SIZE,
     transmit_data,
     listen_for_transmissions,
     TransmissionListener,
@@ -22,10 +19,9 @@ from ipfs_datatransmission import (
     listen_to_buffers_on_port,
     BufferSender,
     BufferReceiver,
-    send_buffer_to_port
 )
 from termcolor import colored
-print(colored("IPFS_DataTransmission: DEPRECATED: The IPFS_DataTransmission module has been renamed to ipfs_datatransmission to accord with PEP 8 naming conventions.", "yellow"))
+print(colored("IPFS_DataTransmission: DEPRECATED: The IPFS_DataTransmission module has been renamed to ipfs_datatransmission.ipfs_datatransmission to accord with PEP 8 naming conventions.", "yellow"))
 
 # TODO: DEPRECATION WARNINGS
 
@@ -34,9 +30,9 @@ def TransmitData(
         data: bytes,
         peerID: str,
         req_lis_name: str,
-        timeout_sec: int = transmission_send_timeout_sec,
-        max_retries: int = transmission_request_max_retries):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (TransmitData) has been renamed to transmit_data to accord with PEP 8 naming conventions.", "yellow"))
+        timeout_sec: int = TRANSM_SEND_TIMEOUT_SEC,
+        max_retries: int = TRANSM_REQ_MAX_RETRIES):
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.TransmitData) has been renamed to ipfs_datatransmission.transmit_data to accord with PEP 8 naming conventions.", "yellow"))
     return transmit_data(
         data,
         peerID,
@@ -46,22 +42,22 @@ def TransmitData(
 
 
 def ListenForTransmissions(listener_name, eventhandler):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (ListenForTransmissions) has been renamed to listen_for_transmissions to accord with PEP 8 naming conventions.", "yellow"))
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.ListenForTransmissions) has been renamed to ipfs_datatransmission.listen_for_transmissions to accord with PEP 8 naming conventions.", "yellow"))
     return listen_for_transmissions(listener_name, eventhandler)
 
 
-def StartConversation(conversation_name,
+def StartConversation(conv_name,
                       peerID,
                       others_req_listener,
                       data_received_eventhandler=None,
                       file_eventhandler=None,
                       file_progress_callback=None,
                       encryption_callbacks=None,
-                      timeout_sec=transmission_send_timeout_sec,
-                      max_retries=transmission_request_max_retries,
+                      timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+                      max_retries=TRANSM_REQ_MAX_RETRIES,
                       dir="."):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (StartConversation) has been renamed to start_conversation to accord with PEP 8 naming conventions.", "yellow"))
-    return start_conversation(conversation_name,
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.StartConversation) has been renamed to ipfs_datatransmission.start_conversation to accord with PEP 8 naming conventions.", "yellow"))
+    return start_conversation(conv_name,
                               peerID,
                               others_req_listener,
                               data_received_eventhandler=data_received_eventhandler,
@@ -74,7 +70,7 @@ def StartConversation(conversation_name,
 
 
 def ListenForConversations(conv_name, eventhandler):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (ListenForConversations) has been renamed to listen_for_conversations to accord with PEP 8 naming conventions.", "yellow"))
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.ListenForConversations) has been renamed to ipfs_datatransmission.listen_for_conversations to accord with PEP 8 naming conventions.", "yellow"))
     return listen_for_conversations(conv_name, eventhandler)
 
 
@@ -84,11 +80,11 @@ def TransmitFile(filepath,
                  metadata=bytearray(),
                  progress_handler=None,
                  encryption_callbacks=None,
-                 block_size=def_block_size,
-                 transmission_send_timeout_sec=transmission_send_timeout_sec,
-                 transmission_request_max_retries=transmission_request_max_retries
+                 block_size=BLOCK_SIZE,
+                 transmission_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+                 transmission_request_max_retries=TRANSM_REQ_MAX_RETRIES
                  ):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (TransmitFile) has been renamed to transmit_file to accord with PEP 8 naming conventions.", "yellow"))
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.TransmitFile) has been renamed to ipfs_datatransmission.transmit_file to accord with PEP 8 naming conventions.", "yellow"))
     return transmit_file(filepath,
                          peerID,
                          others_req_listener,
@@ -96,8 +92,8 @@ def TransmitFile(filepath,
                          progress_handler=progress_handler,
                          encryption_callbacks=encryption_callbacks,
                          block_size=block_size,
-                         transmission_send_timeout_sec=transmission_send_timeout_sec,
-                         transmission_request_max_retries=transmission_request_max_retries
+                         transm_send_timeout_sec=transmission_send_timeout_sec,
+                         transm_req_max_retries=transmission_request_max_retries
                          )
 
 
@@ -106,7 +102,7 @@ def ListenForFileTransmissions(listener_name,
                                progress_handler=None,
                                dir=".",
                                encryption_callbacks=None):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (ListenForFileTransmissions) has been renamed to listen_for_file_transmissions to accord with PEP 8 naming conventions.", "yellow"))
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.ListenForFileTransmissions) has been renamed to ipfs_datatransmission.listen_for_file_transmissions to accord with PEP 8 naming conventions.", "yellow"))
     return listen_for_file_transmissions(listener_name,
                                          eventhandler,
                                          progress_handler=progress_handler,
@@ -115,16 +111,18 @@ def ListenForFileTransmissions(listener_name,
 
 
 def SendBufferToPort(buffer, addr, port):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (SendBufferToPort) has been renamed to send_buffer_to_port to accord with PEP 8 naming conventions.", "yellow"))
-    return send_buffer_to_port(buffer, addr, port)
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.SendBufferToPort) has been removed in ipfs_api.", "yellow"))
+    import socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(buffer, (addr, port))
 
 
 def ListenToBuffersOnPort(eventhandler,
                           port=0,
-                          buffer_size=def_buffer_size,
+                          buffer_size=BUFFER_SIZE,
                           monitoring_interval=2,
                           status_eventhandler=None):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (ListenToBuffersOnPort) has been renamed to listen_to_buffers_on_port to accord with PEP 8 naming conventions.", "yellow"))
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.ListenToBuffersOnPort) has been renamed to ipfs_datatransmission.listen_to_buffers_on_port to accord with PEP 8 naming conventions.", "yellow"))
     return listen_to_buffers_on_port(eventhandler,
                                      port=port,
                                      buffer_size=buffer_size,
@@ -134,11 +132,11 @@ def ListenToBuffersOnPort(eventhandler,
 
 def ListenToBuffers(eventhandler,
                     proto,
-                    buffer_size=def_buffer_size,
+                    buffer_size=BUFFER_SIZE,
                     monitoring_interval=2,
                     status_eventhandler=None,
                     eventhandlers_on_new_threads=True):
-    print(colored("IPFS_DataTransmission: DEPRECATED: This function (ListenToBuffersConversation.) has been renamed to listen_to_buffers to accord with PEP 8 naming conventions.", "yellow"))
+    print(colored("IPFS_DataTransmission: DEPRECATED: This function (IPFS_DataTransmission.ListenToBuffersConversation.) has been renamed to ipfs_datatransmission.listen_to_buffers to accord with PEP 8 naming conventions.", "yellow"))
     return listen_to_buffers(eventhandler,
                              proto,
                              buffer_size=buffer_size,
@@ -151,52 +149,52 @@ def ListenToBuffers(eventhandler,
 
 
 def __ConversationStart(self,
-                        conversation_name,
+                        conv_name,
                         peerID,
                         others_req_listener,
                         data_received_eventhandler=None,
                         file_eventhandler=None,
                         file_progress_callback=None,
                         encryption_callbacks=None,
-                        transmission_send_timeout_sec=transmission_send_timeout_sec,
-                        transmission_request_max_retries=transmission_request_max_retries,
+                        transmission_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+                        transmission_request_max_retries=TRANSM_REQ_MAX_RETRIES,
                         dir="."
                         ):
     print(colored("IPFS_DataTransmission.Conversation: DEPRECATED: This function (Start) has been renamed to start to accord with PEP 8 naming conventions.", "yellow"))
-    return self.start(conversation_name,
+    return self.start(conv_name,
                       peerID,
                       others_req_listener,
                       data_received_eventhandler=data_received_eventhandler,
                       file_eventhandler=file_eventhandler,
                       file_progress_callback=file_progress_callback,
                       encryption_callbacks=encryption_callbacks,
-                      transmission_send_timeout_sec=transmission_send_timeout_sec,
-                      transmission_request_max_retries=transmission_request_max_retries,
+                      transm_send_timeout_sec=transmission_send_timeout_sec,
+                      transm_req_max_retries=transmission_request_max_retries,
                       dir=dir
                       )
 
 
 def __ConversationJoin(self,
-                       conversation_name,
+                       conv_name,
                        peerID,
                        others_trsm_listener,
                        data_received_eventhandler=None,
                        file_eventhandler=None,
                        file_progress_callback=None,
                        encryption_callbacks=None,
-                       transmission_send_timeout_sec=transmission_send_timeout_sec,
-                       transmission_request_max_retries=transmission_request_max_retries,
+                       transmission_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+                       transmission_request_max_retries=TRANSM_REQ_MAX_RETRIES,
                        dir="."):
     print(colored("IPFS_DataTransmission.Conversation: DEPRECATED: This function (Join) has been renamed to join to accord with PEP 8 naming conventions.", "yellow"))
-    self.join(conversation_name,
+    self.join(conv_name,
               peerID,
               others_trsm_listener,
               data_received_eventhandler=data_received_eventhandler,
               file_eventhandler=file_eventhandler,
               file_progress_callback=file_progress_callback,
               encryption_callbacks=encryption_callbacks,
-              transmission_send_timeout_sec=transmission_send_timeout_sec,
-              transmission_request_max_retries=transmission_request_max_retries,
+              transm_send_timeout_sec=transmission_send_timeout_sec,
+              transm_req_max_retries=transmission_request_max_retries,
               dir=dir)
 
 
@@ -205,15 +203,15 @@ def __ConversationListen(self, timeout=None):
     return self.listen(timeout=None)
 
 
-def __ConversationListenForFile(self, abs_timeout=None, no_coms_timeout=None, timeout_exception=False):
+def __ConversationListenForFile(self, abs_timeout=None, no_coms_timeout=None):
     print(colored("IPFS_DataTransmission.Conversation: DEPRECATED: This function (ListenForFile) has been renamed to listen_for_file to accord with PEP 8 naming conventions.", "yellow"))
-    return self.listen_for_file(abs_timeout=None, no_coms_timeout=None, timeout_exception=False)
+    return self.listen_for_file(abs_timeout=None, no_coms_timeout=None)
 
 
 def __ConversationSay(self,
                       data,
-                      timeout_sec=Conversation._transmission_send_timeout_sec,
-                      max_retries=Conversation._transmission_request_max_retries
+                      timeout_sec=Conversation._transm_send_timeout_sec,
+                      max_retries=Conversation._transm_req_max_retries
                       ):
     print(colored("IPFS_DataTransmission.Conversation: DEPRECATED: This function (Say) has been renamed to say to accord with PEP 8 naming conventions.", "yellow"))
     return self.say(
@@ -227,9 +225,9 @@ def __ConversationTransmitFile(self,
                                filepath,
                                metadata=bytearray(),
                                progress_handler=Conversation.file_progress_callback,
-                               block_size=def_block_size,
-                               transmission_send_timeout_sec=Conversation._transmission_send_timeout_sec,
-                               transmission_request_max_retries=Conversation._transmission_request_max_retries
+                               block_size=BLOCK_SIZE,
+                               TRANSM_SEND_TIMEOUT_SEC=Conversation._transm_send_timeout_sec,
+                               TRANSM_REQ_MAX_RETRIES=Conversation._transm_req_max_retries
                                ):
     print(colored("IPFS_DataTransmission.Conversation: DEPRECATED: This function (TransmitFile) has been renamed to transmit_file to accord with PEP 8 naming conventions.", "yellow"))
     return self.transmit_file(
@@ -237,8 +235,8 @@ def __ConversationTransmitFile(self,
         metadata=metadata,
         progress_handler=progress_handler,
         block_size=block_size,
-        transmission_send_timeout_sec=transmission_send_timeout_sec,
-        transmission_request_max_retries=transmission_request_max_retries
+        transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+        transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
     )
 
 
@@ -263,8 +261,8 @@ Conversation.Close = __ConversationClose
 
 
 def __FileTransmitterStart(self):
-    print(colored("IPFS_DataTransmission.FileTransmitter: DEPRECATED: This function (Start) has been renamed to start to accord with PEP 8 naming conventions.", "yellow"))
-    return self.start()
+    print(colored("IPFS_DataTransmission.FileTransmitter: DEPRECATED: This function is no longer implemented in ipfs_api as file transmissions now start automatically.", "yellow"))
+    return
 
 
 FileTransmitter.Start = __FileTransmitterStart

@@ -17,8 +17,12 @@ def get_option(option):
 
 
 class DockerContainer():
-    def __init__(self, container_name):
+    def __init__(self, container_name, auto_run=True):
         self.container_name = container_name
+        if auto_run:
+            self.run()
+
+    def run(self):
         threading.Thread(target=self._run_docker, args=()).start()
         time.sleep(5)
 
@@ -30,7 +34,6 @@ class DockerContainer():
             text=True,
             check=True
         )
-        self.container_name = container_name
         self.container_id = result.stdout.strip("\n")
 
         self.ipfs_id = ""

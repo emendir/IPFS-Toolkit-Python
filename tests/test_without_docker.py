@@ -6,7 +6,6 @@ from termcolor import colored
 from datetime import datetime
 if True:
     sys.path.insert(0, "..")
-    import ipfs_datatransmission
     import ipfs_api
 
 

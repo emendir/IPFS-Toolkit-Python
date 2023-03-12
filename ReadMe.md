@@ -1,31 +1,40 @@
 A library for working with IPFS in Python.  
-It includes a programmer-friendly API called __ipfs_api__ for easy usage of some of the more common IPFS features, a module called __ipfs_datatransmission__ for direct P2P data transmission between two IPFS-Nodes and a module called __ipfs_lns__ for remembering the multiaddressess of known IPFS nodes ("contacts") to speed up connection times.
+It includes a programmer-friendly API called __ipfs_api__ for easy usage of some of the most useful IPFS features, a module called __ipfs_datatransmission__ that allows for easy direct P2P data transmission between two IPFS nodes and a module called __ipfs_lns__ for remembering the multiaddressess of known IPFS nodes ("contacts") to speed up connection times.
 
-Under the hood these modules use a slightly updated version ipfshttpclient, a no-longer-maintained python package for interacting with IPFS via its HTTP-API. The modified package can be accesses as ipfs_api.ipfshttpclient2 to gain full access to all supported ipfs interactivity. In environments where interaction with the IPFS via HTTP is not possible, this package automatically uses __ipfs_cli__ as a fallback, a module that provides all the functionality of ipfs_api by communicating to ipfs via its command-line interface. 
+Under the hood these modules use a slightly updated version [ipfshttpclient](https://github.com/ipfs-shipyard/py-ipfs-http-client), a no-longer-maintained Python package for interacting with IPFS via its HTTP-API. The modified package can be accesses as ipfs_api.ipfshttpclient2 to gain full access to all supported ipfs interactivity in a structured manner similar to the IPFS CLI. In environments where interaction with the IPFS via HTTP is not possible, this package automatically uses __ipfs_cli__ as a fallback, a module that provides all the functionality of ipfs_api by communicating to ipfs via its command-line interface. 
 
 
 # Package Contents:
-## Modules:
-- __ipfs_api__: a wrapper for the module ipfshttpclient2 that makes it easier to work with IPFS in Python
-- __ipfs_datatransmission__: a Python module that enables P2P data transmission between IPFS nodes
-- __ipfs_lns__: a Python module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)
-- __ipfshttpclient2__: a modified version of the official ipfshttpclient module that has been expanded to include the ipfs.p2p functions
+## Python Modules:
+- __ipfs_api__: a wrapper for the module ipfshttpclient2 that provides a simple API for some of the most useful feature of IPFS
+- __ipfs_datatransmission__: a module that enables P2P data transmission between IPFS nodes
+- __ipfs_lns__: a module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)
+- __ipfshttpclient2__: a modified version of the official ipfshttpclient module that has been expanded and updated where needed 
 
 ## Other:
 - __Examples__: a folder of scripts demonstrating how to work with ipfs_datatransmission
 
 
-# Development Updates:
-This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
+# Development Updates: v0.5.0 is released!
+
+This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, some successive versions of this library are not fully backward-compatible with their previous versions.  
+A history of the changes made in all updates is kept under  [./ChangeLog.md](./ChangeLog.md). 
+### Overview
+- renamed all modules and functions from PascalCase to snake_case to conform with Python naming conventions
+- massive speed improvements to the IPFS-DataTransmission protocol (not backward-compatible)
+
 ## Renaming
-With version 0.5.0, all functions and class methods have been renamed from PascalCase to snake_case to comply with the standard PEP8 naming conventions. 
-## IPFS-DataTransmission Protocol Updates
-With version 0.5.0, the basic communication protocol on which all of the features of the ipfs_datatransmission module are built has been improved to bring a massive increase in the speed of connection establishment. Unfortunately, this update lacks backward compatibility, which means that if you have built a project that uses ipfs_datatransmission, instances of your program running v0.4.X and v0.5.X of IPFS-Toolkit won't be able to communicate with each other.
+IPFS-Toolkit has finally adopted standard Python naming conventions! With version 0.5.0, all functions and class methods have been renamed from PascalCase to snake_case to comply with PEP8. The now deprecated PascalCase version of modules remain in v0.5.X so as not to immediately break applications on updating this library, albeit with annoying deprecation warnings in the console output to encourage programmers to take a few minutes and update their code. 
+## IPFS-DataTransmission Protocol Updates (not backward-compatible)
+With version 0.5.0, the underlying communication protocol on which all of the features of the ipfs_datatransmission module are built has been improved to bring a massive increase in the speed of connection establishment. Unfortunately, this update lacks backward compatibility, which means that if you have built a project that uses ipfs_datatransmission, instances of your program running v0.4.X and v0.5.X of IPFS-Toolkit won't be able to communicate with each other.
+## Other
+- Documentation: full API reference for ipfs_api and ipfs_datatransmission in [./Documentation](./Documentation) 
+- various minor feature updates, see [./ChangeLog.md](./ChangeLog.md) 
 
 
 # Getting started with IPFS-Toolkit:
 1. Install IPFS-Toolkit (see below)
-2. Read the _Modules Contained in IPFS-Toolkit_ section below to learn what this package contains and how it works. 
+2. Read the _Modules Contained in IPFS-Toolkit_ section below to learn what this package contains and how it works. For details about the functions contained in the modules, check out the API reference in [./Documentation](./Documentation) 
 3. For IPFS-DataTransmission: Read and try out the demo scripts in the Examples folder.
 
 ## Setup
@@ -53,7 +62,7 @@ IPFS-Toolkit is made for interacting with IPFS in the Python programming languag
 - __Pip__ for Python3:
     https://pip.pypa.io/en/stable/installing/
 - If you want to use the source code, install the following prerequisite Python modules:  
-  (depending on your python installation you may need to use `pip` instead of `pip3` in the following commands)  
+  (depending on your Python installation you may need to use `pip` instead of `pip3` in the following commands)  
 ```bash
 pip3 install setuptools  
 pip3 install wheel  
@@ -81,7 +90,7 @@ cid = ipfs_api.publish('./SomeFileOrDir') # upload file or directory to IPFS and
 # Managing IPNS keys  
 ipfs_api.create_ipns_record('MyWebsite') # generate a pair of IPNS name keys  
 ipfs_api.update_ipns_record('MyWebsite', './SomeFileOrDir') # upload file to IPFS & publish   
-ipfs_api.update_ipns_record_from_hash('MyWebsite', cid) # publish IPFS content to IPNS key  
+ipfs_api.update_ipns_record_from_cid('MyWebsite', cid) # publish IPFS content to IPNS key  
 
 # IPFS PubSub  
 ipfs_api.pubsub_subscribe("test", print) # print is the eventhandler  

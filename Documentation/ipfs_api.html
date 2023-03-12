@@ -1,0 +1,1483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>ipfs_api API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{color:#ddd;background:#111;--highlight-color:#050}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #222;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#f33}pre code{color:#ddd;background:#080808;font-size:.8em;line-height:1.4em}code{color:#ddd;background:#141414;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{color:#ddd;background:#080808;border:0;border-top:1px solid #555;border-bottom:1px solid #555;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #222}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{color:#ddd;background:#181818;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{color:#ddd;background:#181818}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#666;border-left:5px solid #181818;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#999;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{color:#ddd;background:#202}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #222}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#fff !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #666;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ipfs_api</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># This is a wrapper for the ipfshttpclient module to make it easier to interact with the Interplanetary File System (IPFS)
+# process running on the computer.
+# To use it you must have IPFS running on your computer.
+# This wrapper uses a custom updated version of the ipfshttpclient.
+
+
+import shutil
+import tempfile
+# import sys
+from subprocess import Popen, PIPE
+# import subprocess
+import os
+import os.path
+# import threading
+# import multiprocessing
+import traceback
+import ipfs_lns
+import logging
+from threading import Thread
+try:
+    import base64
+    import ipfshttpclient2 as ipfshttpclient
+    from requests.exceptions import ConnectionError
+    from base64 import urlsafe_b64decode, urlsafe_b64encode
+    http_client = ipfshttpclient.client.Client()
+    LIBERROR = False
+except Exception as e:
+    print(str(e))
+    LIBERROR = True
+    http_client = None
+    ipfshttpclient = None
+print_log = False
+
+autostart = True
+started = False
+# List for keeping track of subscriptions to IPFS topics, so that subscriptions can be ended
+subscriptions = list([])
+
+
+def _start():
+    try:
+        global http_client
+        global started
+        from ipfs_cli import run_command, ipfs_cmd
+        Thread(target=run_command, args=[
+               ipfs_cmd, &#34;daemon&#34;, &#34;--enable-pubsub-experiment&#34;])
+
+        http_client = ipfshttpclient.connect(&#39;/ip4/127.0.0.1/tcp/5001/http&#39;)
+        started = True
+        logging.info(&#34;Started ipfs_api, connected to daemon&#34;)
+        return True
+    except Exception as e:
+        logging.warning(&#34;could not connect to daemon&#34;)
+        logging.debug(traceback.format_exc())
+        if print_log:
+            print(&#34;&#34;)
+            print(&#34;----------------------------------------------------&#34;)
+            traceback.print_exc()  # printing stack trace
+            print(&#34;----------------------------------------------------&#34;)
+            print(&#34;&#34;)
+            print(type(e))
+            if(str(e).startswith(&#34;ConnectionError: HTTPConnectionPool&#34;)):
+                print(&#34;Failed to connect to the IPFS process on this machine.&#34;)
+                print(&#34;Is IPFS running?&#34;)
+                print(&#34;Is it listening on &#39;/ip4/127.0.0.1/tcp/5001/http&#39;?&#34;)
+                return &#34;IPFS not running&#34;
+
+
+def publish(path: str):
+    &#34;&#34;&#34;Upload a file or a directory to IPFS, returning its CID.
+    Args:
+        path (str): the path of the file to publish
+    Returns:
+        str: the IPFS content ID (CID) of the published file
+    &#34;&#34;&#34;
+    result = http_client.add(path, recursive=True)
+    if(type(result) == list):
+        return result[-1].get(&#34;Hash&#34;)
+    else:
+        return result.get(&#34;Hash&#34;)
+
+
+def download(cid, path=&#34;.&#34;):
+    &#34;&#34;&#34;Get the specified IPFS content, saving it to a file.
+    Args:
+        cid (str): the IPFS content ID (cid) of the resource to get
+        path (str): (optional) the path (directory or filepath) of the saved file
+    &#34;&#34;&#34;
+
+    # create temporary download directory
+    tempdir = tempfile.mkdtemp()
+
+    # download and save file/folder to temporary directory
+    http_client.get(cid=cid, target=tempdir)
+
+    # move file/folder from temporary directory to desired path
+    shutil.move(os.path.join(tempdir, cid), path)
+
+    # cleanup temporary directory
+    shutil.rmtree(tempdir)
+
+
+def read(cid):
+    &#34;&#34;&#34;Returns the textual content of the specified IPFS resource.
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to read
+    Returns:
+        str: the content of the specified IPFS resource as text
+    &#34;&#34;&#34;
+    return http_client.cat(cid)
+
+
+def pin(cid: str):
+    &#34;&#34;&#34;Ensure the specified IPFS resource remains available on this IPFS node.    
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to pin
+    &#34;&#34;&#34;
+    http_client.pin.add(cid)
+
+
+def unpin(cid: str):
+    &#34;&#34;&#34;Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.    
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to unpin
+    &#34;&#34;&#34;
+    http_client.pin.rm(cid)
+
+
+def create_ipns_record(name: str, type: str = &#34;rsa&#34;, size: int = 2048):
+    &#34;&#34;&#34;Create an IPNS record (eqv. IPNS key).
+    Args:
+        name (str): the name of the record/key (in the scope of this IPFS node)
+        type (str): the cryptographic algorithm behind this key&#39;s security
+        size (int): the length of the key
+    &#34;&#34;&#34;
+    result = http_client.key.gen(key_name=name, type=type, size=size)
+    if isinstance(result, list):
+        return result[-1].get(&#34;Id&#34;)
+    else:
+        return result.get(&#34;Id&#34;)
+
+
+def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;):
+    &#34;&#34;&#34;Assign IPFS content to an IPNS record.
+    Args:
+        record_name (str): the name of the IPNS record (IPNS key) to be updated
+        cid (str): the IPFS content ID (CID) of the content to assign to the IPNS record
+        ttl (str): Time duration this record should be cached for.
+                                Uses the same syntax as the lifetime option.
+                                (caution: experimental).
+        lifetime (str): Time duration that the record will be valid for.
+                                Default: 24h.
+    &#34;&#34;&#34;
+    http_client.name.publish(ipfs_path=cid, key=record_name,
+                             ttl=ttl, lifetime=lifetime)
+
+
+def update_ipns_record(name: str, path, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;):
+    &#34;&#34;&#34;Publish a file to IPFS and assign it to an IPNS record.
+    Args:
+        record_name (str): the name of the IPNS record (IPNS key) to be updated
+        path (str): the path of the file to assign to the IPNS record
+        ttl (str): Time duration this record should be cached for.
+                                Uses the same syntax as the lifetime option.
+                                (caution: experimental).
+        lifetime (str): Time duration that the record will be valid for.
+                                Default: 24h.
+    &#34;&#34;&#34;
+    cid = publish(path)
+    update_ipns_record_from_cid(name, cid, ttl=ttl, lifetime=lifetime)
+    return cid
+
+
+def resolve_ipns_key(ipns_key, nocache=False):
+    &#34;&#34;&#34;Get the IPFS CID of the given IPNS record (IPNS key)
+    Args:
+        ipns_key: the key of the IPNS record to lookup
+        nocache: whether or not to ignore this IPFS nodes cached memory of IPNS keys
+    Returns:
+        str: the IPFS CID associated with the IPNS key
+    &#34;&#34;&#34;
+    return http_client.name.resolve(name=ipns_key, nocache=nocache).get(&#34;Path&#34;)
+
+
+def download_ipns_record(ipns_key, path=&#34;&#34;, nocache=False):
+    &#34;&#34;&#34;Get the specified IPFS content, saving it to a file.
+    Args:
+        ipns_key (str): the key of the IPNS record to get
+        path (str): (optional) the path (directory or filepath) of the saved file
+        nocache: whether or not to ignore this IPFS nodes cached memory of IPNS keys
+    &#34;&#34;&#34;
+    return download(resolve_ipns_key(ipns_key, nocache=nocache), path)
+
+
+def read_ipns_record(ipns_key, nocache=False):
+    &#34;&#34;&#34;Returns the textual content of the specified IPFS resource.
+    Args:
+        ipns_key (str): the key of the IPNS record to read
+    Returns:
+        str: the content of the specified IPFS resource as text
+    &#34;&#34;&#34;
+    return read(resolve_ipns_key(ipns_key, nocache=nocache))
+
+
+def my_id():
+    &#34;&#34;&#34;Returns this IPFS node&#39;s peer ID.
+    Returns:
+        str: the peer ID of this node
+    &#34;&#34;&#34;
+    return http_client.id().get(&#34;ID&#34;)
+
+
+def list_peer_multiaddrs():
+    &#34;&#34;&#34;Returns a list of the IPFS multiaddresses of the other nodes
+    this node is connected to.
+    Returns:
+        list(str): a list of the IPFS multiaddresses of the other nodes
+        this node is connected to
+    &#34;&#34;&#34;
+    proc = Popen([&#39;ipfs&#39;, &#39;swarm&#39;, &#39;peers&#39;], stdout=PIPE)
+    proc.wait()
+    peers = []
+    for line in proc.stdout:
+        peers.append(line.decode(&#39;utf-8&#39;).strip(&#34;\n&#34;))
+
+    return peers
+
+
+def find_peer(peer_id: str):
+    &#34;&#34;&#34;Try to connect to the specified IPFS node.
+    Args:
+        peer_id (str): the IPFS peer ID of the node to connect to
+    Returns:
+        str: the multiaddress of the connected node
+    &#34;&#34;&#34;
+    try:
+        response = http_client.dht.findpeer(peer_id)
+        if(len(response.get(&#34;Responses&#34;)[0].get(&#34;Addrs&#34;)) &gt; 0):
+            return response
+    except:
+        return None
+
+
+def find_providers(cid):
+    &#34;&#34;&#34;Lookup/find out which IPFS nodes provide the file with the given CID
+    (including onesself).
+    E.g. to check if this computer hosts a file with a certain CID:
+    def DoWeHaveFile(cid:str):
+        ipfs_api.my_id() in ipfs_api.find_providers(cid)
+    Args:
+        cid (str): cid (str): the IPFS content ID (CID) of the resource to look up
+    Returns:
+        list: the peer IDs of the IPFS nodes who provide the file
+    &#34;&#34;&#34;
+    responses = http_client.dht.findprovs(cid)
+    peers = []
+    for response in responses:
+        if not isinstance(response, ipfshttpclient.client.base.ResponseBase):
+            continue
+        if response[&#39;Type&#39;] == 4:
+            for resp in response[&#39;Responses&#39;]:
+                if resp[&#39;ID&#39;] and resp[&#39;ID&#39;] not in peers:
+                    peers.append(resp[&#39;ID&#39;])
+    return peers
+
+
+def create_tcp_listening_connection(name: str, port: int):
+    &#34;&#34;&#34;Open a listener TCP connection for IPFS&#39; libp2p stream-mounting (port-forwarding).
+    TCP traffic coming from another peer via this connection is forwarded
+    to the specified port on localhost.
+    Args:
+        name (str): the name of the connection (starts with /x/)
+        port (int): the local TCP port number to forward incoming traffic to
+    &#34;&#34;&#34;
+    if name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    http_client.p2p.listen(name, &#34;/ip4/127.0.0.1/tcp/&#34; + str(port))
+
+
+def create_tcp_sending_connection(name: str, port, peerID):
+    &#34;&#34;&#34;Open a sending TCP connection for IPFS&#39; libp2p stream-mounting (port-forwarding).
+    TCP traffic sent to the specified port on localhost will be fowarded
+    to the specified peer via this connection.
+    Args:
+        name (str): the name of the connection (starts with /x/)
+        port (int): the local TCP port number from which to forward traffic
+    &#34;&#34;&#34;
+    if name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    http_client.p2p.forward(name, &#34;/ip4/127.0.0.1/tcp/&#34; +
+                            str(port), &#34;/p2p/&#34; + peerID)
+
+
+def close_all_tcp_connections(listeners_only=False):
+    &#34;&#34;&#34;Close all libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        listeners_only (bool): if set to True, only listening connections are closed
+    &#34;&#34;&#34;
+    if listeners_only:
+        http_client.p2p.close(listenaddress=&#34;/p2p/&#34; + my_id())
+    else:
+        http_client.p2p.close(True)
+
+
+def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: str = None):
+    &#34;&#34;&#34;Close specific sending libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local forwarded TCP port of the connection to close
+        peer_id (str): the target peer_id of the connection to close
+    &#34;&#34;&#34;
+    if name and name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    if port and isinstance(port, int):
+        listenaddress = f&#34;/ip4/127.0.0.1/tcp/{port}&#34;
+    else:
+        listenaddress = port
+    if peer_id and peer_id[:5] != &#34;/p2p/&#34;:
+        targetaddress = &#34;/p2p/&#34; + peer_id
+    else:
+        targetaddress = peer_id
+    http_client.p2p.close(False, name, listenaddress, targetaddress)
+
+
+def close_tcp_listening_connection(name: str = None, port: str = None):
+    &#34;&#34;&#34;Close specific listening libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local listening TCP port of the connection to close
+    &#34;&#34;&#34;
+    if name and name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    if port and isinstance(port, int):
+        targetaddress = f&#34;/ip4/127.0.0.1/tcp/{port}&#34;
+    else:
+        targetaddress = port
+    http_client.p2p.close(False, name, None, targetaddress)
+
+
+def check_peer_connection(id, name=&#34;&#34;):
+    &#34;&#34;&#34;Try to connect to the specified peer, and stores its multiaddresses in ipfs_lns.
+    Args:
+        id (str): the IPFS PeerID or the ipfs_lns name  of the computer to connect to
+        name (str): (optional) the human readable name of the computer to connect to (not critical, you can put in whatever you like)&#34;&#34;&#34;
+    contact = ipfs_lns.get_contact(id)
+    if not contact:
+        contact = ipfs_lns.add_contact(id, name)
+    return contact.check_connection()
+
+
+class PubsubListener():
+    &#34;&#34;&#34;Listener object for PubSub subscriptions.&#34;&#34;&#34;
+    _terminate = False
+    __listening = False
+    sub = None
+    _REFRESH_RATE = 5  # seconds. How often the pubsub HTTP listener ist restarted, also the maximum duration termination can take
+
+    def __init__(self, topic, eventhandler):
+        self.topic = topic
+        self.eventhandler = eventhandler
+        self.listen()
+
+    def _listen(self):
+        if self.__listening:
+            return
+        self.__listening = True
+        &#34;&#34;&#34;blocks the calling thread&#34;&#34;&#34;
+        while not self._terminate:
+            try:
+                if int(http_client.version()[&#34;Version&#34;].split(&#34;.&#34;)[1]) &gt;= 11:
+                    with http_client.pubsub.subscribe(self.topic, timeout=self._REFRESH_RATE) as self.sub:
+                        for message in self.sub:
+                            if self._terminate:
+                                self.__listening = False
+                                return
+                            data = {
+                                &#34;senderID&#34;: message[&#34;from&#34;],
+                                &#34;data&#34;: _decode_base64_url(message[&#34;data&#34;]),
+                            }
+
+                            Thread(
+                                target=self.eventhandler,
+                                args=(data,),
+                                name=&#34;ipfs_api.PubsubListener-eventhandler&#34;
+                            ).start()
+                else:
+                    with http_client.pubsub.subscribe_old(self.topic) as self.sub:
+                        for message in self.sub:
+                            if self._terminate:
+                                self.__listening = False
+                                return
+                            data = str(base64.b64decode(
+                                str(message).split(&#39;\&#39;&#39;)[7]), &#34;utf-8&#34;)
+                            Thread(
+                                target=self.eventhandler,
+                                args=(data,),
+                                name=&#34;ipfs_api.PubsubListener-eventhandler&#34;
+                            ).start()
+            except:
+                pass
+                # print(f&#34;IPFS API Pubsub: restarting sub {self.topic}&#34;)
+        self.__listening = False
+
+    def listen(self):
+        self._terminate = False
+        self.listener_thread = Thread(
+            target=self._listen, args=(), name=&#34;ipfs_api.PubsubListener&#34;)
+        self.listener_thread.start()
+
+    def terminate(self):
+        &#34;&#34;&#34;Stop this PubSub subscription, stop listening for data.
+        May let one more pubsub message through
+        Takes up to self._REFRESH_RATE seconds to complete.
+        &#34;&#34;&#34;
+        self._terminate = True
+        if self.sub:
+            self.sub.close()
+
+
+def pubsub_publish(topic, data):
+    &#34;&#34;&#34;Publishes te specified data to the specified IPFS-PubSub topic.
+    Args:
+        topic (str): the name of the IPFS PubSub topic to publish to
+        data (str/bytearray): either the filepath of a file whose
+            content should be published to the pubsub topic,
+            or the raw data to be published as a string or bytearray.
+            When using an older version of IPFS &lt; v0.11.0 however,
+            only plain data as a string is accepted.
+    &#34;&#34;&#34;
+    if int(http_client.version()[&#34;Version&#34;].split(&#34;.&#34;)[1]) &lt; 11:
+        return http_client.pubsub.publish_old(topic, data)
+
+    if isinstance(data, str) and not os.path.exists(data):
+        data = data.encode()
+    if isinstance(data, bytes) or isinstance(data, bytearray):
+        with tempfile.NamedTemporaryFile() as tp:
+            tp.write(data)
+            tp.flush()
+            http_client.pubsub.publish(topic, tp.name)
+    else:
+        http_client.pubsub.publish(topic, data)
+
+
+def pubsub_subscribe(topic, eventhandler):
+    &#34;&#34;&#34;
+    Listens to the specified IPFS PubSub topic, calling the eventhandler
+    whenever a message is received, passing the message data and its sender
+    to the eventhandler.
+    Args:
+        topic (str): the name of the IPFS PubSub topic to publish to
+        eventhandler (function): the function to be executed whenever a message is received.
+                            The eventhandler parameter is a dict with the keys &#39;data&#39; and &#39;senderID&#39;,
+                            except when using an older version of IPFS &lt; v0.11.0,
+                            in which case only the message is passed as a string.
+    Returns:
+        PubsubListener: listener object which can  be terminated with the .terminate() method (and restarted with the .listen() method)
+    &#34;&#34;&#34;
+    return PubsubListener(topic, eventhandler)
+
+
+def pubsub_peers(topic: str):
+    &#34;&#34;&#34;Looks up what IPFS nodes we are connected to who are listening on the given topic.
+    Returns:
+        list: peers we are connected to on the specified pubsub topic
+    &#34;&#34;&#34;
+    return http_client.pubsub.peers(topic=_encode_base64_url(topic.encode()))[&#34;Strings&#34;]
+
+
+def _decode_base64_url(data: str):
+    &#34;&#34;&#34;Performs the URL-Safe multibase decoding required by some functions (since IFPS v0.11.0) on strings&#34;&#34;&#34;
+    if isinstance(data, bytes):
+        data = data.decode()
+    data = str(data)[1:].encode()
+    missing_padding = len(data) % 4
+    if missing_padding:
+        data += b&#39;=&#39; * (4 - missing_padding)
+    return urlsafe_b64decode(data)
+
+
+def _encode_base64_url(data: bytearray):
+    &#34;&#34;&#34;Performs the URL-Safe multibase encoding required by some functions (since IFPS v0.11.0) on strings&#34;&#34;&#34;
+    if isinstance(data, str):
+        data = data.encode()
+    data = urlsafe_b64encode(data)
+    while data[-1] == 61 and data[-1]:
+        data = data[:-1]
+    data = b&#39;u&#39; + data
+    return data
+
+
+if autostart:
+    if not LIBERROR:    # if all modules needed for the ipfs_http_client library were loaded
+        _start()
+    if not started:
+        from ipfs_cli import *
+        print(&#34;Using IPFS CLI because our HTTP client isn&#39;t working.&#34;)
+        if not is_daemon_running():
+            run_daemon()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="ipfs_api.publish"><code class="name flex">
+<span>def <span class="ident">publish</span></span>(<span>path: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Upload a file or a directory to IPFS, returning its CID.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>the path of the file to publish</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>the IPFS content ID (CID) of the published file</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def publish(path: str):
+    &#34;&#34;&#34;Upload a file or a directory to IPFS, returning its CID.
+    Args:
+        path (str): the path of the file to publish
+    Returns:
+        str: the IPFS content ID (CID) of the published file
+    &#34;&#34;&#34;
+    result = http_client.add(path, recursive=True)
+    if(type(result) == list):
+        return result[-1].get(&#34;Hash&#34;)
+    else:
+        return result.get(&#34;Hash&#34;)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.download"><code class="name flex">
+<span>def <span class="ident">download</span></span>(<span>cid, path='.')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the specified IPFS content, saving it to a file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS content ID (cid) of the resource to get</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>(optional) the path (directory or filepath) of the saved file</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def download(cid, path=&#34;.&#34;):
+    &#34;&#34;&#34;Get the specified IPFS content, saving it to a file.
+    Args:
+        cid (str): the IPFS content ID (cid) of the resource to get
+        path (str): (optional) the path (directory or filepath) of the saved file
+    &#34;&#34;&#34;
+
+    # create temporary download directory
+    tempdir = tempfile.mkdtemp()
+
+    # download and save file/folder to temporary directory
+    http_client.get(cid=cid, target=tempdir)
+
+    # move file/folder from temporary directory to desired path
+    shutil.move(os.path.join(tempdir, cid), path)
+
+    # cleanup temporary directory
+    shutil.rmtree(tempdir)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.read"><code class="name flex">
+<span>def <span class="ident">read</span></span>(<span>cid)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the textual content of the specified IPFS resource.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS content ID (CID) of the resource to read</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>the content of the specified IPFS resource as text</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read(cid):
+    &#34;&#34;&#34;Returns the textual content of the specified IPFS resource.
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to read
+    Returns:
+        str: the content of the specified IPFS resource as text
+    &#34;&#34;&#34;
+    return http_client.cat(cid)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.pin"><code class="name flex">
+<span>def <span class="ident">pin</span></span>(<span>cid: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Ensure the specified IPFS resource remains available on this IPFS node.
+</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS content ID (CID) of the resource to pin</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pin(cid: str):
+    &#34;&#34;&#34;Ensure the specified IPFS resource remains available on this IPFS node.    
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to pin
+    &#34;&#34;&#34;
+    http_client.pin.add(cid)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.unpin"><code class="name flex">
+<span>def <span class="ident">unpin</span></span>(<span>cid: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.
+</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS content ID (CID) of the resource to unpin</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unpin(cid: str):
+    &#34;&#34;&#34;Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.    
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to unpin
+    &#34;&#34;&#34;
+    http_client.pin.rm(cid)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.create_ipns_record"><code class="name flex">
+<span>def <span class="ident">create_ipns_record</span></span>(<span>name: str, type: str = 'rsa', size: int = 2048)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create an IPNS record (eqv. IPNS key).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the record/key (in the scope of this IPFS node)</dd>
+<dt><strong><code>type</code></strong> :&ensp;<code>str</code></dt>
+<dd>the cryptographic algorithm behind this key's security</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>int</code></dt>
+<dd>the length of the key</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_ipns_record(name: str, type: str = &#34;rsa&#34;, size: int = 2048):
+    &#34;&#34;&#34;Create an IPNS record (eqv. IPNS key).
+    Args:
+        name (str): the name of the record/key (in the scope of this IPFS node)
+        type (str): the cryptographic algorithm behind this key&#39;s security
+        size (int): the length of the key
+    &#34;&#34;&#34;
+    result = http_client.key.gen(key_name=name, type=type, size=size)
+    if isinstance(result, list):
+        return result[-1].get(&#34;Id&#34;)
+    else:
+        return result.get(&#34;Id&#34;)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.update_ipns_record_from_cid"><code class="name flex">
+<span>def <span class="ident">update_ipns_record_from_cid</span></span>(<span>record_name: str, cid: str, ttl: str = '24h', lifetime: str = '24h')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Assign IPFS content to an IPNS record.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>record_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the IPNS record (IPNS key) to be updated</dd>
+<dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS content ID (CID) of the content to assign to the IPNS record</dd>
+<dt><strong><code>ttl</code></strong> :&ensp;<code>str</code></dt>
+<dd>Time duration this record should be cached for.
+Uses the same syntax as the lifetime option.
+(caution: experimental).</dd>
+<dt><strong><code>lifetime</code></strong> :&ensp;<code>str</code></dt>
+<dd>Time duration that the record will be valid for.
+Default: 24h.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;):
+    &#34;&#34;&#34;Assign IPFS content to an IPNS record.
+    Args:
+        record_name (str): the name of the IPNS record (IPNS key) to be updated
+        cid (str): the IPFS content ID (CID) of the content to assign to the IPNS record
+        ttl (str): Time duration this record should be cached for.
+                                Uses the same syntax as the lifetime option.
+                                (caution: experimental).
+        lifetime (str): Time duration that the record will be valid for.
+                                Default: 24h.
+    &#34;&#34;&#34;
+    http_client.name.publish(ipfs_path=cid, key=record_name,
+                             ttl=ttl, lifetime=lifetime)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.update_ipns_record"><code class="name flex">
+<span>def <span class="ident">update_ipns_record</span></span>(<span>name: str, path, ttl: str = '24h', lifetime: str = '24h')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Publish a file to IPFS and assign it to an IPNS record.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>record_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the IPNS record (IPNS key) to be updated</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>the path of the file to assign to the IPNS record</dd>
+<dt><strong><code>ttl</code></strong> :&ensp;<code>str</code></dt>
+<dd>Time duration this record should be cached for.
+Uses the same syntax as the lifetime option.
+(caution: experimental).</dd>
+<dt><strong><code>lifetime</code></strong> :&ensp;<code>str</code></dt>
+<dd>Time duration that the record will be valid for.
+Default: 24h.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_ipns_record(name: str, path, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;):
+    &#34;&#34;&#34;Publish a file to IPFS and assign it to an IPNS record.
+    Args:
+        record_name (str): the name of the IPNS record (IPNS key) to be updated
+        path (str): the path of the file to assign to the IPNS record
+        ttl (str): Time duration this record should be cached for.
+                                Uses the same syntax as the lifetime option.
+                                (caution: experimental).
+        lifetime (str): Time duration that the record will be valid for.
+                                Default: 24h.
+    &#34;&#34;&#34;
+    cid = publish(path)
+    update_ipns_record_from_cid(name, cid, ttl=ttl, lifetime=lifetime)
+    return cid</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.resolve_ipns_key"><code class="name flex">
+<span>def <span class="ident">resolve_ipns_key</span></span>(<span>ipns_key, nocache=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the IPFS CID of the given IPNS record (IPNS key)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ipns_key</code></strong></dt>
+<dd>the key of the IPNS record to lookup</dd>
+<dt><strong><code>nocache</code></strong></dt>
+<dd>whether or not to ignore this IPFS nodes cached memory of IPNS keys</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>the IPFS CID associated with the IPNS key</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def resolve_ipns_key(ipns_key, nocache=False):
+    &#34;&#34;&#34;Get the IPFS CID of the given IPNS record (IPNS key)
+    Args:
+        ipns_key: the key of the IPNS record to lookup
+        nocache: whether or not to ignore this IPFS nodes cached memory of IPNS keys
+    Returns:
+        str: the IPFS CID associated with the IPNS key
+    &#34;&#34;&#34;
+    return http_client.name.resolve(name=ipns_key, nocache=nocache).get(&#34;Path&#34;)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.download_ipns_record"><code class="name flex">
+<span>def <span class="ident">download_ipns_record</span></span>(<span>ipns_key, path='', nocache=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the specified IPFS content, saving it to a file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ipns_key</code></strong> :&ensp;<code>str</code></dt>
+<dd>the key of the IPNS record to get</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>(optional) the path (directory or filepath) of the saved file</dd>
+<dt><strong><code>nocache</code></strong></dt>
+<dd>whether or not to ignore this IPFS nodes cached memory of IPNS keys</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def download_ipns_record(ipns_key, path=&#34;&#34;, nocache=False):
+    &#34;&#34;&#34;Get the specified IPFS content, saving it to a file.
+    Args:
+        ipns_key (str): the key of the IPNS record to get
+        path (str): (optional) the path (directory or filepath) of the saved file
+        nocache: whether or not to ignore this IPFS nodes cached memory of IPNS keys
+    &#34;&#34;&#34;
+    return download(resolve_ipns_key(ipns_key, nocache=nocache), path)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.read_ipns_record"><code class="name flex">
+<span>def <span class="ident">read_ipns_record</span></span>(<span>ipns_key, nocache=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the textual content of the specified IPFS resource.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ipns_key</code></strong> :&ensp;<code>str</code></dt>
+<dd>the key of the IPNS record to read</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>the content of the specified IPFS resource as text</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_ipns_record(ipns_key, nocache=False):
+    &#34;&#34;&#34;Returns the textual content of the specified IPFS resource.
+    Args:
+        ipns_key (str): the key of the IPNS record to read
+    Returns:
+        str: the content of the specified IPFS resource as text
+    &#34;&#34;&#34;
+    return read(resolve_ipns_key(ipns_key, nocache=nocache))</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.my_id"><code class="name flex">
+<span>def <span class="ident">my_id</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns this IPFS node's peer ID.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>the peer ID of this node</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def my_id():
+    &#34;&#34;&#34;Returns this IPFS node&#39;s peer ID.
+    Returns:
+        str: the peer ID of this node
+    &#34;&#34;&#34;
+    return http_client.id().get(&#34;ID&#34;)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.list_peer_multiaddrs"><code class="name flex">
+<span>def <span class="ident">list_peer_multiaddrs</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a list of the IPFS multiaddresses of the other nodes
+this node is connected to.</p>
+<h2 id="returns">Returns</h2>
+<p>list(str): a list of the IPFS multiaddresses of the other nodes
+this node is connected to</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list_peer_multiaddrs():
+    &#34;&#34;&#34;Returns a list of the IPFS multiaddresses of the other nodes
+    this node is connected to.
+    Returns:
+        list(str): a list of the IPFS multiaddresses of the other nodes
+        this node is connected to
+    &#34;&#34;&#34;
+    proc = Popen([&#39;ipfs&#39;, &#39;swarm&#39;, &#39;peers&#39;], stdout=PIPE)
+    proc.wait()
+    peers = []
+    for line in proc.stdout:
+        peers.append(line.decode(&#39;utf-8&#39;).strip(&#34;\n&#34;))
+
+    return peers</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.find_peer"><code class="name flex">
+<span>def <span class="ident">find_peer</span></span>(<span>peer_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Try to connect to the specified IPFS node.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>peer_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS peer ID of the node to connect to</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>the multiaddress of the connected node</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_peer(peer_id: str):
+    &#34;&#34;&#34;Try to connect to the specified IPFS node.
+    Args:
+        peer_id (str): the IPFS peer ID of the node to connect to
+    Returns:
+        str: the multiaddress of the connected node
+    &#34;&#34;&#34;
+    try:
+        response = http_client.dht.findpeer(peer_id)
+        if(len(response.get(&#34;Responses&#34;)[0].get(&#34;Addrs&#34;)) &gt; 0):
+            return response
+    except:
+        return None</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.find_providers"><code class="name flex">
+<span>def <span class="ident">find_providers</span></span>(<span>cid)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Lookup/find out which IPFS nodes provide the file with the given CID
+(including onesself).
+E.g. to check if this computer hosts a file with a certain CID:
+def DoWeHaveFile(cid:str):
+ipfs_api.my_id() in ipfs_api.find_providers(cid)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
+<dd>cid (str): the IPFS content ID (CID) of the resource to look up</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>the peer IDs of the IPFS nodes who provide the file</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_providers(cid):
+    &#34;&#34;&#34;Lookup/find out which IPFS nodes provide the file with the given CID
+    (including onesself).
+    E.g. to check if this computer hosts a file with a certain CID:
+    def DoWeHaveFile(cid:str):
+        ipfs_api.my_id() in ipfs_api.find_providers(cid)
+    Args:
+        cid (str): cid (str): the IPFS content ID (CID) of the resource to look up
+    Returns:
+        list: the peer IDs of the IPFS nodes who provide the file
+    &#34;&#34;&#34;
+    responses = http_client.dht.findprovs(cid)
+    peers = []
+    for response in responses:
+        if not isinstance(response, ipfshttpclient.client.base.ResponseBase):
+            continue
+        if response[&#39;Type&#39;] == 4:
+            for resp in response[&#39;Responses&#39;]:
+                if resp[&#39;ID&#39;] and resp[&#39;ID&#39;] not in peers:
+                    peers.append(resp[&#39;ID&#39;])
+    return peers</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.create_tcp_listening_connection"><code class="name flex">
+<span>def <span class="ident">create_tcp_listening_connection</span></span>(<span>name: str, port: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Open a listener TCP connection for IPFS' libp2p stream-mounting (port-forwarding).
+TCP traffic coming from another peer via this connection is forwarded
+to the specified port on localhost.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the connection (starts with /x/)</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>the local TCP port number to forward incoming traffic to</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_tcp_listening_connection(name: str, port: int):
+    &#34;&#34;&#34;Open a listener TCP connection for IPFS&#39; libp2p stream-mounting (port-forwarding).
+    TCP traffic coming from another peer via this connection is forwarded
+    to the specified port on localhost.
+    Args:
+        name (str): the name of the connection (starts with /x/)
+        port (int): the local TCP port number to forward incoming traffic to
+    &#34;&#34;&#34;
+    if name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    http_client.p2p.listen(name, &#34;/ip4/127.0.0.1/tcp/&#34; + str(port))</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.create_tcp_sending_connection"><code class="name flex">
+<span>def <span class="ident">create_tcp_sending_connection</span></span>(<span>name: str, port, peerID)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Open a sending TCP connection for IPFS' libp2p stream-mounting (port-forwarding).
+TCP traffic sent to the specified port on localhost will be fowarded
+to the specified peer via this connection.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the connection (starts with /x/)</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>the local TCP port number from which to forward traffic</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_tcp_sending_connection(name: str, port, peerID):
+    &#34;&#34;&#34;Open a sending TCP connection for IPFS&#39; libp2p stream-mounting (port-forwarding).
+    TCP traffic sent to the specified port on localhost will be fowarded
+    to the specified peer via this connection.
+    Args:
+        name (str): the name of the connection (starts with /x/)
+        port (int): the local TCP port number from which to forward traffic
+    &#34;&#34;&#34;
+    if name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    http_client.p2p.forward(name, &#34;/ip4/127.0.0.1/tcp/&#34; +
+                            str(port), &#34;/p2p/&#34; + peerID)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.close_all_tcp_connections"><code class="name flex">
+<span>def <span class="ident">close_all_tcp_connections</span></span>(<span>listeners_only=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Close all libp2p stream-mounting (IPFS port-forwarding) connections.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>listeners_only</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if set to True, only listening connections are closed</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def close_all_tcp_connections(listeners_only=False):
+    &#34;&#34;&#34;Close all libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        listeners_only (bool): if set to True, only listening connections are closed
+    &#34;&#34;&#34;
+    if listeners_only:
+        http_client.p2p.close(listenaddress=&#34;/p2p/&#34; + my_id())
+    else:
+        http_client.p2p.close(True)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.close_tcp_sending_connection"><code class="name flex">
+<span>def <span class="ident">close_tcp_sending_connection</span></span>(<span>name: str = None, port: str = None, peer_id: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Close specific sending libp2p stream-mounting (IPFS port-forwarding) connections.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the connection to close</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>str</code></dt>
+<dd>the local forwarded TCP port of the connection to close</dd>
+<dt><strong><code>peer_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>the target peer_id of the connection to close</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: str = None):
+    &#34;&#34;&#34;Close specific sending libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local forwarded TCP port of the connection to close
+        peer_id (str): the target peer_id of the connection to close
+    &#34;&#34;&#34;
+    if name and name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    if port and isinstance(port, int):
+        listenaddress = f&#34;/ip4/127.0.0.1/tcp/{port}&#34;
+    else:
+        listenaddress = port
+    if peer_id and peer_id[:5] != &#34;/p2p/&#34;:
+        targetaddress = &#34;/p2p/&#34; + peer_id
+    else:
+        targetaddress = peer_id
+    http_client.p2p.close(False, name, listenaddress, targetaddress)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.close_tcp_listening_connection"><code class="name flex">
+<span>def <span class="ident">close_tcp_listening_connection</span></span>(<span>name: str = None, port: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Close specific listening libp2p stream-mounting (IPFS port-forwarding) connections.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the connection to close</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>str</code></dt>
+<dd>the local listening TCP port of the connection to close</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def close_tcp_listening_connection(name: str = None, port: str = None):
+    &#34;&#34;&#34;Close specific listening libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local listening TCP port of the connection to close
+    &#34;&#34;&#34;
+    if name and name[:3] != &#34;/x/&#34;:
+        name = &#34;/x/&#34; + name
+    if port and isinstance(port, int):
+        targetaddress = f&#34;/ip4/127.0.0.1/tcp/{port}&#34;
+    else:
+        targetaddress = port
+    http_client.p2p.close(False, name, None, targetaddress)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.check_peer_connection"><code class="name flex">
+<span>def <span class="ident">check_peer_connection</span></span>(<span>id, name='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Try to connect to the specified peer, and stores its multiaddresses in ipfs_lns.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS PeerID or the ipfs_lns name
+of the computer to connect to</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>(optional) the human readable name of the computer to connect to (not critical, you can put in whatever you like)</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_peer_connection(id, name=&#34;&#34;):
+    &#34;&#34;&#34;Try to connect to the specified peer, and stores its multiaddresses in ipfs_lns.
+    Args:
+        id (str): the IPFS PeerID or the ipfs_lns name  of the computer to connect to
+        name (str): (optional) the human readable name of the computer to connect to (not critical, you can put in whatever you like)&#34;&#34;&#34;
+    contact = ipfs_lns.get_contact(id)
+    if not contact:
+        contact = ipfs_lns.add_contact(id, name)
+    return contact.check_connection()</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.pubsub_publish"><code class="name flex">
+<span>def <span class="ident">pubsub_publish</span></span>(<span>topic, data)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Publishes te specified data to the specified IPFS-PubSub topic.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>topic</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the IPFS PubSub topic to publish to</dd>
+</dl>
+<p>data (str/bytearray): either the filepath of a file whose
+content should be published to the pubsub topic,
+or the raw data to be published as a string or bytearray.
+When using an older version of IPFS &lt; v0.11.0 however,
+only plain data as a string is accepted.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pubsub_publish(topic, data):
+    &#34;&#34;&#34;Publishes te specified data to the specified IPFS-PubSub topic.
+    Args:
+        topic (str): the name of the IPFS PubSub topic to publish to
+        data (str/bytearray): either the filepath of a file whose
+            content should be published to the pubsub topic,
+            or the raw data to be published as a string or bytearray.
+            When using an older version of IPFS &lt; v0.11.0 however,
+            only plain data as a string is accepted.
+    &#34;&#34;&#34;
+    if int(http_client.version()[&#34;Version&#34;].split(&#34;.&#34;)[1]) &lt; 11:
+        return http_client.pubsub.publish_old(topic, data)
+
+    if isinstance(data, str) and not os.path.exists(data):
+        data = data.encode()
+    if isinstance(data, bytes) or isinstance(data, bytearray):
+        with tempfile.NamedTemporaryFile() as tp:
+            tp.write(data)
+            tp.flush()
+            http_client.pubsub.publish(topic, tp.name)
+    else:
+        http_client.pubsub.publish(topic, data)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.pubsub_subscribe"><code class="name flex">
+<span>def <span class="ident">pubsub_subscribe</span></span>(<span>topic, eventhandler)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Listens to the specified IPFS PubSub topic, calling the eventhandler
+whenever a message is received, passing the message data and its sender
+to the eventhandler.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>topic</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the IPFS PubSub topic to publish to</dd>
+<dt><strong><code>eventhandler</code></strong> :&ensp;<code>function</code></dt>
+<dd>the function to be executed whenever a message is received.
+The eventhandler parameter is a dict with the keys 'data' and 'senderID',
+except when using an older version of IPFS &lt; v0.11.0,
+in which case only the message is passed as a string.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="ipfs_api.PubsubListener" href="#ipfs_api.PubsubListener">PubsubListener</a></code></dt>
+<dd>listener object which can
+be terminated with the .terminate() method (and restarted with the .listen() method)</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pubsub_subscribe(topic, eventhandler):
+    &#34;&#34;&#34;
+    Listens to the specified IPFS PubSub topic, calling the eventhandler
+    whenever a message is received, passing the message data and its sender
+    to the eventhandler.
+    Args:
+        topic (str): the name of the IPFS PubSub topic to publish to
+        eventhandler (function): the function to be executed whenever a message is received.
+                            The eventhandler parameter is a dict with the keys &#39;data&#39; and &#39;senderID&#39;,
+                            except when using an older version of IPFS &lt; v0.11.0,
+                            in which case only the message is passed as a string.
+    Returns:
+        PubsubListener: listener object which can  be terminated with the .terminate() method (and restarted with the .listen() method)
+    &#34;&#34;&#34;
+    return PubsubListener(topic, eventhandler)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.pubsub_peers"><code class="name flex">
+<span>def <span class="ident">pubsub_peers</span></span>(<span>topic: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Looks up what IPFS nodes we are connected to who are listening on the given topic.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>peers we are connected to on the specified pubsub topic</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pubsub_peers(topic: str):
+    &#34;&#34;&#34;Looks up what IPFS nodes we are connected to who are listening on the given topic.
+    Returns:
+        list: peers we are connected to on the specified pubsub topic
+    &#34;&#34;&#34;
+    return http_client.pubsub.peers(topic=_encode_base64_url(topic.encode()))[&#34;Strings&#34;]</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ipfs_api.PubsubListener"><code class="flex name class">
+<span>class <span class="ident">PubsubListener</span></span>
+<span>(</span><span>topic, eventhandler)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Listener object for PubSub subscriptions.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PubsubListener():
+    &#34;&#34;&#34;Listener object for PubSub subscriptions.&#34;&#34;&#34;
+    _terminate = False
+    __listening = False
+    sub = None
+    _REFRESH_RATE = 5  # seconds. How often the pubsub HTTP listener ist restarted, also the maximum duration termination can take
+
+    def __init__(self, topic, eventhandler):
+        self.topic = topic
+        self.eventhandler = eventhandler
+        self.listen()
+
+    def _listen(self):
+        if self.__listening:
+            return
+        self.__listening = True
+        &#34;&#34;&#34;blocks the calling thread&#34;&#34;&#34;
+        while not self._terminate:
+            try:
+                if int(http_client.version()[&#34;Version&#34;].split(&#34;.&#34;)[1]) &gt;= 11:
+                    with http_client.pubsub.subscribe(self.topic, timeout=self._REFRESH_RATE) as self.sub:
+                        for message in self.sub:
+                            if self._terminate:
+                                self.__listening = False
+                                return
+                            data = {
+                                &#34;senderID&#34;: message[&#34;from&#34;],
+                                &#34;data&#34;: _decode_base64_url(message[&#34;data&#34;]),
+                            }
+
+                            Thread(
+                                target=self.eventhandler,
+                                args=(data,),
+                                name=&#34;ipfs_api.PubsubListener-eventhandler&#34;
+                            ).start()
+                else:
+                    with http_client.pubsub.subscribe_old(self.topic) as self.sub:
+                        for message in self.sub:
+                            if self._terminate:
+                                self.__listening = False
+                                return
+                            data = str(base64.b64decode(
+                                str(message).split(&#39;\&#39;&#39;)[7]), &#34;utf-8&#34;)
+                            Thread(
+                                target=self.eventhandler,
+                                args=(data,),
+                                name=&#34;ipfs_api.PubsubListener-eventhandler&#34;
+                            ).start()
+            except:
+                pass
+                # print(f&#34;IPFS API Pubsub: restarting sub {self.topic}&#34;)
+        self.__listening = False
+
+    def listen(self):
+        self._terminate = False
+        self.listener_thread = Thread(
+            target=self._listen, args=(), name=&#34;ipfs_api.PubsubListener&#34;)
+        self.listener_thread.start()
+
+    def terminate(self):
+        &#34;&#34;&#34;Stop this PubSub subscription, stop listening for data.
+        May let one more pubsub message through
+        Takes up to self._REFRESH_RATE seconds to complete.
+        &#34;&#34;&#34;
+        self._terminate = True
+        if self.sub:
+            self.sub.close()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="ipfs_api.PubsubListener.listen"><code class="name flex">
+<span>def <span class="ident">listen</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def listen(self):
+    self._terminate = False
+    self.listener_thread = Thread(
+        target=self._listen, args=(), name=&#34;ipfs_api.PubsubListener&#34;)
+    self.listener_thread.start()</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.PubsubListener.terminate"><code class="name flex">
+<span>def <span class="ident">terminate</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Stop this PubSub subscription, stop listening for data.
+May let one more pubsub message through
+Takes up to self._REFRESH_RATE seconds to complete.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def terminate(self):
+    &#34;&#34;&#34;Stop this PubSub subscription, stop listening for data.
+    May let one more pubsub message through
+    Takes up to self._REFRESH_RATE seconds to complete.
+    &#34;&#34;&#34;
+    self._terminate = True
+    if self.sub:
+        self.sub.close()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ipfs_api.publish" href="#ipfs_api.publish">publish</a></code></li>
+<li><code><a title="ipfs_api.download" href="#ipfs_api.download">download</a></code></li>
+<li><code><a title="ipfs_api.read" href="#ipfs_api.read">read</a></code></li>
+<li><code><a title="ipfs_api.pin" href="#ipfs_api.pin">pin</a></code></li>
+<li><code><a title="ipfs_api.unpin" href="#ipfs_api.unpin">unpin</a></code></li>
+<li><code><a title="ipfs_api.create_ipns_record" href="#ipfs_api.create_ipns_record">create_ipns_record</a></code></li>
+<li><code><a title="ipfs_api.update_ipns_record_from_cid" href="#ipfs_api.update_ipns_record_from_cid">update_ipns_record_from_cid</a></code></li>
+<li><code><a title="ipfs_api.update_ipns_record" href="#ipfs_api.update_ipns_record">update_ipns_record</a></code></li>
+<li><code><a title="ipfs_api.resolve_ipns_key" href="#ipfs_api.resolve_ipns_key">resolve_ipns_key</a></code></li>
+<li><code><a title="ipfs_api.download_ipns_record" href="#ipfs_api.download_ipns_record">download_ipns_record</a></code></li>
+<li><code><a title="ipfs_api.read_ipns_record" href="#ipfs_api.read_ipns_record">read_ipns_record</a></code></li>
+<li><code><a title="ipfs_api.my_id" href="#ipfs_api.my_id">my_id</a></code></li>
+<li><code><a title="ipfs_api.list_peer_multiaddrs" href="#ipfs_api.list_peer_multiaddrs">list_peer_multiaddrs</a></code></li>
+<li><code><a title="ipfs_api.find_peer" href="#ipfs_api.find_peer">find_peer</a></code></li>
+<li><code><a title="ipfs_api.find_providers" href="#ipfs_api.find_providers">find_providers</a></code></li>
+<li><code><a title="ipfs_api.create_tcp_listening_connection" href="#ipfs_api.create_tcp_listening_connection">create_tcp_listening_connection</a></code></li>
+<li><code><a title="ipfs_api.create_tcp_sending_connection" href="#ipfs_api.create_tcp_sending_connection">create_tcp_sending_connection</a></code></li>
+<li><code><a title="ipfs_api.close_all_tcp_connections" href="#ipfs_api.close_all_tcp_connections">close_all_tcp_connections</a></code></li>
+<li><code><a title="ipfs_api.close_tcp_sending_connection" href="#ipfs_api.close_tcp_sending_connection">close_tcp_sending_connection</a></code></li>
+<li><code><a title="ipfs_api.close_tcp_listening_connection" href="#ipfs_api.close_tcp_listening_connection">close_tcp_listening_connection</a></code></li>
+<li><code><a title="ipfs_api.check_peer_connection" href="#ipfs_api.check_peer_connection">check_peer_connection</a></code></li>
+<li><code><a title="ipfs_api.pubsub_publish" href="#ipfs_api.pubsub_publish">pubsub_publish</a></code></li>
+<li><code><a title="ipfs_api.pubsub_subscribe" href="#ipfs_api.pubsub_subscribe">pubsub_subscribe</a></code></li>
+<li><code><a title="ipfs_api.pubsub_peers" href="#ipfs_api.pubsub_peers">pubsub_peers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ipfs_api.PubsubListener" href="#ipfs_api.PubsubListener">PubsubListener</a></code></h4>
+<ul class="">
+<li><code><a title="ipfs_api.PubsubListener.listen" href="#ipfs_api.PubsubListener.listen">listen</a></code></li>
+<li><code><a title="ipfs_api.PubsubListener.terminate" href="#ipfs_api.PubsubListener.terminate">terminate</a></code></li>
+<li><code><a title="ipfs_api.PubsubListener.sub" href="#ipfs_api.PubsubListener.sub">sub</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

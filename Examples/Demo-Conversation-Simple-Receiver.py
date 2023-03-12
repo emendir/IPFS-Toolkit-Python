@@ -7,18 +7,16 @@ after reading the instructions in that script,
 and of course make sure IPFS is running on both computers first.
 """
 
-import threading
-import time
 import ipfs_datatransmission
 
 
-def new_conv_handler(conversation_name, peerID):
+def new_conv_handler(conv_name, peer_id):
     """Eventhandler for when we join a new conversation."""
-    print("Joining a new conversation:", conversation_name)
+    print("Joining a new conversation:", conv_name)
 
     def on_message_received(conversation, message):
         """Eventhandler for when the other peer says something in the conversation."""
-        print(f"Received message on {conversation.conversation_name}:", message.decode(
+        print(f"Received message on {conversation.conv_name}:", message.decode(
             "utf-8"))
         if message.decode("utf-8") == "Hello there!":
             conversation.say("Seeya!".encode())
@@ -27,8 +25,8 @@ def new_conv_handler(conversation_name, peerID):
         else:
             conversation.say("I dare say!".encode("utf-8"))
 
-    conv = ipfs_datatransmission.Conversation()
-    conv.join(conversation_name, peerID, conversation_name, on_message_received)
+    conv = ipfs_datatransmission.join_conversation(
+        conv_name, peer_id, conv_name, on_message_received)
     print("Joined")
 
     conv.say("Hi!".encode("utf-8"))

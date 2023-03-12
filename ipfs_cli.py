@@ -268,7 +268,7 @@ def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
     return result.strip("\n")
 
 
-def update_ipns_record_from_hash(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
+def update_ipns_record_from_cid(name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
     """
     Parameters:
         string ttl: Time duration this record should be cached for.
@@ -291,7 +291,7 @@ def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h")
                                 Default: 24h.
     """
     cid = publish(path)
-    update_ipns_record_from_hash(name, cid, ttl=ttl, lifetime=lifetime)
+    update_ipns_record_from_cid(name, cid, ttl=ttl, lifetime=lifetime)
     return cid
 
 
@@ -335,22 +335,22 @@ def my_id():
 myid = my_id
 
 
-def listen_on_port(protocol, port):
+def create_tcp_listening_connection(name, port):
     run_command([ipfs_cmd, "p2p", "listen", "/x/" +
-                 protocol, "/ip4/127.0.0.1/tcp/" + str(port)])
+                 name, "/ip4/127.0.0.1/tcp/" + str(port)])
 
 
-ListenUDP = listen_on_port
-listenudp = listen_on_port
-listenonport = listen_on_port
-listen = listen_on_port
-listen = listen_on_port
+ListenUDP = create_tcp_listening_connection
+listenudp = create_tcp_listening_connection
+listenonport = create_tcp_listening_connection
+listen = create_tcp_listening_connection
+listen = create_tcp_listening_connection
 
 
-def forward_from_port_to_peer(protocol: str, port, peerID):
-    # result = run_command([ipfs_cmd, "p2p", "forward", "/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
+def create_tcp_sending_connection(name: str, port, peerID):
+    # result = run_command([ipfs_cmd, "p2p", "forward", "/x/" + name, "/ip4/127.0.0.1/tcp/" +
     #                     str(port), "/p2p/" + peerID])
-    cmd = [ipfs_cmd, "p2p", "forward", "/x/" + protocol, "/ip4/127.0.0.1/tcp/" +
+    cmd = [ipfs_cmd, "p2p", "forward", "/x/" + name, "/ip4/127.0.0.1/tcp/" +
            str(port), "/p2p/" + peerID]
 
     try:
@@ -367,15 +367,66 @@ def forward_from_port_to_peer(protocol: str, port, peerID):
         return True     # signal success
 
 
-def close_port_forwarding(all: bool = False, protocol: str = None, listenaddress: str = None, targetaddress: str = None):
+def close_all_tcp_connections(listeners_only=False):
+    """Close all libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        listeners_only (bool): if set to True, only listening connections are closed
+    """
+    if listeners_only:
+        cmd = [ipfs_cmd, "p2p", "close", "-l", "/p2p/"+my_id()]
+    else:
+        cmd = [ipfs_cmd, "p2p", "close", "-a"]
+    run_command(cmd)
+
+
+def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: str = None):
+    """Close specific sending libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local forwarded TCP port of the connection to close
+        peer_id (str): the target peer_id of the connection to close
+    """
+    if name and name[:3] != "/x/":
+        name = "/x/" + name
+    if port and isinstance(port, int):
+        listenaddress = f"/ip4/127.0.0.1/tcp/{port}"
+    else:
+        listenaddress = port
+    if peer_id and peer_id[:5] != "/p2p/":
+        targetaddress = "/p2p/" + peer_id
+    else:
+        targetaddress = peer_id
     cmd = [ipfs_cmd, "p2p", "close"]
     if all:
         cmd.append("--all")
     else:
-        if protocol:
-            cmd.append(f"--protocol={protocol}")
+        if name:
+            cmd.append(f"--name={name}")
         if listenaddress:
             cmd.append(f"--listen-address={listenaddress}")
+        if targetaddress:
+            cmd.append(f"--target-address={targetaddress}")
+    run_command(cmd)
+
+
+def close_tcp_listening_connection(name: str = None, port: str = None):
+    """Close specific listening libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        name (str): the name of the connection to close
+        port (str): the local listening TCP port of the connection to close
+    """
+    if name and name[:3] != "/x/":
+        name = "/x/" + name
+    if port and isinstance(port, int):
+        targetaddress = f"/ip4/127.0.0.1/tcp/{port}"
+    else:
+        targetaddress = port
+    cmd = [ipfs_cmd, "p2p", "close"]
+    if all:
+        cmd.append("--all")
+    else:
+        if name:
+            cmd.append(f"--name={name}")
         if targetaddress:
             cmd.append(f"--target-address={targetaddress}")
     run_command(cmd)

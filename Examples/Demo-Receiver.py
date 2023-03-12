@@ -10,10 +10,14 @@ and of course make sure IPFS is running on both computers first.
 
 import threading
 import time
-import ipfs_datatransmission
+if True:
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+    import ipfs_datatransmission
 
 
-def on_receive(data, PeerID):
+def on_receive(data, peer_id):
     """Eventhandler to handle received data"""
     print("Received data transmission!")
     print(data.decode("utf-8"))

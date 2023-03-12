@@ -3,10 +3,16 @@ This library is still under development and is currently being tested in various
 
 ## v0.5.0 (2023-02-) (not backward-compatible)
 ### Renaming
-With version 0.5.0, all functions and class methods have been renamed from PascalCase to snake_case to comply with the standard PEP8 naming conventions. 
+With version 0.5.0, all functions class methods have been renamed from PascalCase to snake_case to comply with the standard PEP8 naming conventions. 
+#### Parameter Renaming in Many Functions:
+- `peerID` -> `peer_id`.
+- `conv_name` -> `conv_name`
+#### Other:
+- In ipfs_datatransmission, many attributes of classes that shouldn't be used by API users have been made hidden by prepending "_" to their names.
+- ipfs_datatransmission.ListenTimeout has been renamed to ConvListenTimeout
 ### Other API Changes:
 - CatFile renamed to read_file
-- IPFS libp2p stream-mounting functions ( previously ForwardFromPortToPeer(), ListenOnPort(), ClosePortForwarding()):
+- ipfs_api: IPFS libp2p stream-mounting functions ( previously ForwardFromPortToPeer(), ListenOnPort(), ClosePortForwarding()):
   - Renamed and Reorganised to:
     - create_tcp_sending_connection()
     - create_tcp_listening_connection()
@@ -14,12 +20,14 @@ With version 0.5.0, all functions and class methods have been renamed from Pasca
     - close_tcp_sending_connection()
     - close_tcp_listening_connection()
   -> with clearer parameters
+- ipfs_datatransmission: FileTransmitter now starts transmitting file automatically
+### Features:
+- ipfs_api.pubsub_subscribe: now has a timeout option. Note that it never lasted forever even without the timeout :(
+- ipfs_datatransmission.join_conversation: new function to simplify the previously needed two lines of code needed for joining conversations `conv = Conversation();conv.join(...)` into one `conv = join_conversation(...)`
 
 ### IPFS-DataTransmission Protocol Updates
 With version 0.5.0, the basic communication protocol on which all of the features of the ipfs_datatransmission module are built has been improved to bring a massive increase in the speed of connection establishment. Unfortunately, this update lacks backward compatibility, which means that if you have built a project that uses ipfs_datatransmission, instances of your program running v0.4.X and v0.5.X of IPFS-Toolkit won't be able to communicate with each other.
 
-### Features:
-- ipfs_api.pubsub_subscribe: now has a timeout option. Note that it never lasted forever even without the timeout :(
 
 ## v0.4.4 (2023-01-28)
 - ipfs_api.topic_peers(): new function to get the number of peers we are connected to on a pubsub topic
