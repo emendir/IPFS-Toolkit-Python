@@ -15,21 +15,25 @@ from Cryptem import Crypt
 crypt = Crypt("mypassword")  # cryptography object that contains encryption and decryption functions
 
 
-def new_conv_handler(conversation_name, peerID):
+def new_conv_handler(conv_name, peer_id):
     """Eventhandler for when we join a new conversation."""
-    print("Joining a new conversation:", conversation_name)
+    print("Joining a new conversation:", conv_name)
 
     def on_message_received(conversation, message):
         """Eventhandler for when the other peer says something in the conversation."""
-        print(f"Received message on {conversation.conversation_name}:", message.decode(
+        print(f"Received message on {conversation.conv_name}:", message.decode(
             "utf-8"))
         if message.decode("utf-8") == "Bye!":
             conversation.close()
         conv.say("Bye!".encode("utf-8"))
 
-    conv = ipfs_datatransmission.Conversation()
-    conv.join(conversation_name, peerID, conversation_name, on_message_received,
-              encryption_callbacks=(crypt.Encrypt, crypt.Decrypt))
+    conv = ipfs_datatransmission.join_conversation(
+        conv_name,
+        peer_id,
+        conv_name,
+        on_message_received,
+        encryption_callbacks=(crypt.Encrypt, crypt.Decrypt)
+    )
     print("Joined")
 
     conv.say("Hi!".encode("utf-8"))

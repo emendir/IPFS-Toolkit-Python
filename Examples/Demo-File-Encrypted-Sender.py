@@ -5,7 +5,7 @@ with the IPFS DataTransmission library.
 
 Run Demo-File-Encrypted-Receiver.py on another computer,
 make sure IPFS is running on both computers first,
-paste the other's IPFS ID in the peerID variable below and specify a file to upload,
+paste the other's IPFS ID in the peer_id variable below and specify a file to upload,
 and then run this script.
 """
 
@@ -17,7 +17,7 @@ from Cryptem import Crypt
 crypt = Crypt("mypassword")
 
 # replace QmHash with your peer's IPFS ID
-peerID = ""
+peer_id = ""
 
 # insert the path of the file to transmit here
 filepath = ""
@@ -26,7 +26,7 @@ filepath = ""
 metadata = os.path.basename(filepath).encode()
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
-ipfs_api.find_peer(peerID)
+ipfs_api.find_peer(peer_id)
 
 
 # --OPTIONAL--
@@ -37,7 +37,7 @@ def progress_update(progress):
 
 # Transmit the file. The object ft can be referenced for example to check transmission progress
 ft = ipfs_datatransmission.transmit_file(
-    filepath, peerID, "my_apps_filelistener", metadata, progress_update, encryption_callbacks=(crypt.Encrypt, crypt.Decrypt))
+    filepath, peer_id, "my_apps_filelistener", metadata, progress_update, encryption_callbacks=(crypt.Encrypt, crypt.Decrypt))
 if ft:
     print("Started Transmission")
 else:

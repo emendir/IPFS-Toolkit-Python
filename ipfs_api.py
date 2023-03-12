@@ -4,7 +4,6 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
-from multiprocessing import Process
 import shutil
 import tempfile
 # import sys
@@ -21,7 +20,6 @@ from threading import Thread
 try:
     import base64
     import ipfshttpclient2 as ipfshttpclient
-    from requests.exceptions import ConnectionError
     from base64 import urlsafe_b64decode, urlsafe_b64encode
     http_client = ipfshttpclient.client.Client()
     LIBERROR = False
@@ -38,7 +36,7 @@ started = False
 subscriptions = list([])
 
 
-def start():
+def _start():
     try:
         global http_client
         global started
@@ -141,7 +139,7 @@ def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
         return result.get("Id")
 
 
-def update_ipns_record_from_hash(record_name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
+def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
     """Assign IPFS content to an IPNS record.
     Args:
         record_name (str): the name of the IPNS record (IPNS key) to be updated
@@ -168,7 +166,7 @@ def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h")
                                 Default: 24h.
     """
     cid = publish(path)
-    update_ipns_record_from_hash(name, cid, ttl=ttl, lifetime=lifetime)
+    update_ipns_record_from_cid(name, cid, ttl=ttl, lifetime=lifetime)
     return cid
 
 
@@ -203,6 +201,14 @@ def read_ipns_record(ipns_key, nocache=False):
     return read(resolve_ipns_key(ipns_key, nocache=nocache))
 
 
+def my_id():
+    """Returns this IPFS node's peer ID.
+    Returns:
+        str: the peer ID of this node
+    """
+    return http_client.id().get("ID")
+
+
 def list_peer_multiaddrs():
     """Returns a list of the IPFS multiaddresses of the other nodes
     this node is connected to.
@@ -234,12 +240,27 @@ def find_peer(peer_id: str):
         return None
 
 
-def my_id():
-    """Returns this IPFS node's peer ID.
+def find_providers(cid):
+    """Lookup/find out which IPFS nodes provide the file with the given CID
+    (including onesself).
+    E.g. to check if this computer hosts a file with a certain CID:
+    def DoWeHaveFile(cid:str):
+        ipfs_api.my_id() in ipfs_api.find_providers(cid)
+    Args:
+        cid (str): cid (str): the IPFS content ID (CID) of the resource to look up
     Returns:
-        str: the peer ID of this node
+        list: the peer IDs of the IPFS nodes who provide the file
     """
-    return http_client.id().get("ID")
+    responses = http_client.dht.findprovs(cid)
+    peers = []
+    for response in responses:
+        if not isinstance(response, ipfshttpclient.client.base.ResponseBase):
+            continue
+        if response['Type'] == 4:
+            for resp in response['Responses']:
+                if resp['ID'] and resp['ID'] not in peers:
+                    peers.append(resp['ID'])
+    return peers
 
 
 def create_tcp_listening_connection(name: str, port: int):
@@ -269,9 +290,15 @@ def create_tcp_sending_connection(name: str, port, peerID):
                             str(port), "/p2p/" + peerID)
 
 
-def close_all_tcp_connections():
-    """Close all libp2p stream-mounting (IPFS port-forwarding) connections."""
-    http_client.p2p.close(True)
+def close_all_tcp_connections(listeners_only=False):
+    """Close all libp2p stream-mounting (IPFS port-forwarding) connections.
+    Args:
+        listeners_only (bool): if set to True, only listening connections are closed
+    """
+    if listeners_only:
+        http_client.p2p.close(listenaddress="/p2p/" + my_id())
+    else:
+        http_client.p2p.close(True)
 
 
 def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: str = None):
@@ -320,26 +347,8 @@ def check_peer_connection(id, name=""):
     return contact.check_connection()
 
 
-def find_providers(cid):
-    """Returns a list of the IDs of the peers who provide the file
-    with the given CID  (including onesself).
-    E.g. to check if this computer hosts a file with a certain CID:
-    def DoWeHaveFile(cid:str):
-        ipfs_api.my_id() in ipfs_api.find_providers(cid)
-    """
-    responses = http_client.dht.findprovs(cid)
-    peers = []
-    for response in responses:
-        if not isinstance(response, ipfshttpclient.client.base.ResponseBase):
-            continue
-        if response['Type'] == 4:
-            for resp in response['Responses']:
-                if resp['ID'] and resp['ID'] not in peers:
-                    peers.append(resp['ID'])
-    return peers
-
-
 class PubsubListener():
+    """Listener object for PubSub subscriptions."""
     _terminate = False
     __listening = False
     sub = None
@@ -398,7 +407,8 @@ class PubsubListener():
         self.listener_thread.start()
 
     def terminate(self):
-        """May let one more pubsub message through
+        """Stop this PubSub subscription, stop listening for data.
+        May let one more pubsub message through
         Takes up to self._REFRESH_RATE seconds to complete.
         """
         self._terminate = True
@@ -408,13 +418,13 @@ class PubsubListener():
 
 def pubsub_publish(topic, data):
     """Publishes te specified data to the specified IPFS-PubSub topic.
-    Parameters:
-        topic: str: the name of the IPFS PubSub topic to publish to
-        data: string or bytes/bytearray: either the filepath of a file whose
+    Args:
+        topic (str): the name of the IPFS PubSub topic to publish to
+        data (str/bytearray): either the filepath of a file whose
             content should be published to the pubsub topic,
             or the raw data to be published as a string or bytearray.
             When using an older version of IPFS < v0.11.0 however,
-            only plai data as a string is accepted.
+            only plain data as a string is accepted.
     """
     if int(http_client.version()["Version"].split(".")[1]) < 11:
         return http_client.pubsub.publish_old(topic, data)
@@ -434,21 +444,23 @@ def pubsub_subscribe(topic, eventhandler):
     """
     Listens to the specified IPFS PubSub topic, calling the eventhandler
     whenever a message is received, passing the message data and its sender
-    to the evventhandler.
-    Parameters:
-        topic: str: the name of the IPFS PubSub topic to publish to
-        eventhandler: function(dict): the function to be executed whenever a message is received.
+    to the eventhandler.
+    Args:
+        topic (str): the name of the IPFS PubSub topic to publish to
+        eventhandler (function): the function to be executed whenever a message is received.
                             The eventhandler parameter is a dict with the keys 'data' and 'senderID',
                             except when using an older version of IPFS < v0.11.0,
                             in which case only the message is passed as a string.
-    Returns a PubsubListener object which can  be terminated with the .terminate() method (and restarted with the .listen() method)
+    Returns:
+        PubsubListener: listener object which can  be terminated with the .terminate() method (and restarted with the .listen() method)
     """
     return PubsubListener(topic, eventhandler)
 
 
 def pubsub_peers(topic: str):
-    """
-    Returns the list of peers we are connected to on the specified pubsub topic
+    """Looks up what IPFS nodes we are connected to who are listening on the given topic.
+    Returns:
+        list: peers we are connected to on the specified pubsub topic
     """
     return http_client.pubsub.peers(topic=_encode_base64_url(topic.encode()))["Strings"]
 
@@ -477,8 +489,9 @@ def _encode_base64_url(data: bytearray):
 
 if autostart:
     if not LIBERROR:    # if all modules needed for the ipfs_http_client library were loaded
-        start()
+        _start()
     if not started:
+        from ipfs_cli import is_daemon_running, run_daemon
         from ipfs_cli import *
         print("Using IPFS CLI because our HTTP client isn't working.")
         if not is_daemon_running():

@@ -16,13 +16,13 @@ and of course make sure IPFS is running on both computers first.
 # ipfs_datatransmission.print_log_files = True
 
 
-def new_conv_handler(conversation_name, peerID):
+def new_conv_handler(conv_name, peerID):
     """Eventhandler for when we join a new conversation."""
-    print("Joining a new conversation:", conversation_name)
+    print("Joining a new conversation:", conv_name)
 
     def on_message_received(conversation, message):
         """Eventhandler for when the other peer says something in the conversation."""
-        print(f"Received message on {conversation.conversation_name}:", message.decode(
+        print(f"Received message on {conversation.conv_name}:", message.decode(
             "utf-8"))
         if message.decode("utf-8") == "Bye!":
             conversation.terminate()
@@ -34,7 +34,7 @@ def new_conv_handler(conversation_name, peerID):
         print(str(round(progress*100))+"%")
 
     conv = ipfs_datatransmission.Conversation()
-    conv.join(conversation_name, peerID, conversation_name, on_message_received,
+    conv.join(conv_name, peerID, conv_name, on_message_received,
               on_file_received, file_progress_callback=progress_handler, dir="/opt")
     print("Waiting for file...")
     data = conv.listen_for_file(200)

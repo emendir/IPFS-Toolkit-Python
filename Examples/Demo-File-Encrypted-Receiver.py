@@ -23,12 +23,12 @@ def receiving_file_progress(peer, file, filesize, progress):
 # ------------
 
 
-def on_data_received(peer, file, metadata):
+def on_data_received(peer_id, file, metadata):
     """Eventhandler which gets executed after a file has been received."""
     print("Received file.")
     print("File metadata:", metadata.decode())
     print("Filepath:", file)
-    print("Sender:", peer)
+    print("Sender:", peer_id)
 
 
 file_receiver = ipfs_datatransmission.listen_for_file_transmissions(

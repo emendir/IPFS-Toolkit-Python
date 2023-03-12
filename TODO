@@ -1,17 +1,14 @@
+IPFS_API.ClosePortForwarding
+
 FileTransmission:
   abortion
+  test blocksize upgrades
 
 DataTransmission: terminate properly on error
-PubsubListener: terminate faster
+
 include encryption parameters in transmit_data?
 add more realistic encryption scenario to Encryption example
 
 
-make parameter names more consistent (e.g. ID, cid , peerID)
-
 # Documentation
 ipfs_cli: docs
-proper docstrings everywhere
-API reference
-
-rename ipfs_api.read to ipfs_api.ReadFile

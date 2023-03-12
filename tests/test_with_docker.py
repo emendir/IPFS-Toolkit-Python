@@ -1,4 +1,4 @@
-"""
+""" DON'T FORGET TO REBUILD DOCKER CONTAINER
 This script runs a docker container with which it tests various forms of
 communication.
 
@@ -14,8 +14,10 @@ and the next time you run this script you get an error reading:
     The container name "/IPFS-Toolkit-Test" is already in use by container
 
 run the following commands to stop and remove the unterminated container:
+```
     docker stop $(docker ps -aqf "name=^IPFS-Toolkit-Test$")
     docker rm $(docker ps -aqf "name=^IPFS-Toolkit-Test$")
+```
 """
 
 import time
@@ -24,17 +26,23 @@ from termcolor import colored
 from docker_container import DockerContainer
 import os
 import threading
-if True:
-    sys.path.insert(0, "..")
-    import ipfs_datatransmission
-    import ipfs_api
-
-docker_peer = DockerContainer("IPFS-Toolkit-Test")
 
 # replace with the path of a file you would like to send
 file_path = "/mnt/Uverlin/Music/Davy Jones  - Pirates of the Caribbean.mp3"
 # time in seconds to wait for file to transmit before calling test a failure
 FILE_SEND_TIMEOUT = 20
+
+TEST_CLI = False
+
+if True:
+    sys.path.insert(0, "..")
+    if TEST_CLI:
+        import ipfs_cli as ipfs_api
+    else:
+        import ipfs_api
+    import ipfs_datatransmission
+
+docker_peer = DockerContainer("IPFS-Toolkit-Test")
 
 
 def mark(success):
@@ -57,7 +65,7 @@ def mark(success):
 
 def on_message_received(conversation, message):
     """Eventhandler for when the other peer says something in the conversation."""
-    print(f"Received message on {conversation.conversation_name}:", message.decode(
+    print(f"Received message on {conversation.conv_name}:", message.decode(
         "utf-8"))
 
 

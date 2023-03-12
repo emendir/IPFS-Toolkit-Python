@@ -4,7 +4,7 @@ the advanced usage of the ipfs_datatransmission.Conversation class.
 
 Run Demo-Conversation-Full-Receiver.py on another computer,
 make sure IPFS is running on both computers first,
-paste the other's IPFS ID in the peerID variable below,
+paste the other's IPFS ID in the peer_id variable below,
 and then run this script.
 """
 
@@ -13,16 +13,16 @@ import ipfs_api
 
 
 # insert your peer's IPFS ID here
-peerID = ""
+peer_id = ""
 # replace with the path of a file you would like to send
 file = ""
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
-ipfs_api.find_peer(peerID)
+ipfs_api.find_peer(peer_id)
 
 
 def on_message_received(conversation, message):
     """Eventhandler for when the other peer says something in the conversation."""
-    print(f"Received message on {conversation.conversation_name}:", message.decode(
+    print(f"Received message on {conversation.conv_name}:", message.decode(
         "utf-8"))
 
 
@@ -31,7 +31,7 @@ def on_message_received(conversation, message):
 # waiting for the peer to join the conversation until executing the next line of code
 print("Setting up conversation...")
 conv = ipfs_datatransmission.start_conversation(
-    "test-con", peerID, "general_listener", on_message_received)
+    "test-con", peer_id, "general_listener", on_message_received)
 print("Peer joined conversation.")
 print("Sending file...")
 
