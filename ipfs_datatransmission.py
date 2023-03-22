@@ -560,12 +560,16 @@ class Conversation:
         # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
         data = bytearray("I want to start a conversation".encode(
             'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
-        transmit_data(data,
-                      peer_id,
-                      others_req_listener,
-                      self._transm_send_timeout_sec,
-                      self._transm_req_max_retries
-                      )
+        try:
+            transmit_data(data,
+                          peer_id,
+                          others_req_listener,
+                          self._transm_send_timeout_sec,
+                          self._transm_req_max_retries
+                          )
+        except Exception as e:
+            self.terminate()
+            raise e
         self._last_coms_time = datetime.utcnow()
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + ": sent conversation request")

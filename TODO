@@ -1,10 +1,9 @@
-IPFS_API.ClosePortForwarding
 
 FileTransmission:
   abortion
   test blocksize upgrades
 
-DataTransmission: terminate properly on error
+DataTransmission: terminate properly on error (test it in conv properly, see if more needs to be done for FileTransission)
 
 include encryption parameters in transmit_data?
 add more realistic encryption scenario to Encryption example

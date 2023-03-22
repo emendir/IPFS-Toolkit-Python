@@ -1,7 +1,8 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
-
-## v0.5.0 (2023-02-) (not backward-compatible)
+## v0.5.1 (2023-03-22)
+- ipfs_datatransmission.Conversation: termination of threads if the start() method returns an error.
+## v0.5.0 (2023-03-12) (not backward-compatible)
 ### Renaming
 With version 0.5.0, all functions class methods have been renamed from PascalCase to snake_case to comply with the standard PEP8 naming conventions. 
 #### Parameter Renaming in Many Functions:
