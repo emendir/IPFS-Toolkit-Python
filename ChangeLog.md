@@ -1,5 +1,8 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
+
+## v0.5.2 (2023-03-22)
+This update is a patch to fix dependency version issues with httpx and httpcore modules.
 ## v0.5.1 (2023-03-22)
 - ipfs_datatransmission.Conversation: termination of threads if the start() method returns an error.
 ## v0.5.0 (2023-03-12) (not backward-compatible)
