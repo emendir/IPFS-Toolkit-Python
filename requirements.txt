@@ -1,11 +1,8 @@
 setuptools  
 wheel  
-multiaddr  
 appdirs  
 multiaddr  
-appdirs  
-idna  
-httpcore  
+idna
 httpx
 requests
 termcolor
