@@ -27,12 +27,28 @@ from docker_container import DockerContainer
 import os
 import threading
 
-# replace with the path of a file you would like to send
-file_path = input("Enter filepath for test transmission file (~10MB): ")
 # time in seconds to wait for file to transmit before calling test a failure
 FILE_SEND_TIMEOUT = 20
 
 TEST_CLI = False
+
+# if you do not have any other important brenthydrive docker containers,
+# you can set this to true to automatically remove unpurged docker containers
+# after failed tests
+DELETE_ALL_BRENTHY_DOCKERS = True
+
+
+if os.path.exists("testfile"):
+    file_path = "testfile"
+else:
+    file_path = input("Enter filepath for test transmission file (~10MB): ")
+
+if DELETE_ALL_BRENTHY_DOCKERS:
+    try:
+        os.system("docker stop $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1; docker rm $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1")
+    except:
+        pass
+
 
 if True:
     sys.path.insert(0, "..")
@@ -41,6 +57,7 @@ if True:
     else:
         import ipfs_api
     import ipfs_datatransmission
+
 
 docker_peer = DockerContainer("IPFS-Toolkit-Test")
 
