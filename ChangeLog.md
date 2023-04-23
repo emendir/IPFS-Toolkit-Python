@@ -1,7 +1,7 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
-## v0.5.2 (2023-03-22)
+## v0.5.4 (2023-03-22)
 - ipfs_datatransmission.Conversation.start(): bugfix in timeout
 
 ## v0.5.2 (2023-03-22)
