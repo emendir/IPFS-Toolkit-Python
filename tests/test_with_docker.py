@@ -28,7 +28,7 @@ import os
 import threading
 
 # replace with the path of a file you would like to send
-file_path = "/mnt/Uverlin/Music/Davy Jones  - Pirates of the Caribbean.mp3"
+file_path = input("Enter filepath for test transmission file (~10MB): ")
 # time in seconds to wait for file to transmit before calling test a failure
 FILE_SEND_TIMEOUT = 20
 

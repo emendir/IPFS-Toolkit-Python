@@ -573,7 +573,7 @@ class Conversation:
         self._last_coms_time = datetime.utcnow()
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + ": sent conversation request")
-        self.started.wait()
+        self.started.wait(transm_send_timeout_sec)
         return True     # signal success
 
     def join(self,
