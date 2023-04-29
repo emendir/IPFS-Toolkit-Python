@@ -32,23 +32,28 @@ FILE_SEND_TIMEOUT = 20
 
 TEST_CLI = False
 
+
 # if you do not have any other important brenthydrive docker containers,
 # you can set this to true to automatically remove unpurged docker containers
 # after failed tests
-DELETE_ALL_BRENTHY_DOCKERS = True
-
+DELETE_ALL_IPFS_DOCKERS = True
+REBUILD_DOCKER = True
 
 if os.path.exists("testfile"):
     file_path = "testfile"
 else:
     file_path = input("Enter filepath for test transmission file (~10MB): ")
 
-if DELETE_ALL_BRENTHY_DOCKERS:
+if DELETE_ALL_IPFS_DOCKERS:
     try:
         os.system("docker stop $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1; docker rm $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1")
     except:
         pass
 
+
+if REBUILD_DOCKER:
+    from build_docker import build_docker
+    build_docker(verbose=False)
 
 if True:
     sys.path.insert(0, "..")

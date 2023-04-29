@@ -522,8 +522,8 @@ if autostart:
     if not started:
         from ipfs_cli import *
         print(&#34;Using IPFS CLI because our HTTP client isn&#39;t working.&#34;)
-        if not is_daemon_running():
-            run_daemon()</code></pre>
+        if not is_ipfs_running():
+            try_run_ipfs()</code></pre>
 </details>
 </section>
 <section>

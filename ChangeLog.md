@@ -1,6 +1,12 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.5 (2023-03-22)
+- ipfs_api: New (improved!) system for checking on the status of the IPFS daemon, allowing for cleaner code when waiting for IPFS daemon to start, starting it manually etc. See [Examples/Demo-Check-IPFS-Status.py](Examples/Demo-Check-IPFS-Status.py)
+- ipfs_datatransmission: raise ConvListenTimeout **from None**
+- ipfs_cli: fixed PubsubListener thread cleanup
+- ipfs_cli: is_daemon_running renamed to is_ipfs_running
+
 ## v0.5.4 (2023-03-22)
 - ipfs_datatransmission.Conversation.start(): bugfix in timeout
 

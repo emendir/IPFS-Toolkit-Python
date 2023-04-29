@@ -48,29 +48,18 @@ if not run_command([ipfs_cmd]):
         ipfs_cmd = "./ipfs"
 
 
-def is_daemon_running():
-    try:
-        proc = Popen([ipfs_cmd, "swarm", "peers"], stdout=PIPE, stderr=PIPE)
+def is_ipfs_running():
+    return len(my_multiaddrs()) > 0
 
-        proc.wait()
-        if proc.stderr.readline():
-            return False
-        else:
+
+def try_run_ipfs():
+    print("Starting IPFS...")
+    proc = Popen([ipfs_cmd, "daemon", "--enable-pubsub-experiment"],
+                 stdout=PIPE, stdin=PIPE)
+    while True:
+        data = proc.stdout.read1().decode()
+        if data.strip("\n") == "Daemon is ready":
             return True
-    except:
-        return
-
-
-def run_daemon():
-    try:
-        proc = Popen([ipfs_cmd, "daemon", "--enable-pubsub-experiment"],
-                     stdout=PIPE, stdin=PIPE)
-        while True:
-            data = proc.stdout.read1().decode()
-            if data.strip("\n") == "Daemon is ready" or is_daemon_running():
-                return True
-    except:
-        return
 
 
 def download_ipfs_binary(downloading_callback=None):
@@ -116,7 +105,7 @@ def download_ipfs_binary(downloading_callback=None):
         run_command(
             [ipfs_cmd, "config", "--json Experimental.Libp2pStreamMounting", "true"])
         # run ipfs
-        run_daemon()
+        try_run_ipfs()
 
 
 found_ipfs = bool(run_command([ipfs_cmd]))
@@ -172,13 +161,15 @@ class PubsubListener():
         self.__listening = True
         """blocks the calling thread"""
         while not self._terminate:
-            proc = Popen([ipfs_cmd, "pubsub", "sub", self.topic],
-                         stdout=PIPE, stdin=PIPE)
+            self.proc = Popen([ipfs_cmd, "pubsub", "sub", self.topic],
+                              stdout=PIPE, stdin=PIPE)
             while True:
                 data = {
                     "senderID": "",
-                    "data": proc.stdout.read1(),
+                    "data": self.proc.stdout.read1(),
                 }
+                if self._terminate:
+                    return
                 Thread(target=self.eventhandler, args=(data,)).start()
         self.__listening = False
 
@@ -195,12 +186,13 @@ class PubsubListener():
 
     def listen(self):
         self._terminate = False
-        thr = Thread(target=self._listen, args=())
+        thr = Thread(target=self._listen, args=(), name=f"ipfs_cli.pubsub_listener {self.topic}")
         thr.start()
 
     def terminate(self):
         """May let one more pubsub message through"""
         self._terminate = True
+        pubsub_publish(self.topic, "terminate".encode())
 
 
 def pubsub_subscribe(topic, eventhandler):
@@ -217,17 +209,6 @@ def pubsub_subscribe(topic, eventhandler):
     Returns a PubsubListener object which can  be terminated with the .terminate() method (and restarted with the .listen() method)
     """
     return PubsubListener(topic, eventhandler)
-
-
-def pubsub_unsubscribe(topic, eventhandler):
-    index = 0
-    for subscription in subscriptions:
-        if(subscription[0] == topic and subscription[1] == eventhandler):
-            subscription[2].terminate()
-            break
-        index = index + 1
-    # remove the subscription from the list of subscriptions
-    subscriptions.pop(index)
 
 
 def publish(path: str):
@@ -330,6 +311,14 @@ def find_peer(ID: str):
 
 def my_id():
     return json.loads(run_command([ipfs_cmd, "id"])).get("ID")
+
+
+def my_multiaddrs():
+    multi_addrs = json.loads(run_command([ipfs_cmd, "id"])).get("Addresses")
+    if multi_addrs:
+        return multi_addrs
+    else:
+        return []
 
 
 myid = my_id

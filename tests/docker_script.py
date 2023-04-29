@@ -1,7 +1,8 @@
 import time
 if True:
-    time.sleep(5)
+    import ipfs_api
     import ipfs_datatransmission
+    ipfs_api.wait_till_ipfs_is_running()
 """
 This script demonstrates, together with Demo-Conversation-Full-Starter,
 the advanced usage of the ipfs_datatransmission.Conversation class.
