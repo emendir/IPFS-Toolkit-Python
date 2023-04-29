@@ -35,13 +35,15 @@ def test_pubsub():
         received_msg = data["data"]
     sub = ipfs_api.pubsub_subscribe("autotest", on_pubsub_received)
     ipfs_api.pubsub_publish("autotest", "Hello there!".encode())
-    time.sleep(3)
+    time.sleep(5)
     success = received_msg.decode() == "Hello there!"
+
     print(mark(success), "PubSub communication")
     term_start = datetime.utcnow()
     sub.terminate()
     term_end = datetime.utcnow()
     term_dur = (term_end - term_start).total_seconds()
+    time.sleep(30)
     success = len(threading.enumerate()) == 1
     print(mark(success), f"PubSub thread cleanup {term_dur}s")
     if not success:

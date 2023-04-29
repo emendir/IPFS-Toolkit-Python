@@ -4,6 +4,8 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+import time
+from threading import Event
 import shutil
 import tempfile
 # import sys
@@ -30,39 +32,8 @@ except Exception as e:
     ipfshttpclient = None
 print_log = False
 
-autostart = True
-started = False
 # List for keeping track of subscriptions to IPFS topics, so that subscriptions can be ended
 subscriptions = list([])
-
-
-def _start():
-    try:
-        global http_client
-        global started
-        from ipfs_cli import run_command, ipfs_cmd
-        Thread(target=run_command, args=[
-               ipfs_cmd, "daemon", "--enable-pubsub-experiment"])
-
-        http_client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
-        started = True
-        logging.info("Started ipfs_api, connected to daemon")
-        return True
-    except Exception as e:
-        logging.warning("could not connect to daemon")
-        logging.debug(traceback.format_exc())
-        if print_log:
-            print("")
-            print("----------------------------------------------------")
-            traceback.print_exc()  # printing stack trace
-            print("----------------------------------------------------")
-            print("")
-            print(type(e))
-            if(str(e).startswith("ConnectionError: HTTPConnectionPool")):
-                print("Failed to connect to the IPFS process on this machine.")
-                print("Is IPFS running?")
-                print("Is it listening on '/ip4/127.0.0.1/tcp/5001/http'?")
-                return "IPFS not running"
 
 
 def publish(path: str):
@@ -110,7 +81,7 @@ def read(cid):
 
 
 def pin(cid: str):
-    """Ensure the specified IPFS resource remains available on this IPFS node.    
+    """Ensure the specified IPFS resource remains available on this IPFS node.
     Args:
         cid (str): the IPFS content ID (CID) of the resource to pin
     """
@@ -118,7 +89,7 @@ def pin(cid: str):
 
 
 def unpin(cid: str):
-    """Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.    
+    """Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.
     Args:
         cid (str): the IPFS content ID (CID) of the resource to unpin
     """
@@ -209,6 +180,22 @@ def my_id():
     return http_client.id().get("ID")
 
 
+def is_ipfs_running():
+    """Checks whether or not the IPFS daemon is currently running.
+    Returns:
+        bool: whether or not the IPFS daemon is currently running
+    """
+    return len(my_multiaddrs()) > 0
+
+
+def my_multiaddrs():
+    """Returns this IPFS node's peer ID.
+    Returns:
+        str: the peer ID of this node
+    """
+    return http_client.id().get("Addresses")
+
+
 def list_peer_multiaddrs():
     """Returns a list of the IPFS multiaddresses of the other nodes
     this node is connected to.
@@ -286,8 +273,8 @@ def create_tcp_sending_connection(name: str, port, peerID):
     """
     if name[:3] != "/x/":
         name = "/x/" + name
-    http_client.p2p.forward(name, "/ip4/127.0.0.1/tcp/" +
-                            str(port), "/p2p/" + peerID)
+    http_client.p2p.forward(name, "/ip4/127.0.0.1/tcp/"
+                            + str(port), "/p2p/" + peerID)
 
 
 def close_all_tcp_connections(listeners_only=False):
@@ -487,12 +474,25 @@ def _encode_base64_url(data: bytearray):
     return data
 
 
-if autostart:
-    if not LIBERROR:    # if all modules needed for the ipfs_http_client library were loaded
-        _start()
-    if not started:
-        from ipfs_cli import is_daemon_running, run_daemon
-        from ipfs_cli import *
-        print("Using IPFS CLI because our HTTP client isn't working.")
-        if not is_daemon_running():
-            run_daemon()
+def wait_till_ipfs_is_running(timeout_sec=None):
+    count = 0
+    while True:
+        try:
+            if is_ipfs_running():
+                return
+        except ipfshttpclient.exceptions.ConnectionError as error:
+            pass
+        time.sleep(1)
+        count += 1
+        if timeout_sec and count == timeout_sec:
+            raise TimeoutError()
+
+
+def try_run_ipfs():
+    from ipfs_cli import try_run_ipfs as _try_run_ipfs
+    _try_run_ipfs()
+
+
+if LIBERROR:    # if not all modules needed for the ipfs_http_client library were loaded
+    print("Falling back to IPFS CLI because our HTTP client isn't working;\nNot all modules required by the http-connection could be loaded.")
+    from ipfs_cli import *

@@ -107,6 +107,8 @@ ipfs_api.http_client.dht.findpeer("QMHash")
 ipfs_api.http_client.swarm.peers()
 ```
 
+To check and somewhat manage the status of the IPFS daemon, see [Examples/Demo-Check-IPFS-Status.py](Examples/Demo-Check-IPFS-Status.py)
+
 ## IPFS-Datatransmission
 `import ipfs_datatransmission`
 

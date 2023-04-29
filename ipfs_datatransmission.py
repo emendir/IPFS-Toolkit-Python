@@ -725,7 +725,7 @@ class Conversation:
             try:
                 data = self.message_queue.get(timeout=timeout)
             except:  # timeout reached
-                raise ConvListenTimeout("Didn't receive any data.")
+                raise ConvListenTimeout("Didn't receive any data.") from None
 
         if data:
             return data
@@ -784,10 +784,10 @@ class Conversation:
                 except QueueEmpty:  # qeue timeout reached
                     # check if any of the user's timeouts were reached
                     if abs_timeout and (datetime.utcnow() - start_time).total_seconds() > abs_timeout:
-                        raise ConvListenTimeout("Didn't receive any files.")
+                        raise ConvListenTimeout("Didn't receive any files.") from None
                     elif (datetime.utcnow() - self._last_coms_time).total_seconds() > no_coms_timeout:
                         raise CommunicationTimeout(
-                            "Communication timeout reached while waiting for file.")
+                            "Communication timeout reached while waiting for file.") from None
         if data:
             return data
         else:

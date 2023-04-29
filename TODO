@@ -11,3 +11,7 @@ add more realistic encryption scenario to Encryption example
 
 # Documentation
 ipfs_cli: docs
+
+
+# Tests
+verify docker container is new on build (cause we've disabled verbose output on docker build)
