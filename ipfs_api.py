@@ -4,6 +4,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+from termcolor import colored
 import time
 from threading import Event
 import shutil
@@ -196,7 +197,7 @@ def my_multiaddrs():
     return http_client.id().get("Addresses")
 
 
-def list_peer_multiaddrs():
+def list_peers():
     """Returns a list of the IPFS multiaddresses of the other nodes
     this node is connected to.
     Returns:
@@ -210,6 +211,45 @@ def list_peer_multiaddrs():
         peers.append(line.decode('utf-8').strip("\n"))
 
     return peers
+
+
+def list_peer_multiaddrs():
+    print(colored("IPFS_API: DEPRECATED: This function (ifps_api.list_peer_multiaddrs) has been renamed to ipfs_api.list_peers to avoid confusion with the new get_peer_multiaddrs function.", "yellow"))
+    return list_peers()
+
+
+def get_peer_multiaddrs(peer_id):
+    """Returns the multiaddresses (without the IPFS CID) via which we can reach
+    the specified peer.
+    Append /p2p/PEER_ID to these multiaddress parts to turn them into complete
+    multiaddresses.
+
+    Args:
+        peer_id (str): the IPFS ID of the peer to lookup
+
+    Returns:
+        list(str): the multiaddresses (without the IPFS CID) via which we can
+        reach the given peer
+    """
+    try:
+        response = http_client.dht.findpeer(peer_id)
+        return response.get("Responses")[0].get("Addrs")
+    except:
+        return []
+
+
+def connect_to_peer(multiaddr):
+    """Tries to connect to a peer given its multiaddress.
+    Returns:
+        bool: success
+    """
+    try:
+        response = http_client.swarm.connect(multiaddr)
+        if response.get("Strings")[0][-7:] == "success":
+            return True
+        return False
+    except:
+        return False
 
 
 def find_peer(peer_id: str):
