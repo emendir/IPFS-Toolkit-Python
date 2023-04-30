@@ -475,6 +475,11 @@ def _encode_base64_url(data: bytearray):
 
 
 def wait_till_ipfs_is_running(timeout_sec=None):
+    """Waits till it can connect to the local IPFS daemon's HTTP-interface.
+    Args:
+        timeout_sec (int): maximum time to wait for. If this duration is,
+                            exceeded, a TimeoutError is raised.
+    """
     count = 0
     while True:
         try:
@@ -489,6 +494,9 @@ def wait_till_ipfs_is_running(timeout_sec=None):
 
 
 def try_run_ipfs():
+    """Tries to use the IPFS CLI to run the local IPFS daemon with PubSub,
+    like manually executing `ipfs daemon --enable-pubsub-experiment`
+    """
     from ipfs_cli import try_run_ipfs as _try_run_ipfs
     _try_run_ipfs()
 
