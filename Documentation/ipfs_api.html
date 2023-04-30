@@ -32,6 +32,8 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+import time
+from threading import Event
 import shutil
 import tempfile
 # import sys
@@ -48,7 +50,6 @@ from threading import Thread
 try:
     import base64
     import ipfshttpclient2 as ipfshttpclient
-    from requests.exceptions import ConnectionError
     from base64 import urlsafe_b64decode, urlsafe_b64encode
     http_client = ipfshttpclient.client.Client()
     LIBERROR = False
@@ -59,39 +60,8 @@ except Exception as e:
     ipfshttpclient = None
 print_log = False
 
-autostart = True
-started = False
 # List for keeping track of subscriptions to IPFS topics, so that subscriptions can be ended
 subscriptions = list([])
-
-
-def _start():
-    try:
-        global http_client
-        global started
-        from ipfs_cli import run_command, ipfs_cmd
-        Thread(target=run_command, args=[
-               ipfs_cmd, &#34;daemon&#34;, &#34;--enable-pubsub-experiment&#34;])
-
-        http_client = ipfshttpclient.connect(&#39;/ip4/127.0.0.1/tcp/5001/http&#39;)
-        started = True
-        logging.info(&#34;Started ipfs_api, connected to daemon&#34;)
-        return True
-    except Exception as e:
-        logging.warning(&#34;could not connect to daemon&#34;)
-        logging.debug(traceback.format_exc())
-        if print_log:
-            print(&#34;&#34;)
-            print(&#34;----------------------------------------------------&#34;)
-            traceback.print_exc()  # printing stack trace
-            print(&#34;----------------------------------------------------&#34;)
-            print(&#34;&#34;)
-            print(type(e))
-            if(str(e).startswith(&#34;ConnectionError: HTTPConnectionPool&#34;)):
-                print(&#34;Failed to connect to the IPFS process on this machine.&#34;)
-                print(&#34;Is IPFS running?&#34;)
-                print(&#34;Is it listening on &#39;/ip4/127.0.0.1/tcp/5001/http&#39;?&#34;)
-                return &#34;IPFS not running&#34;
 
 
 def publish(path: str):
@@ -139,7 +109,7 @@ def read(cid):
 
 
 def pin(cid: str):
-    &#34;&#34;&#34;Ensure the specified IPFS resource remains available on this IPFS node.    
+    &#34;&#34;&#34;Ensure the specified IPFS resource remains available on this IPFS node.
     Args:
         cid (str): the IPFS content ID (CID) of the resource to pin
     &#34;&#34;&#34;
@@ -147,7 +117,7 @@ def pin(cid: str):
 
 
 def unpin(cid: str):
-    &#34;&#34;&#34;Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.    
+    &#34;&#34;&#34;Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.
     Args:
         cid (str): the IPFS content ID (CID) of the resource to unpin
     &#34;&#34;&#34;
@@ -238,6 +208,22 @@ def my_id():
     return http_client.id().get(&#34;ID&#34;)
 
 
+def is_ipfs_running():
+    &#34;&#34;&#34;Checks whether or not the IPFS daemon is currently running.
+    Returns:
+        bool: whether or not the IPFS daemon is currently running
+    &#34;&#34;&#34;
+    return len(my_multiaddrs()) &gt; 0
+
+
+def my_multiaddrs():
+    &#34;&#34;&#34;Returns this IPFS node&#39;s peer ID.
+    Returns:
+        str: the peer ID of this node
+    &#34;&#34;&#34;
+    return http_client.id().get(&#34;Addresses&#34;)
+
+
 def list_peer_multiaddrs():
     &#34;&#34;&#34;Returns a list of the IPFS multiaddresses of the other nodes
     this node is connected to.
@@ -315,8 +301,8 @@ def create_tcp_sending_connection(name: str, port, peerID):
     &#34;&#34;&#34;
     if name[:3] != &#34;/x/&#34;:
         name = &#34;/x/&#34; + name
-    http_client.p2p.forward(name, &#34;/ip4/127.0.0.1/tcp/&#34; +
-                            str(port), &#34;/p2p/&#34; + peerID)
+    http_client.p2p.forward(name, &#34;/ip4/127.0.0.1/tcp/&#34;
+                            + str(port), &#34;/p2p/&#34; + peerID)
 
 
 def close_all_tcp_connections(listeners_only=False):
@@ -516,14 +502,36 @@ def _encode_base64_url(data: bytearray):
     return data
 
 
-if autostart:
-    if not LIBERROR:    # if all modules needed for the ipfs_http_client library were loaded
-        _start()
-    if not started:
-        from ipfs_cli import *
-        print(&#34;Using IPFS CLI because our HTTP client isn&#39;t working.&#34;)
-        if not is_ipfs_running():
-            try_run_ipfs()</code></pre>
+def wait_till_ipfs_is_running(timeout_sec=None):
+    &#34;&#34;&#34;Waits till it can connect to the local IPFS daemon&#39;s HTTP-interface.
+    Args:
+        timeout_sec (int): maximum time to wait for. If this duration is,
+                            exceeded, a TimeoutError is raised.
+    &#34;&#34;&#34;
+    count = 0
+    while True:
+        try:
+            if is_ipfs_running():
+                return
+        except ipfshttpclient.exceptions.ConnectionError as error:
+            pass
+        time.sleep(1)
+        count += 1
+        if timeout_sec and count == timeout_sec:
+            raise TimeoutError()
+
+
+def try_run_ipfs():
+    &#34;&#34;&#34;Tries to use the IPFS CLI to run the local IPFS daemon with PubSub,
+    like manually executing `ipfs daemon --enable-pubsub-experiment`
+    &#34;&#34;&#34;
+    from ipfs_cli import try_run_ipfs as _try_run_ipfs
+    _try_run_ipfs()
+
+
+if LIBERROR:    # if not all modules needed for the ipfs_http_client library were loaded
+    print(&#34;Falling back to IPFS CLI because our HTTP client isn&#39;t working;\nNot all modules required by the http-connection could be loaded.&#34;)
+    from ipfs_cli import *</code></pre>
 </details>
 </section>
 <section>
@@ -635,8 +643,7 @@ if autostart:
 <span>def <span class="ident">pin</span></span>(<span>cid: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Ensure the specified IPFS resource remains available on this IPFS node.
-</p>
+<div class="desc"><p>Ensure the specified IPFS resource remains available on this IPFS node.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
@@ -647,7 +654,7 @@ if autostart:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def pin(cid: str):
-    &#34;&#34;&#34;Ensure the specified IPFS resource remains available on this IPFS node.    
+    &#34;&#34;&#34;Ensure the specified IPFS resource remains available on this IPFS node.
     Args:
         cid (str): the IPFS content ID (CID) of the resource to pin
     &#34;&#34;&#34;
@@ -658,8 +665,7 @@ if autostart:
 <span>def <span class="ident">unpin</span></span>(<span>cid: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.
-</p>
+<div class="desc"><p>Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
@@ -670,7 +676,7 @@ if autostart:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def unpin(cid: str):
-    &#34;&#34;&#34;Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.    
+    &#34;&#34;&#34;Allow a pinned IPFS resource to be garbage-collected and removed on this IPFS node.
     Args:
         cid (str): the IPFS content ID (CID) of the resource to unpin
     &#34;&#34;&#34;
@@ -897,6 +903,50 @@ Default: 24h.</dd>
     return http_client.id().get(&#34;ID&#34;)</code></pre>
 </details>
 </dd>
+<dt id="ipfs_api.is_ipfs_running"><code class="name flex">
+<span>def <span class="ident">is_ipfs_running</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks whether or not the IPFS daemon is currently running.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>whether or not the IPFS daemon is currently running</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_ipfs_running():
+    &#34;&#34;&#34;Checks whether or not the IPFS daemon is currently running.
+    Returns:
+        bool: whether or not the IPFS daemon is currently running
+    &#34;&#34;&#34;
+    return len(my_multiaddrs()) &gt; 0</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.my_multiaddrs"><code class="name flex">
+<span>def <span class="ident">my_multiaddrs</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns this IPFS node's peer ID.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>the peer ID of this node</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def my_multiaddrs():
+    &#34;&#34;&#34;Returns this IPFS node&#39;s peer ID.
+    Returns:
+        str: the peer ID of this node
+    &#34;&#34;&#34;
+    return http_client.id().get(&#34;Addresses&#34;)</code></pre>
+</details>
+</dd>
 <dt id="ipfs_api.list_peer_multiaddrs"><code class="name flex">
 <span>def <span class="ident">list_peer_multiaddrs</span></span>(<span>)</span>
 </code></dt>
@@ -1065,8 +1115,8 @@ to the specified peer via this connection.</p>
     &#34;&#34;&#34;
     if name[:3] != &#34;/x/&#34;:
         name = &#34;/x/&#34; + name
-    http_client.p2p.forward(name, &#34;/ip4/127.0.0.1/tcp/&#34; +
-                            str(port), &#34;/p2p/&#34; + peerID)</code></pre>
+    http_client.p2p.forward(name, &#34;/ip4/127.0.0.1/tcp/&#34;
+                            + str(port), &#34;/p2p/&#34; + peerID)</code></pre>
 </details>
 </dd>
 <dt id="ipfs_api.close_all_tcp_connections"><code class="name flex">
@@ -1300,6 +1350,58 @@ be terminated with the .terminate() method (and restarted with the .listen() met
     return http_client.pubsub.peers(topic=_encode_base64_url(topic.encode()))[&#34;Strings&#34;]</code></pre>
 </details>
 </dd>
+<dt id="ipfs_api.wait_till_ipfs_is_running"><code class="name flex">
+<span>def <span class="ident">wait_till_ipfs_is_running</span></span>(<span>timeout_sec=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Waits till it can connect to the local IPFS daemon's HTTP-interface.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>timeout_sec</code></strong> :&ensp;<code>int</code></dt>
+<dd>maximum time to wait for. If this duration is,
+exceeded, a TimeoutError is raised.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wait_till_ipfs_is_running(timeout_sec=None):
+    &#34;&#34;&#34;Waits till it can connect to the local IPFS daemon&#39;s HTTP-interface.
+    Args:
+        timeout_sec (int): maximum time to wait for. If this duration is,
+                            exceeded, a TimeoutError is raised.
+    &#34;&#34;&#34;
+    count = 0
+    while True:
+        try:
+            if is_ipfs_running():
+                return
+        except ipfshttpclient.exceptions.ConnectionError as error:
+            pass
+        time.sleep(1)
+        count += 1
+        if timeout_sec and count == timeout_sec:
+            raise TimeoutError()</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.try_run_ipfs"><code class="name flex">
+<span>def <span class="ident">try_run_ipfs</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Tries to use the IPFS CLI to run the local IPFS daemon with PubSub,
+like manually executing <code>ipfs daemon --enable-pubsub-experiment</code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def try_run_ipfs():
+    &#34;&#34;&#34;Tries to use the IPFS CLI to run the local IPFS daemon with PubSub,
+    like manually executing `ipfs daemon --enable-pubsub-experiment`
+    &#34;&#34;&#34;
+    from ipfs_cli import try_run_ipfs as _try_run_ipfs
+    _try_run_ipfs()</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -1447,6 +1549,8 @@ Takes up to self._REFRESH_RATE seconds to complete.</p></div>
 <li><code><a title="ipfs_api.download_ipns_record" href="#ipfs_api.download_ipns_record">download_ipns_record</a></code></li>
 <li><code><a title="ipfs_api.read_ipns_record" href="#ipfs_api.read_ipns_record">read_ipns_record</a></code></li>
 <li><code><a title="ipfs_api.my_id" href="#ipfs_api.my_id">my_id</a></code></li>
+<li><code><a title="ipfs_api.is_ipfs_running" href="#ipfs_api.is_ipfs_running">is_ipfs_running</a></code></li>
+<li><code><a title="ipfs_api.my_multiaddrs" href="#ipfs_api.my_multiaddrs">my_multiaddrs</a></code></li>
 <li><code><a title="ipfs_api.list_peer_multiaddrs" href="#ipfs_api.list_peer_multiaddrs">list_peer_multiaddrs</a></code></li>
 <li><code><a title="ipfs_api.find_peer" href="#ipfs_api.find_peer">find_peer</a></code></li>
 <li><code><a title="ipfs_api.find_providers" href="#ipfs_api.find_providers">find_providers</a></code></li>
@@ -1459,6 +1563,8 @@ Takes up to self._REFRESH_RATE seconds to complete.</p></div>
 <li><code><a title="ipfs_api.pubsub_publish" href="#ipfs_api.pubsub_publish">pubsub_publish</a></code></li>
 <li><code><a title="ipfs_api.pubsub_subscribe" href="#ipfs_api.pubsub_subscribe">pubsub_subscribe</a></code></li>
 <li><code><a title="ipfs_api.pubsub_peers" href="#ipfs_api.pubsub_peers">pubsub_peers</a></code></li>
+<li><code><a title="ipfs_api.wait_till_ipfs_is_running" href="#ipfs_api.wait_till_ipfs_is_running">wait_till_ipfs_is_running</a></code></li>
+<li><code><a title="ipfs_api.try_run_ipfs" href="#ipfs_api.try_run_ipfs">try_run_ipfs</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

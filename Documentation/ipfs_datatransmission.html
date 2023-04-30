@@ -575,8 +575,8 @@ class Conversation:
         if encryption_callbacks:
             self.__encryption_callback = encryption_callbacks[0]
             self.__decryption_callback = encryption_callbacks[1]
-        self._transmission_send_timeout_sec = transm_send_timeout_sec
-        self._transmission_request_max_retries = transm_req_max_retries
+        self._transm_send_timeout_sec = transm_send_timeout_sec
+        self._transm_req_max_retries = transm_req_max_retries
         self.peer_id = peer_id
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + &#34;: sending conversation request&#34;)
@@ -593,16 +593,23 @@ class Conversation:
         # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
         data = bytearray(&#34;I want to start a conversation&#34;.encode(
             &#39;utf-8&#39;)) + bytearray([255]) + bytearray(conv_name.encode(&#39;utf-8&#39;))
-        transmit_data(data,
-                      peer_id,
-                      others_req_listener,
-                      self._transmission_send_timeout_sec,
-                      self._transmission_request_max_retries
-                      )
+        try:
+            transmit_data(data,
+                          peer_id,
+                          others_req_listener,
+                          self._transm_send_timeout_sec,
+                          self._transm_req_max_retries
+                          )
+        except Exception as e:
+            self.terminate()
+            raise e
         self._last_coms_time = datetime.utcnow()
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + &#34;: sent conversation request&#34;)
-        self.started.wait()
+        success = self.started.wait(transm_send_timeout_sec)
+        if not success:
+            raise CommunicationTimeout(
+                f&#34;Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.&#34;)
         return True     # signal success
 
     def join(self,
@@ -661,8 +668,8 @@ class Conversation:
         if encryption_callbacks:
             self.__encryption_callback = encryption_callbacks[0]
             self.__decryption_callback = encryption_callbacks[1]
-        self._transmission_send_timeout_sec = transm_send_timeout_sec
-        self._transmission_request_max_retries = transm_req_max_retries
+        self._transm_send_timeout_sec = transm_send_timeout_sec
+        self._transm_req_max_retries = transm_req_max_retries
         self._listener = listen_for_transmissions(conv_name,
                                                   self._hear,
                                                   )
@@ -751,7 +758,7 @@ class Conversation:
             try:
                 data = self.message_queue.get(timeout=timeout)
             except:  # timeout reached
-                raise ConvListenTimeout(&#34;Didn&#39;t receive any data.&#34;)
+                raise ConvListenTimeout(&#34;Didn&#39;t receive any data.&#34;) from None
 
         if data:
             return data
@@ -810,10 +817,10 @@ class Conversation:
                 except QueueEmpty:  # qeue timeout reached
                     # check if any of the user&#39;s timeouts were reached
                     if abs_timeout and (datetime.utcnow() - start_time).total_seconds() &gt; abs_timeout:
-                        raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;)
+                        raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;) from None
                     elif (datetime.utcnow() - self._last_coms_time).total_seconds() &gt; no_coms_timeout:
                         raise CommunicationTimeout(
-                            &#34;Communication timeout reached while waiting for file.&#34;)
+                            &#34;Communication timeout reached while waiting for file.&#34;) from None
         if data:
             return data
         else:
@@ -1132,8 +1139,8 @@ class FileTransmitter:
         self.progress_handler = progress_handler
         self.encryption_callbacks = encryption_callbacks
         self.block_size = block_size
-        self._transmission_send_timeout_sec = transm_send_timeout_sec
-        self._transmission_request_max_retries = transm_req_max_retries
+        self._transm_send_timeout_sec = transm_send_timeout_sec
+        self._transm_req_max_retries = transm_req_max_retries
 
         self.conv_name = self.filename + &#34;_conv&#34;
         self.conversation = Conversation()
@@ -1143,8 +1150,8 @@ class FileTransmitter:
             self.others_req_listener,
             data_received_eventhandler=self._hear,
             encryption_callbacks=self.encryption_callbacks,
-            transm_send_timeout_sec=self._transmission_send_timeout_sec,
-            transm_req_max_retries=self._transmission_request_max_retries
+            transm_send_timeout_sec=self._transm_send_timeout_sec,
+            transm_req_max_retries=self._transm_req_max_retries
         )
         self.conversation.say(
             _to_b255_no_0s(self.filesize) + bytearray([255])
@@ -1735,9 +1742,10 @@ connections_listen = list()
 
 
 def _create_sending_connection(peer_id: str, protocol: str, port=None):
-    _close_sending_connection(
-        peer_id=peer_id, name=protocol)
-
+    # _close_sending_connection(
+    #     peer_id=peer_id, name=protocol)
+    if port:
+        _close_sending_connection(port=port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if port == None:
         for prt in sending_ports:   # trying ports until we find a free one
@@ -1769,8 +1777,7 @@ def _create_listening_connection(protocol, port, force=True):
             print(f&#34;listening fas \&#34;{protocol}\&#34; on {port}&#34;)
     except:
         if force:
-            _close_listening_connection(port=port, name=protocol)
-
+            _close_listening_connection(name=protocol)
         try:
             time.sleep(0.1)
             ipfs_api.create_tcp_listening_connection(protocol, port)
@@ -1784,15 +1791,15 @@ def _create_listening_connection(protocol, port, force=True):
     return port
 
 
-def _close_sending_connection(peer_id, name):
+def _close_sending_connection(peer_id=None, name=None, port=None):
     try:
         ipfs_api.close_tcp_sending_connection(
-            peer_id=peer_id, name=name)
+            peer_id=peer_id, name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))
 
 
-def _close_listening_connection(name, port):
+def _close_listening_connection(name=None, port=None):
     try:
         ipfs_api.close_tcp_listening_connection(
             name=name, port=port)
@@ -2841,8 +2848,8 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
         if encryption_callbacks:
             self.__encryption_callback = encryption_callbacks[0]
             self.__decryption_callback = encryption_callbacks[1]
-        self._transmission_send_timeout_sec = transm_send_timeout_sec
-        self._transmission_request_max_retries = transm_req_max_retries
+        self._transm_send_timeout_sec = transm_send_timeout_sec
+        self._transm_req_max_retries = transm_req_max_retries
         self.peer_id = peer_id
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + &#34;: sending conversation request&#34;)
@@ -2859,16 +2866,23 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
         # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
         data = bytearray(&#34;I want to start a conversation&#34;.encode(
             &#39;utf-8&#39;)) + bytearray([255]) + bytearray(conv_name.encode(&#39;utf-8&#39;))
-        transmit_data(data,
-                      peer_id,
-                      others_req_listener,
-                      self._transmission_send_timeout_sec,
-                      self._transmission_request_max_retries
-                      )
+        try:
+            transmit_data(data,
+                          peer_id,
+                          others_req_listener,
+                          self._transm_send_timeout_sec,
+                          self._transm_req_max_retries
+                          )
+        except Exception as e:
+            self.terminate()
+            raise e
         self._last_coms_time = datetime.utcnow()
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + &#34;: sent conversation request&#34;)
-        self.started.wait()
+        success = self.started.wait(transm_send_timeout_sec)
+        if not success:
+            raise CommunicationTimeout(
+                f&#34;Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.&#34;)
         return True     # signal success
 
     def join(self,
@@ -2927,8 +2941,8 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
         if encryption_callbacks:
             self.__encryption_callback = encryption_callbacks[0]
             self.__decryption_callback = encryption_callbacks[1]
-        self._transmission_send_timeout_sec = transm_send_timeout_sec
-        self._transmission_request_max_retries = transm_req_max_retries
+        self._transm_send_timeout_sec = transm_send_timeout_sec
+        self._transm_req_max_retries = transm_req_max_retries
         self._listener = listen_for_transmissions(conv_name,
                                                   self._hear,
                                                   )
@@ -3017,7 +3031,7 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
             try:
                 data = self.message_queue.get(timeout=timeout)
             except:  # timeout reached
-                raise ConvListenTimeout(&#34;Didn&#39;t receive any data.&#34;)
+                raise ConvListenTimeout(&#34;Didn&#39;t receive any data.&#34;) from None
 
         if data:
             return data
@@ -3076,10 +3090,10 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
                 except QueueEmpty:  # qeue timeout reached
                     # check if any of the user&#39;s timeouts were reached
                     if abs_timeout and (datetime.utcnow() - start_time).total_seconds() &gt; abs_timeout:
-                        raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;)
+                        raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;) from None
                     elif (datetime.utcnow() - self._last_coms_time).total_seconds() &gt; no_coms_timeout:
                         raise CommunicationTimeout(
-                            &#34;Communication timeout reached while waiting for file.&#34;)
+                            &#34;Communication timeout reached while waiting for file.&#34;) from None
         if data:
             return data
         else:
@@ -3312,8 +3326,8 @@ reattempted when the timeout is reached</dd>
     if encryption_callbacks:
         self.__encryption_callback = encryption_callbacks[0]
         self.__decryption_callback = encryption_callbacks[1]
-    self._transmission_send_timeout_sec = transm_send_timeout_sec
-    self._transmission_request_max_retries = transm_req_max_retries
+    self._transm_send_timeout_sec = transm_send_timeout_sec
+    self._transm_req_max_retries = transm_req_max_retries
     self.peer_id = peer_id
     if PRINT_LOG_CONVERSATIONS:
         print(conv_name + &#34;: sending conversation request&#34;)
@@ -3330,16 +3344,23 @@ reattempted when the timeout is reached</dd>
     # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
     data = bytearray(&#34;I want to start a conversation&#34;.encode(
         &#39;utf-8&#39;)) + bytearray([255]) + bytearray(conv_name.encode(&#39;utf-8&#39;))
-    transmit_data(data,
-                  peer_id,
-                  others_req_listener,
-                  self._transmission_send_timeout_sec,
-                  self._transmission_request_max_retries
-                  )
+    try:
+        transmit_data(data,
+                      peer_id,
+                      others_req_listener,
+                      self._transm_send_timeout_sec,
+                      self._transm_req_max_retries
+                      )
+    except Exception as e:
+        self.terminate()
+        raise e
     self._last_coms_time = datetime.utcnow()
     if PRINT_LOG_CONVERSATIONS:
         print(conv_name + &#34;: sent conversation request&#34;)
-    self.started.wait()
+    success = self.started.wait(transm_send_timeout_sec)
+    if not success:
+        raise CommunicationTimeout(
+            f&#34;Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.&#34;)
     return True     # signal success</code></pre>
 </details>
 </dd>
@@ -3453,8 +3474,8 @@ reattempted when the timeout is reached</dd>
     if encryption_callbacks:
         self.__encryption_callback = encryption_callbacks[0]
         self.__decryption_callback = encryption_callbacks[1]
-    self._transmission_send_timeout_sec = transm_send_timeout_sec
-    self._transmission_request_max_retries = transm_req_max_retries
+    self._transm_send_timeout_sec = transm_send_timeout_sec
+    self._transm_req_max_retries = transm_req_max_retries
     self._listener = listen_for_transmissions(conv_name,
                                               self._hear,
                                               )
@@ -3520,7 +3541,7 @@ raising an exception</dd>
         try:
             data = self.message_queue.get(timeout=timeout)
         except:  # timeout reached
-            raise ConvListenTimeout(&#34;Didn&#39;t receive any data.&#34;)
+            raise ConvListenTimeout(&#34;Didn&#39;t receive any data.&#34;) from None
 
     if data:
         return data
@@ -3591,10 +3612,10 @@ until giving up and returning None or raising an exception</dd>
             except QueueEmpty:  # qeue timeout reached
                 # check if any of the user&#39;s timeouts were reached
                 if abs_timeout and (datetime.utcnow() - start_time).total_seconds() &gt; abs_timeout:
-                    raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;)
+                    raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;) from None
                 elif (datetime.utcnow() - self._last_coms_time).total_seconds() &gt; no_coms_timeout:
                     raise CommunicationTimeout(
-                        &#34;Communication timeout reached while waiting for file.&#34;)
+                        &#34;Communication timeout reached while waiting for file.&#34;) from None
     if data:
         return data
     else:
@@ -3930,8 +3951,8 @@ the timeout is reached</dd>
         self.progress_handler = progress_handler
         self.encryption_callbacks = encryption_callbacks
         self.block_size = block_size
-        self._transmission_send_timeout_sec = transm_send_timeout_sec
-        self._transmission_request_max_retries = transm_req_max_retries
+        self._transm_send_timeout_sec = transm_send_timeout_sec
+        self._transm_req_max_retries = transm_req_max_retries
 
         self.conv_name = self.filename + &#34;_conv&#34;
         self.conversation = Conversation()
@@ -3941,8 +3962,8 @@ the timeout is reached</dd>
             self.others_req_listener,
             data_received_eventhandler=self._hear,
             encryption_callbacks=self.encryption_callbacks,
-            transm_send_timeout_sec=self._transmission_send_timeout_sec,
-            transm_req_max_retries=self._transmission_request_max_retries
+            transm_send_timeout_sec=self._transm_send_timeout_sec,
+            transm_req_max_retries=self._transm_req_max_retries
         )
         self.conversation.say(
             _to_b255_no_0s(self.filesize) + bytearray([255])
