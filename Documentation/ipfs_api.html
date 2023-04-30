@@ -32,6 +32,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+from termcolor import colored
 import time
 from threading import Event
 import shutil
@@ -224,7 +225,7 @@ def my_multiaddrs():
     return http_client.id().get(&#34;Addresses&#34;)
 
 
-def list_peer_multiaddrs():
+def list_peers():
     &#34;&#34;&#34;Returns a list of the IPFS multiaddresses of the other nodes
     this node is connected to.
     Returns:
@@ -238,6 +239,45 @@ def list_peer_multiaddrs():
         peers.append(line.decode(&#39;utf-8&#39;).strip(&#34;\n&#34;))
 
     return peers
+
+
+def list_peer_multiaddrs():
+    print(colored(&#34;IPFS_API: DEPRECATED: This function (ifps_api.list_peer_multiaddrs) has been renamed to ipfs_api.list_peers to avoid confusion with the new get_peer_multiaddrs function.&#34;, &#34;yellow&#34;))
+    return list_peers()
+
+
+def get_peer_multiaddrs(peer_id):
+    &#34;&#34;&#34;Returns the multiaddresses (without the IPFS CID) via which we can reach
+    the specified peer.
+    Append /p2p/PEER_ID to these multiaddress parts to turn them into complete
+    multiaddresses.
+
+    Args:
+        peer_id (str): the IPFS ID of the peer to lookup
+
+    Returns:
+        list(str): the multiaddresses (without the IPFS CID) via which we can
+        reach the given peer
+    &#34;&#34;&#34;
+    try:
+        response = http_client.dht.findpeer(peer_id)
+        return response.get(&#34;Responses&#34;)[0].get(&#34;Addrs&#34;)
+    except:
+        return []
+
+
+def connect_to_peer(multiaddr):
+    &#34;&#34;&#34;Tries to connect to a peer given its multiaddress.
+    Returns:
+        bool: success
+    &#34;&#34;&#34;
+    try:
+        response = http_client.swarm.connect(multiaddr)
+        if response.get(&#34;Strings&#34;)[0][-7:] == &#34;success&#34;:
+            return True
+        return False
+    except:
+        return False
 
 
 def find_peer(peer_id: str):
@@ -947,8 +987,8 @@ Default: 24h.</dd>
     return http_client.id().get(&#34;Addresses&#34;)</code></pre>
 </details>
 </dd>
-<dt id="ipfs_api.list_peer_multiaddrs"><code class="name flex">
-<span>def <span class="ident">list_peer_multiaddrs</span></span>(<span>)</span>
+<dt id="ipfs_api.list_peers"><code class="name flex">
+<span>def <span class="ident">list_peers</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns a list of the IPFS multiaddresses of the other nodes
@@ -960,7 +1000,7 @@ this node is connected to</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def list_peer_multiaddrs():
+<pre><code class="python">def list_peers():
     &#34;&#34;&#34;Returns a list of the IPFS multiaddresses of the other nodes
     this node is connected to.
     Returns:
@@ -974,6 +1014,88 @@ this node is connected to</p></div>
         peers.append(line.decode(&#39;utf-8&#39;).strip(&#34;\n&#34;))
 
     return peers</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.list_peer_multiaddrs"><code class="name flex">
+<span>def <span class="ident">list_peer_multiaddrs</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list_peer_multiaddrs():
+    print(colored(&#34;IPFS_API: DEPRECATED: This function (ifps_api.list_peer_multiaddrs) has been renamed to ipfs_api.list_peers to avoid confusion with the new get_peer_multiaddrs function.&#34;, &#34;yellow&#34;))
+    return list_peers()</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.get_peer_multiaddrs"><code class="name flex">
+<span>def <span class="ident">get_peer_multiaddrs</span></span>(<span>peer_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the multiaddresses (without the IPFS CID) via which we can reach
+the specified peer.
+Append /p2p/PEER_ID to these multiaddress parts to turn them into complete
+multiaddresses.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>peer_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS ID of the peer to lookup</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>list(str): the multiaddresses (without the IPFS CID) via which we can
+reach the given peer</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_peer_multiaddrs(peer_id):
+    &#34;&#34;&#34;Returns the multiaddresses (without the IPFS CID) via which we can reach
+    the specified peer.
+    Append /p2p/PEER_ID to these multiaddress parts to turn them into complete
+    multiaddresses.
+
+    Args:
+        peer_id (str): the IPFS ID of the peer to lookup
+
+    Returns:
+        list(str): the multiaddresses (without the IPFS CID) via which we can
+        reach the given peer
+    &#34;&#34;&#34;
+    try:
+        response = http_client.dht.findpeer(peer_id)
+        return response.get(&#34;Responses&#34;)[0].get(&#34;Addrs&#34;)
+    except:
+        return []</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.connect_to_peer"><code class="name flex">
+<span>def <span class="ident">connect_to_peer</span></span>(<span>multiaddr)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Tries to connect to a peer given its multiaddress.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>success</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def connect_to_peer(multiaddr):
+    &#34;&#34;&#34;Tries to connect to a peer given its multiaddress.
+    Returns:
+        bool: success
+    &#34;&#34;&#34;
+    try:
+        response = http_client.swarm.connect(multiaddr)
+        if response.get(&#34;Strings&#34;)[0][-7:] == &#34;success&#34;:
+            return True
+        return False
+    except:
+        return False</code></pre>
 </details>
 </dd>
 <dt id="ipfs_api.find_peer"><code class="name flex">
@@ -1551,7 +1673,10 @@ Takes up to self._REFRESH_RATE seconds to complete.</p></div>
 <li><code><a title="ipfs_api.my_id" href="#ipfs_api.my_id">my_id</a></code></li>
 <li><code><a title="ipfs_api.is_ipfs_running" href="#ipfs_api.is_ipfs_running">is_ipfs_running</a></code></li>
 <li><code><a title="ipfs_api.my_multiaddrs" href="#ipfs_api.my_multiaddrs">my_multiaddrs</a></code></li>
+<li><code><a title="ipfs_api.list_peers" href="#ipfs_api.list_peers">list_peers</a></code></li>
 <li><code><a title="ipfs_api.list_peer_multiaddrs" href="#ipfs_api.list_peer_multiaddrs">list_peer_multiaddrs</a></code></li>
+<li><code><a title="ipfs_api.get_peer_multiaddrs" href="#ipfs_api.get_peer_multiaddrs">get_peer_multiaddrs</a></code></li>
+<li><code><a title="ipfs_api.connect_to_peer" href="#ipfs_api.connect_to_peer">connect_to_peer</a></code></li>
 <li><code><a title="ipfs_api.find_peer" href="#ipfs_api.find_peer">find_peer</a></code></li>
 <li><code><a title="ipfs_api.find_providers" href="#ipfs_api.find_providers">find_providers</a></code></li>
 <li><code><a title="ipfs_api.create_tcp_listening_connection" href="#ipfs_api.create_tcp_listening_connection">create_tcp_listening_connection</a></code></li>
