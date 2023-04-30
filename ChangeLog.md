@@ -1,16 +1,21 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
-## v0.5.5 (2023-03-22)
+## v0.5.6 (2023-4-30)
+- ipfs_peers: new module to extend the functionality of ipfs_lns. Docs coming soon.
+- list_peer_multiaddrs renamed to list_peers to avoid confusion with get_peer_multiaddrs
+- get_peer_multiaddrs: new function
+
+## v0.5.5 (2023-04-29)
 - ipfs_api: New (improved!) system for checking on the status of the IPFS daemon, allowing for cleaner code when waiting for IPFS daemon to start, starting it manually etc. See [Examples/Demo-Check-IPFS-Status.py](Examples/Demo-Check-IPFS-Status.py)
 - ipfs_datatransmission: raise ConvListenTimeout **from None**
 - ipfs_cli: fixed PubsubListener thread cleanup
 - ipfs_cli: is_daemon_running renamed to is_ipfs_running
 
-## v0.5.4 (2023-03-22)
+## v0.5.4 (2023-04-23)
 - ipfs_datatransmission.Conversation.start(): bugfix in timeout
 
-## v0.5.2 (2023-03-22)
+## v0.5.2 (2023-04-23)
 This update is a patch to fix dependency version issues with httpx and httpcore modules.
 
 ## v0.5.1 (2023-03-22)
