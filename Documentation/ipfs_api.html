@@ -295,6 +295,18 @@ def find_peer(peer_id: str):
         return None
 
 
+def is_peer_connected(peer_id, ping_count=1):
+    &#34;&#34;&#34;Tests the connection to the given IPFS peer.
+    Args:
+        peer_id (str): the IPFS ID of the peer to test
+        count (int): (optional, default 1) the number of pings to send
+    Returns:
+        bool: whether or not the peer is connected
+    &#34;&#34;&#34;
+    responses = http_client.ping(peer_id, count=ping_count)
+    return responses[-1][&#39;Success&#39;]
+
+
 def find_providers(cid):
     &#34;&#34;&#34;Lookup/find out which IPFS nodes provide the file with the given CID
     (including onesself).
@@ -1132,6 +1144,39 @@ reach the given peer</p></div>
         return None</code></pre>
 </details>
 </dd>
+<dt id="ipfs_api.is_peer_connected"><code class="name flex">
+<span>def <span class="ident">is_peer_connected</span></span>(<span>peer_id, ping_count=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Tests the connection to the given IPFS peer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>peer_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS ID of the peer to test</dd>
+<dt><strong><code>count</code></strong> :&ensp;<code>int</code></dt>
+<dd>(optional, default 1) the number of pings to send</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>whether or not the peer is connected</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_peer_connected(peer_id, ping_count=1):
+    &#34;&#34;&#34;Tests the connection to the given IPFS peer.
+    Args:
+        peer_id (str): the IPFS ID of the peer to test
+        count (int): (optional, default 1) the number of pings to send
+    Returns:
+        bool: whether or not the peer is connected
+    &#34;&#34;&#34;
+    responses = http_client.ping(peer_id, count=ping_count)
+    return responses[-1][&#39;Success&#39;]</code></pre>
+</details>
+</dd>
 <dt id="ipfs_api.find_providers"><code class="name flex">
 <span>def <span class="ident">find_providers</span></span>(<span>cid)</span>
 </code></dt>
@@ -1678,6 +1723,7 @@ Takes up to self._REFRESH_RATE seconds to complete.</p></div>
 <li><code><a title="ipfs_api.get_peer_multiaddrs" href="#ipfs_api.get_peer_multiaddrs">get_peer_multiaddrs</a></code></li>
 <li><code><a title="ipfs_api.connect_to_peer" href="#ipfs_api.connect_to_peer">connect_to_peer</a></code></li>
 <li><code><a title="ipfs_api.find_peer" href="#ipfs_api.find_peer">find_peer</a></code></li>
+<li><code><a title="ipfs_api.is_peer_connected" href="#ipfs_api.is_peer_connected">is_peer_connected</a></code></li>
 <li><code><a title="ipfs_api.find_providers" href="#ipfs_api.find_providers">find_providers</a></code></li>
 <li><code><a title="ipfs_api.create_tcp_listening_connection" href="#ipfs_api.create_tcp_listening_connection">create_tcp_listening_connection</a></code></li>
 <li><code><a title="ipfs_api.create_tcp_sending_connection" href="#ipfs_api.create_tcp_sending_connection">create_tcp_sending_connection</a></code></li>
