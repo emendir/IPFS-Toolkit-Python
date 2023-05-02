@@ -1,8 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
-## v0.5.7 (2023-5-2)
+## v0.5.8 (2023-5-2)
 - is_peer_connected: new function
+- ipfs_peers: I had forgotten to get this module installed by setuptools!
 - ipfs_peers.PeerMonitor: cleanup old peers to prevent endless datastore growth
 ## v0.5.6 (2023-4-30)
 - ipfs_peers: new module to extend the functionality of ipfs_lns. Docs coming soon.
