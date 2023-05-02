@@ -1,4 +1,4 @@
-# ifps_peers:
+# ipfs_peers:
 - docs
 - take care of ipfs_lns
 - support using ipfs_cli

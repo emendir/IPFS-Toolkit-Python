@@ -1,14 +1,40 @@
+import shutil
 import time
 import threading
 from datetime import datetime
 import sys
 import os
 from termcolor import colored
+from docker_container import DockerContainer
 if True:
     sys.path.insert(0, "..")
+    import ipfs_api
     from ipfs_peers import Peer, PeerMonitor
 
-peer_id = "12D3KooWBwLgwjonrHommn8zdTgTYHndDftyLbVJ48QGyEJHecZ1"
+
+DELETE_ALL_IPFS_DOCKERS = True
+REBUILD_DOCKER = False
+
+if os.path.exists("testfile"):
+    file_path = "testfile"
+else:
+    file_path = input("Enter filepath for test transmission file (~10MB): ")
+
+if DELETE_ALL_IPFS_DOCKERS:
+    try:
+        os.system("docker stop $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1; docker rm $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1")
+    except:
+        pass
+
+
+if REBUILD_DOCKER:
+    from build_docker import build_docker
+    build_docker(verbose=False)
+
+docker_peer = DockerContainer("IPFS-Toolkit-Test")
+peer_id = docker_peer.ipfs_id
+
+
 peer = None
 
 
@@ -68,14 +94,15 @@ monitor = None
 monitor2 = None
 
 
-monitor_config_path = "monitor_config.json"
+monitor1_config_path = "monitor1_config.json"
+monitor2_config_path = "monitor2_config.json"
 
 
 def test_create_peer_monitor():
-    if os.path.exists(monitor_config_path):
-        os.remove(monitor_config_path)
+    if os.path.exists(monitor1_config_path):
+        os.remove(monitor1_config_path)
     global monitor
-    monitor = PeerMonitor(monitor_config_path)
+    monitor = PeerMonitor(monitor1_config_path)
     monitor.register_contact_event(peer_id)
 
     print(mark(validate_peer_object(monitor.peers()[0])), "Create PeerMonitor")
@@ -83,14 +110,45 @@ def test_create_peer_monitor():
 
 def test_load_peer_monitor():
     global monitor2
-    monitor2 = PeerMonitor(monitor_config_path)
+    time.sleep(6)   # wait so that the test_autoconnect can be sure of its result
+    if os.path.exists(monitor2_config_path):
+        os.remove(monitor2_config_path)
+    shutil.copy(monitor1_config_path, monitor2_config_path)
+    monitor2 = PeerMonitor(monitor2_config_path)
     print(mark(monitor.peers()[0].serialise() ==
           monitor2.peers()[0].serialise()), "Load PeerMonitor")
+
+
+def test_autoconnect():
+    monitor2.forget_after_hrs = 0.0025    # 9s
+    monitor2.connection_attempt_interval_sec = 5
+    print(mark((monitor2.peers()[0].multiaddrs()[0][1] -
+          datetime.utcnow()).total_seconds() < 1), "Autoconnection")
+
+
+def test_entry_deletion():
+    # wait one cycle, make sure peer isn't forgotten while it is still online
+    time.sleep(6)
+    print(mark(len(monitor2.peers()) == 1), "Forget peer not malfunctioning")
+    # do another autoconnect test, making sure the mutltiaddr date was updated
+    print(mark((monitor2.peers()[0].multiaddrs()[0][1] -
+          datetime.utcnow()).total_seconds() < 3), "Autoconnection still working")
+    # take peer offline, then wait some cycles and enough time for the IPFS
+    # daemon to realise the connection loss and check if peer was forgoten
+    docker_peer.stop()
+    time.sleep(20)
+    forget_success = len(monitor2.peers()) == 0
+    print(mark(forget_success), "Forget peer working")
+    if not forget_success:
+        print(ipfs_api.is_peer_connected(monitor2.peers()[0].peer_id()))
+        print("Multiaddrs: ", monitor2.peers()[0].multiaddrs())
 
 
 def test_terminate():
     monitor.terminate()
     monitor2.terminate()
+    docker_peer.terminate()
+    time.sleep(10)
 
 
 def test_thread_cleanup():
@@ -103,11 +161,14 @@ def test_thread_cleanup():
 
 
 def run_tests():
+    print("Starting tests...")
     test_peer_creation()
     test_peer_connection()
     test_serialisation()
     test_create_peer_monitor()
     test_load_peer_monitor()
+    test_autoconnect()
+    test_entry_deletion()
     test_terminate()
     test_thread_cleanup()
 

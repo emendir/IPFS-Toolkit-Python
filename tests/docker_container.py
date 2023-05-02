@@ -6,6 +6,7 @@ import time
 import os
 import threading
 import sys
+import ipfs_api
 
 
 def get_option(option):
@@ -40,6 +41,7 @@ class DockerContainer():
         while self.ipfs_id == "":
             time.sleep(5)
             self.ipfs_id = self.run_shell_command("ipfs id -f=\"<id>\"")
+        self.wait_till_peer_connected()
 
     def run_python_code(self, python_code):
         command = f"docker exec {self.container_id} /usr/bin/python3 -c \"{python_code}\""
@@ -63,11 +65,33 @@ class DockerContainer():
         )
         return result.stdout
 
+    def stop(self):
+        """Stops the docker container"""
+        if self.container_id:
+            os.system(f"docker stop {self.container_id}  >/dev/null 2>&1")
+
+    def restart(self):
+        """Creates and runs a Brenthy docker container"""
+        os.system(f"docker restart {self.container_id}  >/dev/null 2>&1")
+        self.wait_till_peer_connected()
+
+    def wait_till_peer_connected(self):
+        peer_connected = False
+        while not peer_connected:
+            peer_connected = ipfs_api.find_peer(self.ipfs_id)
+
+    def login(self):
+        import pyperclip
+        command = f"docker exec -it {self.container_id} /bin/bash"
+        pyperclip.copy(command)
+        print(command)
+        print("Command copied to clipboard.")
+
     def terminate(self):
         """Stops and removes the docker container"""
         print("\nStopping and removing container...")
-        os.system(f"docker stop {self.container_id}")
-        os.system(f"docker rm {self.container_id}")
+        os.system(f"docker stop {self.container_id} >/dev/null 2>&1")
+        os.system(f"docker rm {self.container_id} >/dev/null 2>&1")
         print("Finished!!")
 
     def _run_docker(self):

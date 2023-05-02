@@ -267,6 +267,18 @@ def find_peer(peer_id: str):
         return None
 
 
+def is_peer_connected(peer_id, ping_count=1):
+    """Tests the connection to the given IPFS peer.
+    Args:
+        peer_id (str): the IPFS ID of the peer to test
+        count (int): (optional, default 1) the number of pings to send
+    Returns:
+        bool: whether or not the peer is connected
+    """
+    responses = http_client.ping(peer_id, count=ping_count)
+    return responses[-1]['Success']
+
+
 def find_providers(cid):
     """Lookup/find out which IPFS nodes provide the file with the given CID
     (including onesself).
