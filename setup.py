@@ -27,7 +27,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     py_modules=['ipfs_api', 'ipfs_datatransmission', 'ipfs_lns',
-                'ipfs_cli', 'ipfs_peers' 'IPFS_API', 'IPFS_LNS', 'IPFS_DataTransmission'],
+                'ipfs_cli', 'ipfs_peers', 'IPFS_API', 'IPFS_LNS', 'IPFS_DataTransmission'],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
     install_requires=['multiaddr', 'appdirs', 'idna',
