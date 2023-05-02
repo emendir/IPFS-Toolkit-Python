@@ -3,7 +3,6 @@
 
 from threading import Event
 import threading
-from event_signal import Signal
 import time
 from threading import Thread, Lock
 import os
@@ -128,7 +127,6 @@ class PeerMonitor:
     __peers = []  # list(Peer)
     __terminate = False
     __save_lock = Lock()
-    __save = Signal()
     __file_manager_thread = None    # Thread
     __save_event = Event()
 
@@ -141,7 +139,6 @@ class PeerMonitor:
                 for peer_data in peers:
                     self.__peers.append(Peer(serial=peer_data))
         Thread(target=self.connect_to_peers, args=()).start()
-        self.__save.connect(self.save)
         self.__file_manager_thread = Thread(
             target=self.__file_manager, args=(), name="PeerMonitor-FileManager")
         self.__file_manager_thread.start()
