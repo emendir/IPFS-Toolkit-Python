@@ -143,7 +143,7 @@ class PeerMonitor:
         Thread(target=self.connect_to_peers, args=()).start()
         self.__save.connect(self.save)
         self.__file_manager_thread = Thread(
-            target=self.file_manager, args=(), name="PeerMonitor-FileManager")
+            target=self.__file_manager, args=(), name="PeerMonitor-FileManager")
         self.__file_manager_thread.start()
 
     def register_contact_event(self, peer_id):
@@ -164,7 +164,7 @@ class PeerMonitor:
     def peers(self):
         return self.__peers
 
-    def file_manager(self):
+    def __file_manager(self):
         while True:
             if self.__terminate:
                 return
