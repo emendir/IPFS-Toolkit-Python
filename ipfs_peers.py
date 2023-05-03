@@ -24,6 +24,7 @@ class Peer:
     __last_seen = None  # datetime
 
     __multi_addrs_lock = Lock()
+    __terminate = False
 
     def __init__(self, peer_id="", serial=None):
         if peer_id and not serial:
@@ -46,10 +47,10 @@ class Peer:
         # skip registering if last register wasn't very long ago
         if self.last_seen() and (datetime.utcnow() - self.last_seen()).total_seconds() < successive_register_ignore_dur_sec:
             return False
-        if not ipfs_api.is_peer_connected(self.__peer_id):
-            return False
         with self.__multi_addrs_lock:
             multiaddrs = ipfs_api.get_peer_multiaddrs(self.__peer_id)
+            if not ipfs_api.is_peer_connected(self.__peer_id):
+                return False
             now = datetime.utcnow()
             if multiaddrs:
                 self.__last_seen = now
@@ -89,12 +90,16 @@ class Peer:
             bool: whether or not we managed to connect to this peer
         """
         for multiaddr, date in self.__multiaddrs:
+            if self.__terminate:
+                return False
             success = ipfs_api.connect_to_peer(
                 f"{multiaddr}/p2p/{self.__peer_id}")
             if success and ipfs_api.is_peer_connected(self.__peer_id):
                 self.register_contact_event(successive_register_ignore_dur_sec)
 
                 return True
+            if self.__terminate:
+                return False
         # if none of the known multiaddresses worked, try a general findpeer
         if ipfs_api.find_peer(self.__peer_id) and ipfs_api.is_peer_connected(self.__peer_id):
             self.register_contact_event(successive_register_ignore_dur_sec)
@@ -117,6 +122,9 @@ class Peer:
             'multiaddrs': [[addr, time_to_string(t)] for addr, t in self.__multiaddrs],
         }
         return json.dumps(data)
+
+    def terminate(self):
+        self.__terminate = True
 
 
 class PeerMonitor:
@@ -161,18 +169,23 @@ class PeerMonitor:
 
     def peers(self):
         return self.__peers
+    __save = False
 
     def __file_manager(self):
         while True:
             if self.__terminate:
                 return
-            if self.__save_event.wait(1):
+            # if self.__save_event.wait(1):
+            #     self.save()
+            #     self.__save_event.clear()
+            if self.__save:
                 self.save()
-                self.__save_event.clear()
+                self.__save = False
+                time.sleep(1)
 
     def save(self):
-        if threading.current_thread().name != "PeerMonitor-FileManager":
-            self.__save_event.set()
+        if threading.current_thread().name != "PeerMonitor.__file_manager":
+            self.__save = True
             return
         with self.__save_lock:
             with open(self.__filepath, 'w+') as file:
@@ -180,14 +193,14 @@ class PeerMonitor:
                     'peers': [peer.serialise() for peer in self.__peers]
                 }
                 file.write(json.dumps(data))
-        self.__save_event.clear()
+        # self.__save_event.clear()
+        self.__save = False
 
     def __connect_to_peers(self):
         while not self.__terminate:
             for peer in self.__peers:
                 Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,),
                        name="PeerMonitor-Peer.connnect").start()
-
             threshhold_time = datetime.utcnow() - timedelta(hours=self.forget_after_hrs)
             for peer in self.__peers:
                 peer.forget_old_entries(threshhold_time)
@@ -201,6 +214,8 @@ class PeerMonitor:
 
     def terminate(self):
         self.__terminate = True
+        for peer in self.__peers:
+            peer.terminate()
 
 
 TIME_FORMAT = '%Y.%m.%d_%H.%M.%S'
