@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.10 (2023-5-1)
+- ipfs_api.pins: new function
+- ipfs_peers.PeerMonitor: bugfix in save
 ## v0.5.9 (2023-5-2)
 - is_peer_connected: new function
 - ipfs_peers: I had forgotten to get this module installed by setuptools!

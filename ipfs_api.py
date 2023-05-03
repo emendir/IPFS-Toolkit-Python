@@ -4,6 +4,8 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 
+from datetime import datetime
+from datetime import timedelta
 from termcolor import colored
 import time
 from threading import Event
@@ -95,6 +97,38 @@ def unpin(cid: str):
         cid (str): the IPFS content ID (CID) of the resource to unpin
     """
     http_client.pin.rm(cid)
+
+
+__pins_cache = {}
+
+
+def pins(cids_only: bool = False, cache_age_s: int = None):
+    """Get the CIDs of files we have pinned on IPFS
+    Args:
+        cids_only (bool): if True, returns a plain list of IPFS CIDs
+            otherwise, returns a list of dicts of CIDs and their pinning type
+        cache_age_s (int): getting the of pins from IPFS can take several
+            seconds. IPFS_API therefore caches each result. If the age of the
+            cache is less than this parameter, the cacheed result is returned,
+            otherwise the slow process of getting the latest list of pins is
+            used.
+    Returns:
+        list(): a list of the CIDs of pinned objects. The list element type
+            depends on the cids_only parameter (see above)
+    """
+    global __pins_cache
+    if __pins_cache and cache_age_s and (datetime.utcnow() - __pins_cache['date']).total_seconds() < cache_age_s:
+        data = __pins_cache['data']
+    else:
+        data = http_client.pin.ls()['Keys'].as_json()
+        __pins_cache = {
+            "date": datetime.utcnow(),
+            "data": data
+        }
+    if cids_only:
+        return list(data.keys())
+    else:
+        return data
 
 
 def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):

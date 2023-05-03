@@ -110,6 +110,7 @@ def test_create_peer_monitor():
 
 def test_load_peer_monitor():
     global monitor2
+    monitor.save()
     time.sleep(6)   # wait so that the test_autoconnect can be sure of its result
     if os.path.exists(monitor2_config_path):
         os.remove(monitor2_config_path)
@@ -136,7 +137,7 @@ def test_entry_deletion():
     # take peer offline, then wait some cycles and enough time for the IPFS
     # daemon to realise the connection loss and check if peer was forgoten
     docker_peer.stop()
-    time.sleep(20)
+    time.sleep(60)
     forget_success = len(monitor2.peers()) == 0
     print(mark(forget_success), "Forget peer working")
     if not forget_success:
