@@ -138,9 +138,10 @@ class PeerMonitor:
                 peers = data['peers']
                 for peer_data in peers:
                     self.__peers.append(Peer(serial=peer_data))
-        Thread(target=self.connect_to_peers, args=()).start()
+        Thread(target=self.__connect_to_peers, args=(),
+               name="PeerMonitor.__connect_to_peers").start()
         self.__file_manager_thread = Thread(
-            target=self.__file_manager, args=(), name="PeerMonitor-FileManager")
+            target=self.__file_manager, args=(), name="PeerMonitor.__file_manager")
         self.__file_manager_thread.start()
 
     def register_contact_event(self, peer_id):
@@ -181,10 +182,11 @@ class PeerMonitor:
                 file.write(json.dumps(data))
         self.__save_event.clear()
 
-    def connect_to_peers(self):
+    def __connect_to_peers(self):
         while not self.__terminate:
             for peer in self.__peers:
-                Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,)).start()
+                Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,),
+                       name="PeerMonitor-Peer.connnect").start()
 
             threshhold_time = datetime.utcnow() - timedelta(hours=self.forget_after_hrs)
             for peer in self.__peers:
