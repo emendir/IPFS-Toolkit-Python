@@ -1,5 +1,4 @@
 from ipfs_api import (
-    _start,
     publish,
     download,
     read,
@@ -32,8 +31,8 @@ print(colored("IPFS_API: DEPRECATED: The IPFS_API module has been renamed to ipf
 
 
 def Start():
-    print(colored("IPFS_API: DEPRECATED: This function (IPFS_API.Start) has been renamed to ipfs_api._start to accord with PEP 8 naming conventions.", "yellow"))
-    return _start()
+    print(colored("IPFS_API: DEPRECATED: This function (IPFS_API.Start) has been reemoved", "yellow"))
+    return
 
 
 def PublishToTopic(topic, data):
