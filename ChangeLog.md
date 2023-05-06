@@ -1,7 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
-## v0.5.10 (2023-5-1)
+## v0.5.11 (2023-5-6)
+- ipfs_peers.PeerMonitor: bugfixes for rare cases in multi-threaded access
+
+## v0.5.10 (2023-5-3)
 - ipfs_api.pins: new function
 - ipfs_peers.PeerMonitor: bugfix in save
 ## v0.5.9 (2023-5-2)
