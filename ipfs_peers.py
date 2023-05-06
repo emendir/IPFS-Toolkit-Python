@@ -30,7 +30,14 @@ class Peer:
         if peer_id and not serial:
             self.__peer_id = peer_id
         elif serial:
-            data = json.loads(serial)
+            if isinstance(serial, str):
+                data = json.loads(serial)
+            else:
+                data = serial
+            if not isinstance(serial, dict):
+                raise TypeError(
+                    f"Parameter serial must be of type dict or str, not {type(serial)}")
+
             self.__peer_id = data['peer_id']
             self.__last_seen = string_to_time(data['last_seen'])
             self.__multiaddrs = [(addr, string_to_time(t))
@@ -121,7 +128,7 @@ class Peer:
             'last_seen': last_seen,
             'multiaddrs': [[addr, time_to_string(t)] for addr, t in self.__multiaddrs],
         }
-        return json.dumps(data)
+        return data
 
     def terminate(self):
         self.__terminate = True
@@ -137,14 +144,28 @@ class PeerMonitor:
     __save_lock = Lock()
     __file_manager_thread = None    # Thread
     __save_event = Event()
+    __peers_lock = Lock()   # for adding & removing peers
 
-    def __init__(self, filepath):
+    def __init__(self,
+                 filepath,
+                 forget_after_hrs=FORGET_AFTER_HOURS,
+                 connection_attempt_interval_sec=CONNECTION_ATTEMPT_INTERVAL_SEC,
+                 successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC):
         self.__filepath = filepath
+        self.forget_after_hrs = forget_after_hrs
+        self.connection_attempt_interval_sec = connection_attempt_interval_sec
+        self.successive_register_ignore_dur_sec = successive_register_ignore_dur_sec
+
         if os.path.exists(filepath):
             with open(filepath, 'r') as file:
                 data = json.loads(file.read())
                 peers = data['peers']
                 for peer_data in peers:
+                    if self.get_peer_by_id(peer_data['peer_id']):
+                        # TODO how to warn user about duplicate entries?
+                        # Function to merge peers?
+                        # Ever necessary?
+                        continue
                     self.__peers.append(Peer(serial=peer_data))
         Thread(target=self.__connect_to_peers, args=(),
                name="PeerMonitor.__connect_to_peers").start()
@@ -153,19 +174,31 @@ class PeerMonitor:
         self.__file_manager_thread.start()
 
     def register_contact_event(self, peer_id):
-        peer = self.get_peer_by_id(peer_id)
-        if not peer:
-            peer = Peer(peer_id)
-            self.__peers.append(peer)
+        # get peer, create if new
+        with self.__peers_lock:
+            peer = self.get_peer_by_id(peer_id, already_locked=True)
+            if not peer:
+                peer = Peer(peer_id)
+                self.__peers.append(peer)
 
         # try register, and if data is recorded, save to file
         if peer.register_contact_event(successive_register_ignore_dur_sec=self.successive_register_ignore_dur_sec):
             self.save()
 
-    def get_peer_by_id(self, peer_id):
+    def get_peer_by_id(self, peer_id, already_locked=False):
+        if not already_locked:
+
+            self.__peers_lock.acquire()
+
+        found_peer = None
         for peer in self.__peers:
             if peer.peer_id() == peer_id:
-                return peer
+                found_peer = peer
+                break
+        if not already_locked:
+            self.__peers_lock.release()
+
+        return found_peer
 
     def peers(self):
         return self.__peers
@@ -198,14 +231,23 @@ class PeerMonitor:
 
     def __connect_to_peers(self):
         while not self.__terminate:
+            # try to connect to all peers on separate threads
             for peer in self.__peers:
                 Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,),
                        name="PeerMonitor-Peer.connnect").start()
+
+            # make peers forget old multiaddresses
             threshhold_time = datetime.utcnow() - timedelta(hours=self.forget_after_hrs)
             for peer in self.__peers:
                 peer.forget_old_entries(threshhold_time)
-            self.__peers = [peer for peer in self.__peers if peer.multiaddrs()]
+            # forget old peers
+            with self.__peers_lock:
+                self.__peers = [
+                    peer for peer in self.__peers if peer.multiaddrs()]
+
             self.save()
+
+            # wait a bit to save processing power
             for i in range(self.connection_attempt_interval_sec):
                 if self.__terminate:
                     self.save()
