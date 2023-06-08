@@ -158,7 +158,9 @@ class PeerMonitor:
 
         if os.path.exists(filepath):
             with open(filepath, 'r') as file:
-                data = json.loads(file.read())
+                data = file.read()
+            if data.strip("\n"):    # if file isn't empty
+                data = json.loads(data)
                 peers = data['peers']
                 for peer_data in peers:
                     if self.get_peer_by_id(peer_data['peer_id']):
