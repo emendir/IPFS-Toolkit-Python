@@ -1,6 +1,11 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.12 (2023-5-6)
+- ipfs_peers.PeerMonitor: bugfixfor loading empty config file
+- ipfshttpcient2: implementet p2p.ls()
+
+
 ## v0.5.11 (2023-5-6)
 - ipfs_peers.PeerMonitor: bugfixes for rare cases in multi-threaded access
 

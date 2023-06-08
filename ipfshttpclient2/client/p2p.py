@@ -102,3 +102,23 @@ class Section(base.SectionBase):
         kwargs.setdefault("opts", {}).update(opts)
         args = (all,)  # if all is not None else ()
         return self._client.request('/p2p/close', decoder='json', **kwargs)
+
+    def ls(self, **kwargs: base.CommonArgs):
+        """List open libp2p connections.
+
+
+        .. code-block:: python
+
+                >>> client.p2p.ls()
+                []
+
+        Returns
+        -------
+        list
+            A list with a dict with a list of dicts (seriously?)
+                Use response[0]['Listeners'] to get to the juice:
+                That's a list of dicts, each with the keys:
+                    Protocol, ListenAddress, TargetAddress
+        """
+
+        return self._client.request('/p2p/ls', decoder='json', **kwargs)
