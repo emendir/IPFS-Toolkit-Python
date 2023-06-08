@@ -6,7 +6,7 @@ Under the hood these modules use a slightly updated version [ipfshttpclient](htt
 
 # Package Contents:
 ## Python Modules:
-- __ipfs_api__: a wrapper for the module ipfshttpclient2 that provides a simple API for some of the most useful feature of IPFS
+- __ipfs_api__: a wrapper for the module ipfshttpclient2 that provides a simple API for some of the most useful features of IPFS
 - __ipfs_datatransmission__: a module that enables P2P data transmission between IPFS nodes
 - __ipfs_lns__: a module that allows IPFS nodes and their multiaddresses to be stored in app data to make them easier to find in the IP layer of the internet (easier to connect to)
 - __ipfshttpclient2__: a modified version of the official ipfshttpclient module that has been expanded and updated where needed 
