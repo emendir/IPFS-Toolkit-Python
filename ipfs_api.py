@@ -48,9 +48,9 @@ def publish(path: str):
     """
     result = http_client.add(path, recursive=True)
     if(type(result) == list):
-        return result[-1].get("Hash")
+        return result[-1]["Hash"]
     else:
-        return result.get("Hash")
+        return result["Hash"]
 
 
 def download(cid, path="."):
@@ -140,9 +140,9 @@ def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
     """
     result = http_client.key.gen(key_name=name, type=type, size=size)
     if isinstance(result, list):
-        return result[-1].get("Id")
+        return result[-1]["Id"]
     else:
-        return result.get("Id")
+        return result["Id"]
 
 
 def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
@@ -184,7 +184,7 @@ def resolve_ipns_key(ipns_key, nocache=False):
     Returns:
         str: the IPFS CID associated with the IPNS key
     """
-    return http_client.name.resolve(name=ipns_key, nocache=nocache).get("Path")
+    return http_client.name.resolve(name=ipns_key, nocache=nocache)["Path"]
 
 
 def download_ipns_record(ipns_key, path="", nocache=False):
@@ -212,7 +212,7 @@ def my_id():
     Returns:
         str: the peer ID of this node
     """
-    return http_client.id().get("ID")
+    return http_client.id()["ID"]
 
 
 def is_ipfs_running():
@@ -228,7 +228,7 @@ def my_multiaddrs():
     Returns:
         str: the peer ID of this node
     """
-    return http_client.id().get("Addresses")
+    return http_client.id()["Addresses"]
 
 
 def list_peers():
@@ -267,7 +267,7 @@ def get_peer_multiaddrs(peer_id):
     """
     try:
         response = http_client.dht.findpeer(peer_id)
-        return response.get("Responses")[0].get("Addrs")
+        return response["Responses"][0]["Addrs"]
     except:
         return []
 
@@ -279,7 +279,7 @@ def connect_to_peer(multiaddr):
     """
     try:
         response = http_client.swarm.connect(multiaddr)
-        if response.get("Strings")[0][-7:] == "success":
+        if response["Strings"][0][-7:] == "success":
             return True
         return False
     except:
@@ -295,7 +295,7 @@ def find_peer(peer_id: str):
     """
     try:
         response = http_client.dht.findpeer(peer_id)
-        if(len(response.get("Responses")[0].get("Addrs")) > 0):
+        if(len(response["Responses"][0]["Addrs"]) > 0):
             return response
     except:
         return None
