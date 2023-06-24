@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
-SUCCESSIVE_REGISTER_IGNORE_DUR_SEC = 5
-CONNECTION_ATTEMPT_INTERVAL_SEC = 300
+SUCCESSIVE_REGISTER_IGNORE_DUR_SEC = 60
+CONNECTION_ATTEMPT_INTERVAL_SEC = 60
 
 
 class Peer:
@@ -135,7 +135,18 @@ class Peer:
 
 
 class PeerMonitor:
-    """A class for managing peer contact information for a certain app"""
+    """A class for managing peer contact information for a certain app
+    Args:
+        filepath (str): path of the configuration file in which this
+                PeerMonitor's data is/should be stored
+        forget_after_hrs (int): after how many hours of no communication
+                a peer should be forgotten
+        connection_attempt_interval_sec (int): in the loop that constantly
+                tries to connect to known peers, how many seconds should be
+                paused between consecutive connection attempts
+        successive_register_ignore_dur_sec (int): minimum duration between
+                successive registrations of the same peer
+    """
     forget_after_hrs = FORGET_AFTER_HOURS
     connection_attempt_interval_sec = CONNECTION_ATTEMPT_INTERVAL_SEC
     successive_register_ignore_dur_sec = SUCCESSIVE_REGISTER_IGNORE_DUR_SEC
@@ -235,8 +246,16 @@ class PeerMonitor:
         while not self.__terminate:
             # try to connect to all peers on separate threads
             for peer in self.__peers:
-                Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,),
-                       name="PeerMonitor-Peer.connnect").start()
+                # Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,),
+                #        name="PeerMonitor-Peer.connnect").start()
+                peer.connect(self.successive_register_ignore_dur_sec)
+                # wait a bit to save processing power
+                # and reduce up congestion of ipfs http client
+                for i in range(self.connection_attempt_interval_sec):
+                    if self.__terminate:
+                        self.save()
+                        return
+                    time.sleep(1)
 
             # make peers forget old multiaddresses
             threshhold_time = datetime.utcnow() - timedelta(hours=self.forget_after_hrs)
@@ -248,13 +267,6 @@ class PeerMonitor:
                     peer for peer in self.__peers if peer.multiaddrs()]
 
             self.save()
-
-            # wait a bit to save processing power
-            for i in range(self.connection_attempt_interval_sec):
-                if self.__terminate:
-                    self.save()
-                    return
-                time.sleep(1)
 
     def terminate(self):
         self.__terminate = True

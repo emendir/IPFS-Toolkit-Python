@@ -29,6 +29,8 @@ print(colored("IPFS_API: DEPRECATED: The IPFS_API module has been renamed to ipf
 
 """Deprecated naming of Functions:"""
 
+started = True
+
 
 def Start():
     print(colored("IPFS_API: DEPRECATED: This function (IPFS_API.Start) has been reemoved", "yellow"))
