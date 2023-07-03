@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
 SUCCESSIVE_REGISTER_IGNORE_DUR_SEC = 60
-CONNECTION_ATTEMPT_INTERVAL_SEC = 60
+CONNECTION_ATTEMPT_INTERVAL_SEC = 5
 
 
 class Peer:
@@ -227,7 +227,7 @@ class PeerMonitor:
             if self.__save:
                 self.save()
                 self.__save = False
-                time.sleep(1)
+            time.sleep(1)
 
     def save(self):
         if threading.current_thread().name != "PeerMonitor.__file_manager":
