@@ -2,7 +2,7 @@
 - docs
 - take care of ipfs_lns
 - support using ipfs_cli
-
+- timeout errors cleanup resources first
 
 FileTransmission:
   abortion

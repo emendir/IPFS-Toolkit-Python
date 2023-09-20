@@ -180,8 +180,9 @@ class PeerMonitor:
                         # Ever necessary?
                         continue
                     self.__peers.append(Peer(serial=peer_data))
-        Thread(target=self.__connect_to_peers, args=(),
-               name="PeerMonitor.__connect_to_peers").start()
+        self.__peer_finder_thread = Thread(target=self.__connect_to_peers, args=(),
+                                           name="PeerMonitor.__connect_to_peers")
+        self.__peer_finder_thread.start()
         self.__file_manager_thread = Thread(
             target=self.__file_manager, args=(), name="PeerMonitor.__file_manager")
         self.__file_manager_thread.start()
@@ -268,10 +269,19 @@ class PeerMonitor:
 
             self.save()
 
-    def terminate(self):
+    def terminate(self, wait=False):
+        """Stop this PeerMonitor's activities.
+        Args:
+            wait (bool): whether or not this function should block until all
+                activity has been stopped and resources have been cleaned up
+        """
+
         self.__terminate = True
         for peer in self.__peers:
             peer.terminate()
+
+        self.__peer_finder_thread.join()
+        self.__file_manager_thread.join()
 
 
 TIME_FORMAT = '%Y.%m.%d_%H.%M.%S'

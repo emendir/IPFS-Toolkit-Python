@@ -1,3 +1,7 @@
+if True:
+    import sys
+    sys.path.insert(0, "..")
+    import ipfs_api
 import test_peers
 import test_with_docker
 import test_without_docker

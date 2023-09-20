@@ -3,25 +3,24 @@
 # To use it you must have IPFS running on your computer.
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
-
-from datetime import datetime
-from datetime import timedelta
-from termcolor import colored
-import time
-from threading import Event
-import shutil
-import tempfile
-# import sys
-from subprocess import Popen, PIPE
-# import subprocess
-import os
+from threading import Thread
+import logging
+import ipfs_lns
+import traceback
 import os.path
+import os
+from subprocess import Popen, PIPE
+import tempfile
+import shutil
+from threading import Event
+import time
+from termcolor import colored
+from datetime import timedelta
+from datetime import datetime
+# import sys
+# import subprocess
 # import threading
 # import multiprocessing
-import traceback
-import ipfs_lns
-import logging
-from threading import Thread
 try:
     import base64
     import ipfshttpclient2 as ipfshttpclient
@@ -479,14 +478,21 @@ class PubsubListener():
             target=self._listen, args=(), name="ipfs_api.PubsubListener")
         self.listener_thread.start()
 
-    def terminate(self):
+    def terminate(self, wait=False):
         """Stop this PubSub subscription, stop listening for data.
         May let one more pubsub message through
         Takes up to self._REFRESH_RATE seconds to complete.
+
+        Args:
+            wait (bool): whether or not this function should block until all
+                activity has been stopped and resources have been cleaned up
+
         """
         self._terminate = True
         if self.sub:
             self.sub.close()
+        if wait:
+            self.listener_thread.join()
 
 
 def pubsub_publish(topic, data):
