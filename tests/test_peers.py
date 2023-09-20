@@ -146,7 +146,7 @@ def test_entry_deletion():
 
 
 def test_terminate():
-    monitor.terminate()
+    monitor.terminate(True)
     monitor2.terminate()
     docker_peer.terminate()
     time.sleep(10)
