@@ -1,6 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.15 (2023-9-20)
+- ipfs_peers.PeerMonitor.terminate(): option to wait until termination is finished
+- ipfs_api.PubsubListener.terminate(): option to wait until termination is finished
+
 ## v0.5.14 (2023-7-3)
 - ipfs_peers.PeerMonitor: fixed CPU-loading bug in PeerMonitor
 
