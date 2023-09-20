@@ -54,7 +54,7 @@ def test_pubsub():
 
     print(mark(success), "PubSub communication")
     term_start = datetime.utcnow()
-    sub.terminate()
+    sub.terminate(True)
     term_end = datetime.utcnow()
     term_dur = (term_end - term_start).total_seconds()
     time.sleep(30)

@@ -186,13 +186,21 @@ class PubsubListener():
 
     def listen(self):
         self._terminate = False
-        thr = Thread(target=self._listen, args=(), name=f"ipfs_cli.pubsub_listener {self.topic}")
-        thr.start()
+        self.listener_thread = Thread(target=self._listen, args=(),
+                                      name=f"ipfs_cli.pubsub_listener {self.topic}")
+        self.listener_thread.start()
 
-    def terminate(self):
-        """May let one more pubsub message through"""
+    def terminate(self, wait=False):
+        """May let one more pubsub message through.
+
+        Args:
+            wait (bool): whether or not this function should block until all
+                activity has been stopped and resources have been cleaned up
+        """
         self._terminate = True
         pubsub_publish(self.topic, "terminate".encode())
+        if wait:
+            self.listener_thread.join()
 
 
 def pubsub_subscribe(topic, eventhandler):
