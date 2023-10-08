@@ -12,15 +12,10 @@ def build_docker(verbose=True):
     args_str = ""
     if not verbose:
         args_str += " >/dev/null"
-    result = subprocess.run(
-        "tests/build_docker.sh" + args_str,
-        shell=True,
-        capture_output=True,
-        text=True,
-    )
+    exit_code = os.system("tests/build_docker.sh" + args_str)
     os.chdir(cwd)
-    if result.returncode == 1:
-        print(colored("IPFS-Toolkit docker udpate failed!", "red"))
+    if exit_code == 1:
+        print(colored("Docker image udpate failed!", "red"))
         return False
 
 

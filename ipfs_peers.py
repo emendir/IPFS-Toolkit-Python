@@ -121,8 +121,7 @@ class Peer:
 
     def serialise(self):
         last_seen = None
-        if self.__last_seen:
-            last_seen = time_to_string(self.__last_seen)
+        last_seen = time_to_string(self.__last_seen)
         data = {
             'peer_id': self.__peer_id,
             'last_seen': last_seen,
@@ -287,9 +286,13 @@ class PeerMonitor:
 TIME_FORMAT = '%Y.%m.%d_%H.%M.%S'
 
 
-def time_to_string(time: datetime):
-    return time.strftime(TIME_FORMAT)
+def time_to_string(_time: datetime):
+    if not _time:
+        return None
+    return _time.strftime(TIME_FORMAT)
 
 
 def string_to_time(string):
+    if not string:
+        return None
     return datetime.strptime(string, TIME_FORMAT)
