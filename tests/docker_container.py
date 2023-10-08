@@ -96,7 +96,10 @@ class DockerContainer():
 
     def _run_docker(self):
         """Creates and runs a Brenthy docker container"""
-        os.system(f"docker run --name {self.container_name} emendir/ipfs-toolkit")
+        # docker run emendir/ipfs-toolkit
+
+        os.system(
+            f"docker run --name {self.container_name} --cap-add SYS_ADMIN --privileged emendir/ipfs-toolkit")
 
 
 if __name__ == "__main__":
