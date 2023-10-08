@@ -1,6 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.16 (2023-10-08)
+- ipfs_peers: Bugfix for while loading peer from serial where last_seen is null 
+- updated to systemd docker container for tests
+
 ## v0.5.15 (2023-9-20)
 - ipfs_peers.PeerMonitor.terminate(): option to wait until termination is finished
 - ipfs_api.PubsubListener.terminate(): option to wait until termination is finished

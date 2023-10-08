@@ -162,8 +162,8 @@ def test_thread_cleanup():
 
 
 def run_tests():
-    prepare()
     print("\nStarting tests for IPFS-Peers...")
+    prepare()
     test_peer_creation()
     test_peer_connection()
     test_serialisation()
