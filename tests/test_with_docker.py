@@ -70,6 +70,11 @@ def prepare():
 
     docker_peer = DockerContainer("IPFS-Toolkit-Test")
 
+    # run test script on docker container
+    command = "python3 /opt/IPFS-Toolkit/docker_script.py"
+    os.system(f"docker exec {docker_peer.container_id} {command}&")
+    time.sleep(1)
+
 
 def mark(success):
     """
@@ -174,8 +179,8 @@ def test_thread_cleanup():
 
 
 def run_tests():
-    prepare()
     print("\nStarting tests for IPFS-DataTransmission...")
+    prepare()
     test_find_peer()
     test_create_conv()
     test_send_file()
