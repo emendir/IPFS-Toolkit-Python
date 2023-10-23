@@ -25,8 +25,8 @@ class DockerContainer():
 
     def run(self):
         threading.Thread(target=self._run_docker, args=()).start()
-        time.sleep(5)
 
+        time.sleep(1)
         # getting container id from container name
         result = subprocess.run(
             f'docker ps -aqf "name=^{self.container_name}$"',
@@ -38,10 +38,16 @@ class DockerContainer():
         self.container_id = result.stdout.strip("\n")
 
         self.ipfs_id = ""
-        while self.ipfs_id == "":
-            time.sleep(5)
-            self.ipfs_id = self.run_shell_command("ipfs id -f=\"<id>\"")
-        self.wait_till_peer_connected()
+        # wait till IPFS is running and till we can reach it
+        while not self.ipfs_id or not ipfs_api.find_peer(self.ipfs_id):
+            time.sleep(1)
+            self.ipfs_id = subprocess.run(
+                f"docker exec -it {self.container_id} ipfs id -f=\"<id>\" 2>/dev/null",
+                shell=True,
+                capture_output=True,
+                text=True,
+                check=False
+            ).stdout
 
     def run_python_code(self, python_code):
         command = f"docker exec {self.container_id} /usr/bin/python3 -c \"{python_code}\""
@@ -73,12 +79,18 @@ class DockerContainer():
     def restart(self):
         """Creates and runs a Brenthy docker container"""
         os.system(f"docker restart {self.container_id}  >/dev/null 2>&1")
-        self.wait_till_peer_connected()
-
-    def wait_till_peer_connected(self):
-        peer_connected = False
-        while not peer_connected:
-            peer_connected = ipfs_api.find_peer(self.ipfs_id)
+        # wait till IPFS is running
+        while not subprocess.run(
+            f"docker exec -it {self.container_id} ipfs id -f=\"<id>\" 2>/dev/null",
+            shell=True,
+            capture_output=True,
+            text=True,
+            check=False
+        ).stdout:
+            time.sleep(1)
+        # wait till we can connect to docker via IPFS
+        while not ipfs_api.find_peer(self.ipfs_id):
+            pass
 
     def login(self):
         import pyperclip

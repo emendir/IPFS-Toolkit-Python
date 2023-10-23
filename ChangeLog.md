@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.17 (2023-10-23)
+- ipfs_peers: new find_all_peers function to try to connect to all peers now
+
 ## v0.5.16 (2023-10-08)
 - ipfs_peers: Bugfix for while loading peer from serial where last_seen is null 
 - updated to systemd docker container for tests
@@ -151,7 +154,7 @@ ipfs_datatransmission:
   - Conversation.SendFiles: Conversation objects now have functions to send and receive files, receiving files with callback functions and/or thread-blocking waiting functions.
 
 ## v0.2.2 (not backward-compatible):
-Highlights (see [ChangeLog-v0.2.2](./ChangeLog-v0.2.2.md) for details):
+Highlights:
   - ipfs_datatransmission:
     - failure handling system
     - implemented ZMQ in data transmission (replaced with TCP in v0.2.3)

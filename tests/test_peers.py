@@ -127,6 +127,16 @@ def test_autoconnect():
           datetime.utcnow()).total_seconds() < 1), "Autoconnection")
 
 
+def test_find_all_peers():
+    success = False
+    try:
+        monitor.find_all_peers()
+        success = True
+    except Exception as error:
+        print(error)
+    print(mark(success), "find_all_peers")
+
+
 def test_entry_deletion():
     # wait one cycle, make sure peer isn't forgotten while it is still online
     time.sleep(6)
@@ -168,6 +178,7 @@ def run_tests():
     test_peer_connection()
     test_serialisation()
     test_create_peer_monitor()
+    test_find_all_peers()
     test_load_peer_monitor()
     test_autoconnect()
     test_entry_deletion()
