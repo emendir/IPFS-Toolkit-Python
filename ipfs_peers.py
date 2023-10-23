@@ -268,6 +268,18 @@ class PeerMonitor:
 
             self.save()
 
+    def find_all_peers(self):
+        """Try to connect to all peers now.
+        Blocks until all connection attempts have been finished."""
+        threads = []
+        for peer in self.__peers:
+            thread = Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,))
+            threads.append(thread)
+            thread.start()
+        # wait for all threads to finish
+        for thread in threads:
+            thread.join()
+
     def terminate(self, wait=False):
         """Stop this PeerMonitor's activities.
         Args:
