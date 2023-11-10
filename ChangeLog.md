@@ -1,7 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
-## v0.5.17 (2023-11-10)
+## v0.5.19 (2023-11-10)
+- ipfs_api.remove(): new feature
+
+## v0.5.18 (2023-11-10)
 - ipfs_api.predict_cid(): new feature
 
 ## v0.5.17 (2023-10-23)

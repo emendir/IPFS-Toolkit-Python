@@ -114,6 +114,16 @@ def unpin(cid: str):
     http_client.pin.rm(cid)
 
 
+def remove(cid: str):
+    """Remove content with the given CID from this IPFS node's storage.
+    Note: removes all unpinned content from this IPFS node's storage.
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to unpin
+    """
+    unpin(cid)
+    http_client.repo.gc()
+
+
 __pins_cache = {}
 
 
