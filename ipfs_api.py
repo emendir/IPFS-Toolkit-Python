@@ -41,11 +41,27 @@ subscriptions = list([])
 def publish(path: str):
     """Upload a file or a directory to IPFS, returning its CID.
     Args:
-        path (str): the path of the file to publish
+        path (str): the path of the file or directroy to publish
     Returns:
-        str: the IPFS content ID (CID) of the published file
+        str: the IPFS content ID (CID) of the published file/directory
     """
     result = http_client.add(path, recursive=True)
+    if(type(result) == list):
+        return result[-1]["Hash"]
+    else:
+        return result["Hash"]
+
+
+def predict_cid(path: str):
+    """Get the CID a file or directory would have if it were to be published on
+    IPFS, without actually publishing it.
+    Args:
+        path (str): the path of the file or directroy to publish
+    Returns:
+        str: the IPFS content ID (CID) the file/directory would have
+                if published
+    """
+    result = http_client.add(path, recursive=True, only_hash=True)
     if(type(result) == list):
         return result[-1]["Hash"]
     else:
