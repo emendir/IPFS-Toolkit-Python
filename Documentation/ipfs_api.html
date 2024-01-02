@@ -142,6 +142,16 @@ def unpin(cid: str):
     http_client.pin.rm(cid)
 
 
+def remove(cid: str):
+    &#34;&#34;&#34;Remove content with the given CID from this IPFS node&#39;s storage.
+    Note: removes all unpinned content from this IPFS node&#39;s storage.
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to unpin
+    &#34;&#34;&#34;
+    unpin(cid)
+    http_client.repo.gc()
+
+
 __pins_cache = {}
 
 
@@ -826,6 +836,31 @@ if published</dd>
         cid (str): the IPFS content ID (CID) of the resource to unpin
     &#34;&#34;&#34;
     http_client.pin.rm(cid)</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.remove"><code class="name flex">
+<span>def <span class="ident">remove</span></span>(<span>cid: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove content with the given CID from this IPFS node's storage.
+Note: removes all unpinned content from this IPFS node's storage.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cid</code></strong> :&ensp;<code>str</code></dt>
+<dd>the IPFS content ID (CID) of the resource to unpin</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove(cid: str):
+    &#34;&#34;&#34;Remove content with the given CID from this IPFS node&#39;s storage.
+    Note: removes all unpinned content from this IPFS node&#39;s storage.
+    Args:
+        cid (str): the IPFS content ID (CID) of the resource to unpin
+    &#34;&#34;&#34;
+    unpin(cid)
+    http_client.repo.gc()</code></pre>
 </details>
 </dd>
 <dt id="ipfs_api.pins"><code class="name flex">
@@ -1876,6 +1911,7 @@ activity has been stopped and resources have been cleaned up</dd>
 <li><code><a title="ipfs_api.read" href="#ipfs_api.read">read</a></code></li>
 <li><code><a title="ipfs_api.pin" href="#ipfs_api.pin">pin</a></code></li>
 <li><code><a title="ipfs_api.unpin" href="#ipfs_api.unpin">unpin</a></code></li>
+<li><code><a title="ipfs_api.remove" href="#ipfs_api.remove">remove</a></code></li>
 <li><code><a title="ipfs_api.pins" href="#ipfs_api.pins">pins</a></code></li>
 <li><code><a title="ipfs_api.create_ipns_record" href="#ipfs_api.create_ipns_record">create_ipns_record</a></code></li>
 <li><code><a title="ipfs_api.update_ipns_record_from_cid" href="#ipfs_api.update_ipns_record_from_cid">update_ipns_record_from_cid</a></code></li>
