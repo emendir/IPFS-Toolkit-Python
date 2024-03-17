@@ -17,6 +17,7 @@
 - migrate find_peer and find_providers from dht to routing
 
 # Documentation
+- improve ReadMe
 - ipfs_cli: docs
 - add more realistic encryption scenario to DataTransmission Encryption example
 

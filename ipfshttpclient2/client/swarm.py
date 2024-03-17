@@ -62,6 +62,26 @@ class FiltersSection(base.SectionBase):
         args = (str(address), *(str(a) for a in address))
         return self._client.request('/swarm/filters/rm', args, decoder='json', **kwargs)
 
+    @base.returns_single_item(base.ResponseBase)
+    def list(self):
+        """List out currently applied filters.
+
+
+        .. code-block:: python
+
+                >>> client.swarm.filters.list()
+                {'Strings': ['/ip4/192.168.0.0/ipcidr/16']}
+
+        Returns
+        -------
+                dict
+
+        +---------+-------------------------------+
+        | Strings | List of swarm filters removed |
+        +---------+-------------------------------+
+        """
+        return self._client.request('/swarm/filters', decoder='json')
+
 
 class Section(base.SectionBase):
     filters = base.SectionProperty(FiltersSection)
