@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.19 (2024-03-17)
+- ipfs_http_client2.swarm.filters.list(): added missing IPFS RPC 'swarm/filters' call
+
 ## v0.5.19 (2023-11-10)
 - ipfs_api.remove(): new feature
 
