@@ -28,7 +28,8 @@ try:
     http_client = ipfshttpclient.client.Client()
     LIBERROR = False
 except Exception as e:
-    print(str(e))
+    import traceback
+    traceback.print_exc()
     LIBERROR = True
     http_client = None
     ipfshttpclient = None
@@ -46,7 +47,7 @@ def publish(path: str):
         str: the IPFS content ID (CID) of the published file/directory
     """
     result = http_client.add(path, recursive=True)
-    if(type(result) == list):
+    if (type(result) == list):
         return result[-1]["Hash"]
     else:
         return result["Hash"]
@@ -62,7 +63,7 @@ def predict_cid(path: str):
                 if published
     """
     result = http_client.add(path, recursive=True, only_hash=True)
-    if(type(result) == list):
+    if (type(result) == list):
         return result[-1]["Hash"]
     else:
         return result["Hash"]
@@ -232,6 +233,22 @@ def read_ipns_record(ipns_key, nocache=False):
     return read(resolve_ipns_key(ipns_key, nocache=nocache))
 
 
+def get_ipns_record_validity(ipns_key):
+    if not ipns_key.startswith('/ipns/'):
+        ipns_key = f"/ipns/{ipns_key}"
+    tempdir = tempfile.mkdtemp()
+    record_filepath = os.path.join(tempdir, "ipns_record")
+    http_client.routing.get(
+        ipns_key,
+        record_filepath
+    )
+    response = http_client.name.inspect(record_filepath)
+    validity = response['Entry']['Validity']
+
+    shutil.rmtree(tempdir)
+    return validity
+
+
 def my_id():
     """Returns this IPFS node's peer ID.
     Returns:
@@ -320,7 +337,7 @@ def find_peer(peer_id: str):
     """
     try:
         response = http_client.dht.findpeer(peer_id)
-        if(len(response["Responses"][0]["Addrs"]) > 0):
+        if (len(response["Responses"][0]["Addrs"]) > 0):
             return response
     except:
         return None
