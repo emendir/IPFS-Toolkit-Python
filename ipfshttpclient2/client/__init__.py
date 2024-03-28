@@ -4,7 +4,7 @@ Classes:
 
  * Client – a TCP client for interacting with an IPFS daemon
 """
-if True:
+if True:    # stop my IDE from rearranging imports
     import os
     import typing as ty
     import warnings

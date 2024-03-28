@@ -234,6 +234,14 @@ def read_ipns_record(ipns_key, nocache=False):
 
 
 def get_ipns_record_validity(ipns_key):
+    """Gets the time at which the given IPNS record expires.
+
+    Args:
+        ipns_key (str): the key of the IPNS record to look up
+
+    Returns:
+        datetime: the time at which the given IPNS record expires
+    """
     if not ipns_key.startswith('/ipns/'):
         ipns_key = f"/ipns/{ipns_key}"
     tempdir = tempfile.mkdtemp()
@@ -243,10 +251,10 @@ def get_ipns_record_validity(ipns_key):
         record_filepath
     )
     response = http_client.name.inspect(record_filepath)
-    validity = response['Entry']['Validity']
+    timestamp = response['Entry']['Validity']
 
     shutil.rmtree(tempdir)
-    return validity
+    return datetime.fromisoformat(timestamp[:-1])
 
 
 def my_id():
