@@ -7,11 +7,11 @@ from .. import utils
 class Section(base.SectionBase):
     @base.returns_single_item(base.ResponseBase)
     def findpeer(self, peer_id: str, *peer_ids: str, **kwargs: base.CommonArgs):
-        """Queries the DHT for all of the associated multiaddresses
+        """UNTESTED Queries the routing for all of the associated multiaddresses
 
         .. code-block:: python
 
-                >>> client.dht.findpeer("QmaxqKpiYNr62uSFBhxJAMmEMkT6dvc3oHkrZN … MTLZ")
+                >>> client.routing.findpeer("QmaxqKpiYNr62uSFBhxJAMmEMkT6dvc3oHkrZN … MTLZ")
                 [{'ID': 'QmfVGMFrwW6AV6fTWmD6eocaTybffqAvkVLXQEFrYdk6yc',
                   'Extra': '', 'Type': 6, 'Responses': None},
                  {'ID': 'QmTKiUdjbRjeN9yPhNhG1X38YNuBdjeiV9JXYWzCAJ4mj5',
@@ -44,11 +44,11 @@ class Section(base.SectionBase):
 
     @base.returns_multiple_items(base.ResponseBase)
     def findprovs(self, cid: base.cid_t, *cids: base.cid_t, **kwargs: base.CommonArgs):
-        """Finds peers in the DHT that can provide a specific value
+        """UNTESTED Finds peers in the routing that can provide a specific value
 
         .. code-block:: python
 
-                >>> client.dht.findprovs("QmNPXDC6wTXVmZ9Uoc8X1oqxRRJr4f1sDuyQu … mpW2")
+                >>> client.routing.findprovs("QmNPXDC6wTXVmZ9Uoc8X1oqxRRJr4f1sDuyQu … mpW2")
                 [{'ID': 'QmaxqKpiYNr62uSFBhxJAMmEMkT6dvc3oHkrZNpH2VMTLZ',
                   'Extra': '', 'Type': 6, 'Responses': None},
                  {'ID': 'QmaK6Aj5WXkfnWGoWq7V8pGUYzcHPZp4jKQ5JtmRvSzQGk',
@@ -72,7 +72,7 @@ class Section(base.SectionBase):
         Parameters
         ----------
         cid
-                The DHT key to find providers for
+                The routing key to find providers for
 
         Returns
         -------
@@ -85,10 +85,10 @@ class Section(base.SectionBase):
     # @base.returns_no_item(base.ResponseBase)
     def get(self, key: str,  target: utils.path_t = ".",
             **kwargs: base.CommonArgs):
-        """Queries the DHT for its best value related to given key
+        """Queries the routing for its best value related to given key
 
         There may be several different values for a given key stored in the
-        DHT; in this context *best* means the record that is most desirable.
+        routing; in this context *best* means the record that is most desirable.
         There is no one metric for *best*: it depends entirely on the key type.
         For IPNS, *best* is the record that is both valid and has the highest
         sequence number (freshest). Different key types may specify other rules
@@ -104,7 +104,7 @@ class Section(base.SectionBase):
         import json
         res = json.loads(res.decode())
         if not (isinstance(res, dict) and "Extra" in res):
-            raise exceptions.Error("empty response from DHT")
+            raise exceptions.Error("empty response from routing")
 
         from base64 import urlsafe_b64encode, urlsafe_b64decode
 
@@ -116,10 +116,10 @@ class Section(base.SectionBase):
 
     @base.returns_multiple_items(base.ResponseBase)
     def put(self, key: str, value: str, **kwargs: base.CommonArgs):
-        """Writes a key/value pair to the DHT
+        """UNTESTED Writes a key/value pair to the routing
 
         Given a key of the form ``/foo/bar`` and a value of any form, this will
-        write that value to the DHT with that key.
+        write that value to the routing with that key.
 
         Keys have two parts: a keytype (foo) and the key name (bar). IPNS uses
         the ``/ipns/`` keytype, and expects the key name to be a Peer ID. IPNS
@@ -135,7 +135,7 @@ class Section(base.SectionBase):
 
         .. code-block:: python
 
-                >>> client.dht.put("QmVgNoP89mzpgEAAqK8owYoDEyB97Mkc … E9Uc", "test123")
+                >>> client.routing.put("QmVgNoP89mzpgEAAqK8owYoDEyB97Mkc … E9Uc", "test123")
                 [{'ID': 'QmfLy2aqbhU1RqZnGQyqHSovV8tDufLUaPfN1LNtg5CvDZ',
                   'Extra': '', 'Type': 5, 'Responses': None},
                  {'ID': 'QmZ5qTkNvvZ5eFq9T4dcCEK7kX8L7iysYEpvQmij9vokGE',
@@ -158,4 +158,4 @@ class Section(base.SectionBase):
                 list
         """
         args = (key, value)
-        return self._client.request('/dht/put', args, decoder='json', **kwargs)
+        return self._client.request('/routing/put', args, decoder='json', **kwargs)
