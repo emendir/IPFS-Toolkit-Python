@@ -690,7 +690,6 @@ class ClientSyncBase(ty.Generic[S], metaclass=abc.ABCMeta):
 
             # type: ty.IO[bytes]  # type: ignore[assignment]
             fileobj = ReadableStreamWrapper(res)
-            breakpoint()
             with tarfile.open(fileobj=fileobj, mode=mode) as tf:
                 tf.extractall(path=target)
         finally:

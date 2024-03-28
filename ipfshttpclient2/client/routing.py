@@ -108,7 +108,6 @@ class Section(base.SectionBase):
 
         from base64 import urlsafe_b64encode, urlsafe_b64decode
 
-        # breakpoint()
         with open(target, 'wb+') as file:
             file.write(urlsafe_b64decode(res["Extra"]))
 
