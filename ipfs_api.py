@@ -171,7 +171,7 @@ def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
         return result["Id"]
 
 
-def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = "24h", lifetime: str = "24h"):
+def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = "24h", lifetime: str = "24h", ** kwargs: ipfshttpclient.client.base.CommonArgs):
     """Assign IPFS content to an IPNS record.
     Args:
         record_name (str): the name of the IPNS record (IPNS key) to be updated
@@ -183,7 +183,7 @@ def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = "24h", li
                                 Default: 24h.
     """
     http_client.name.publish(ipfs_path=cid, key=record_name,
-                             ttl=ttl, lifetime=lifetime)
+                             ttl=ttl, lifetime=lifetime, ** kwargs)
 
 
 def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):

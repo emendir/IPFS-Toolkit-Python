@@ -17,6 +17,7 @@
 - migrate find_peer and find_providers from dht to routing
 - write tests for all routing functionality
 - write tests for all pubsub functionality
+- pass kwargs
 
 # Documentation
 - improve ReadMe
