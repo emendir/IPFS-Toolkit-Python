@@ -56,7 +56,8 @@ try:
     http_client = ipfshttpclient.client.Client()
     LIBERROR = False
 except Exception as e:
-    print(str(e))
+    import traceback
+    traceback.print_exc()
     LIBERROR = True
     http_client = None
     ipfshttpclient = None
@@ -74,7 +75,7 @@ def publish(path: str):
         str: the IPFS content ID (CID) of the published file/directory
     &#34;&#34;&#34;
     result = http_client.add(path, recursive=True)
-    if(type(result) == list):
+    if (type(result) == list):
         return result[-1][&#34;Hash&#34;]
     else:
         return result[&#34;Hash&#34;]
@@ -90,7 +91,7 @@ def predict_cid(path: str):
                 if published
     &#34;&#34;&#34;
     result = http_client.add(path, recursive=True, only_hash=True)
-    if(type(result) == list):
+    if (type(result) == list):
         return result[-1][&#34;Hash&#34;]
     else:
         return result[&#34;Hash&#34;]
@@ -198,7 +199,7 @@ def create_ipns_record(name: str, type: str = &#34;rsa&#34;, size: int = 2048):
         return result[&#34;Id&#34;]
 
 
-def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;):
+def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;, ** kwargs: ipfshttpclient.client.base.CommonArgs):
     &#34;&#34;&#34;Assign IPFS content to an IPNS record.
     Args:
         record_name (str): the name of the IPNS record (IPNS key) to be updated
@@ -210,7 +211,7 @@ def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = &#34;24h&
                                 Default: 24h.
     &#34;&#34;&#34;
     http_client.name.publish(ipfs_path=cid, key=record_name,
-                             ttl=ttl, lifetime=lifetime)
+                             ttl=ttl, lifetime=lifetime, ** kwargs)
 
 
 def update_ipns_record(name: str, path, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;):
@@ -258,6 +259,30 @@ def read_ipns_record(ipns_key, nocache=False):
         str: the content of the specified IPFS resource as text
     &#34;&#34;&#34;
     return read(resolve_ipns_key(ipns_key, nocache=nocache))
+
+
+def get_ipns_record_validity(ipns_key):
+    &#34;&#34;&#34;Gets the time at which the given IPNS record expires.
+
+    Args:
+        ipns_key (str): the key of the IPNS record to look up
+
+    Returns:
+        datetime: the time at which the given IPNS record expires
+    &#34;&#34;&#34;
+    if not ipns_key.startswith(&#39;/ipns/&#39;):
+        ipns_key = f&#34;/ipns/{ipns_key}&#34;
+    tempdir = tempfile.mkdtemp()
+    record_filepath = os.path.join(tempdir, &#34;ipns_record&#34;)
+    http_client.routing.get(
+        ipns_key,
+        record_filepath
+    )
+    response = http_client.name.inspect(record_filepath)
+    timestamp = response[&#39;Entry&#39;][&#39;Validity&#39;]
+
+    shutil.rmtree(tempdir)
+    return datetime.fromisoformat(timestamp[:-1])
 
 
 def my_id():
@@ -348,7 +373,7 @@ def find_peer(peer_id: str):
     &#34;&#34;&#34;
     try:
         response = http_client.dht.findpeer(peer_id)
-        if(len(response[&#34;Responses&#34;][0][&#34;Addrs&#34;]) &gt; 0):
+        if (len(response[&#34;Responses&#34;][0][&#34;Addrs&#34;]) &gt; 0):
             return response
     except:
         return None
@@ -686,7 +711,7 @@ if LIBERROR:    # if not all modules needed for the ipfs_http_client library wer
         str: the IPFS content ID (CID) of the published file/directory
     &#34;&#34;&#34;
     result = http_client.add(path, recursive=True)
-    if(type(result) == list):
+    if (type(result) == list):
         return result[-1][&#34;Hash&#34;]
     else:
         return result[&#34;Hash&#34;]</code></pre>
@@ -723,7 +748,7 @@ if published</dd>
                 if published
     &#34;&#34;&#34;
     result = http_client.add(path, recursive=True, only_hash=True)
-    if(type(result) == list):
+    if (type(result) == list):
         return result[-1][&#34;Hash&#34;]
     else:
         return result[&#34;Hash&#34;]</code></pre>
@@ -949,7 +974,7 @@ depends on the cids_only parameter (see above)</p></div>
 </details>
 </dd>
 <dt id="ipfs_api.update_ipns_record_from_cid"><code class="name flex">
-<span>def <span class="ident">update_ipns_record_from_cid</span></span>(<span>record_name: str, cid: str, ttl: str = '24h', lifetime: str = '24h')</span>
+<span>def <span class="ident">update_ipns_record_from_cid</span></span>(<span>record_name: str, cid: str, ttl: str = '24h', lifetime: str = '24h', **kwargs: ipfshttpclient2.client.base.CommonArgs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign IPFS content to an IPNS record.</p>
@@ -971,7 +996,7 @@ Default: 24h.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;):
+<pre><code class="python">def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = &#34;24h&#34;, lifetime: str = &#34;24h&#34;, ** kwargs: ipfshttpclient.client.base.CommonArgs):
     &#34;&#34;&#34;Assign IPFS content to an IPNS record.
     Args:
         record_name (str): the name of the IPNS record (IPNS key) to be updated
@@ -983,7 +1008,7 @@ Default: 24h.</dd>
                                 Default: 24h.
     &#34;&#34;&#34;
     http_client.name.publish(ipfs_path=cid, key=record_name,
-                             ttl=ttl, lifetime=lifetime)</code></pre>
+                             ttl=ttl, lifetime=lifetime, ** kwargs)</code></pre>
 </details>
 </dd>
 <dt id="ipfs_api.update_ipns_record"><code class="name flex">
@@ -1112,6 +1137,49 @@ Default: 24h.</dd>
         str: the content of the specified IPFS resource as text
     &#34;&#34;&#34;
     return read(resolve_ipns_key(ipns_key, nocache=nocache))</code></pre>
+</details>
+</dd>
+<dt id="ipfs_api.get_ipns_record_validity"><code class="name flex">
+<span>def <span class="ident">get_ipns_record_validity</span></span>(<span>ipns_key)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the time at which the given IPNS record expires.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ipns_key</code></strong> :&ensp;<code>str</code></dt>
+<dd>the key of the IPNS record to look up</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>datetime</code></dt>
+<dd>the time at which the given IPNS record expires</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_ipns_record_validity(ipns_key):
+    &#34;&#34;&#34;Gets the time at which the given IPNS record expires.
+
+    Args:
+        ipns_key (str): the key of the IPNS record to look up
+
+    Returns:
+        datetime: the time at which the given IPNS record expires
+    &#34;&#34;&#34;
+    if not ipns_key.startswith(&#39;/ipns/&#39;):
+        ipns_key = f&#34;/ipns/{ipns_key}&#34;
+    tempdir = tempfile.mkdtemp()
+    record_filepath = os.path.join(tempdir, &#34;ipns_record&#34;)
+    http_client.routing.get(
+        ipns_key,
+        record_filepath
+    )
+    response = http_client.name.inspect(record_filepath)
+    timestamp = response[&#39;Entry&#39;][&#39;Validity&#39;]
+
+    shutil.rmtree(tempdir)
+    return datetime.fromisoformat(timestamp[:-1])</code></pre>
 </details>
 </dd>
 <dt id="ipfs_api.my_id"><code class="name flex">
@@ -1319,7 +1387,7 @@ reach the given peer</p></div>
     &#34;&#34;&#34;
     try:
         response = http_client.dht.findpeer(peer_id)
-        if(len(response[&#34;Responses&#34;][0][&#34;Addrs&#34;]) &gt; 0):
+        if (len(response[&#34;Responses&#34;][0][&#34;Addrs&#34;]) &gt; 0):
             return response
     except:
         return None</code></pre>
@@ -1919,6 +1987,7 @@ activity has been stopped and resources have been cleaned up</dd>
 <li><code><a title="ipfs_api.resolve_ipns_key" href="#ipfs_api.resolve_ipns_key">resolve_ipns_key</a></code></li>
 <li><code><a title="ipfs_api.download_ipns_record" href="#ipfs_api.download_ipns_record">download_ipns_record</a></code></li>
 <li><code><a title="ipfs_api.read_ipns_record" href="#ipfs_api.read_ipns_record">read_ipns_record</a></code></li>
+<li><code><a title="ipfs_api.get_ipns_record_validity" href="#ipfs_api.get_ipns_record_validity">get_ipns_record_validity</a></code></li>
 <li><code><a title="ipfs_api.my_id" href="#ipfs_api.my_id">my_id</a></code></li>
 <li><code><a title="ipfs_api.is_ipfs_running" href="#ipfs_api.is_ipfs_running">is_ipfs_running</a></code></li>
 <li><code><a title="ipfs_api.my_multiaddrs" href="#ipfs_api.my_multiaddrs">my_multiaddrs</a></code></li>
