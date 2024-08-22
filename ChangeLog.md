@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.24 (2024-08-22)
+- `ipfs_datatransmission`: for various objects, don't throw errors on multiple callings of `.terminate()`
+
 ## v0.5.23 (2024-04-21)
 - `ipfs_api.get_ipns_record_validity()`: added keword arguments
 
