@@ -326,6 +326,8 @@ class TransmissionListener:
         &#34;&#34;&#34;Stop listening for transmissions and clean up IPFS connection
         configurations.&#34;&#34;&#34;
         # self.socket.unbind(self.port)
+        if self._terminate:
+            return
         self._terminate = True
         _close_listening_connection(self._listener_name, self.port)
         try:
@@ -566,7 +568,7 @@ class Conversation:
         if peer_id == ipfs_api.my_id():
             raise InvalidPeer(
                 message=&#34;You cannot use your own IPFS peer ID as your conversation partner.&#34;)
-        if(PRINT_LOG_CONVERSATIONS):
+        if (PRINT_LOG_CONVERSATIONS):
             print(conv_name + &#34;: Starting conversation&#34;)
         self.conv_name = conv_name
         self.data_received_eventhandler = data_received_eventhandler
@@ -817,7 +819,8 @@ class Conversation:
                 except QueueEmpty:  # qeue timeout reached
                     # check if any of the user&#39;s timeouts were reached
                     if abs_timeout and (datetime.utcnow() - start_time).total_seconds() &gt; abs_timeout:
-                        raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;) from None
+                        raise ConvListenTimeout(
+                            &#34;Didn&#39;t receive any files.&#34;) from None
                     elif (datetime.utcnow() - self._last_coms_time).total_seconds() &gt; no_coms_timeout:
                         raise CommunicationTimeout(
                             &#34;Communication timeout reached while waiting for file.&#34;) from None
@@ -927,6 +930,8 @@ class Conversation:
     def terminate(self):
         &#34;&#34;&#34;Stop the conversation and clean up IPFS connection configurations.
         &#34;&#34;&#34;
+        if self._terminate:
+            return
         self._terminate = True
         if self._listener:
             self._listener.terminate()
@@ -953,7 +958,7 @@ class ConversationListener:
 
     def __init__(self, listener_name, eventhandler):
         self._listener_name = listener_name
-        if(PRINT_LOG_CONVERSATIONS):
+        if (PRINT_LOG_CONVERSATIONS):
             print(&#34;Listening for conversations as &#34; + listener_name)
         self.eventhandler = eventhandler
         self._listener = listen_for_transmissions(
@@ -1274,7 +1279,7 @@ class FileTransmissionReceiver:
                            name=&#39;FileTransmissionReceiver.progress&#39;
                            ).start()
 
-                if(self.filesize == 0):
+                if (self.filesize == 0):
                     self.finish()
             except:
                 if PRINT_LOG_FILES:
@@ -1462,7 +1467,7 @@ class _ListenerTCP(threading.Thread):
         while True:
             data = conn.recv(self.buffer_size)
             self.last_time_recv = datetime.utcnow()
-            if(self._terminate == True):
+            if (self._terminate == True):
                 if PRINT_LOG_CONNECTIONS:
                     print(&#34;listener terminated&#34;)
                 break
@@ -1483,11 +1488,11 @@ class _ListenerTCP(threading.Thread):
             print(&#34;Closed listener.&#34;)
 
     def status_monitor(self):
-        while(True):
+        while (True):
             if self._terminate:
                 break
             time.sleep(self.monitoring_interval)
-            if(datetime.utcnow() - self.last_time_recv).total_seconds() &gt; self.monitoring_interval:
+            if (datetime.utcnow() - self.last_time_recv).total_seconds() &gt; self.monitoring_interval:
                 self.status_eventhandler(
                     (datetime.utcnow() - self.last_time_recv).total_seconds())
 
@@ -1498,6 +1503,8 @@ class _ListenerTCP(threading.Thread):
     # return thread, used_port
 
     def terminate(self):
+        if self._terminate:
+            return
         if PRINT_LOG_CONNECTIONS:
             print(&#34;terminating listener&#34;)
         self._terminate = True   # marking the terminate flag as true
@@ -1627,7 +1634,7 @@ def __add_integritybyte_to_buffer(buffer):
 # turns a base 10 integer into a base 255 integer in  the form of an array of bytes where each byte represents a digit, and where no byte has the value 0
 def _to_b255_no_0s(number):
     array = bytearray([])
-    while(number &gt; 0):
+    while (number &gt; 0):
         # modulus + 1 in order to get a range of possible values from 1-256 instead of 0-255
         array.insert(0, int(number % 255 + 1))
         number -= number % 255
@@ -1640,7 +1647,7 @@ def _from_b255_no_0s(array):
     order = 1
     # for loop backwards through th ebytes in array
     i = len(array) - 1  # th eindex of the last byte in the array
-    while(i &gt;= 0):
+    while (i &gt;= 0):
         # byte - 1 to change the range from 1-266 to 0-255
         number = number + (array[i] - 1) * order
         order = order * 255
@@ -2704,6 +2711,8 @@ Parameters: data (bytearray), peer_id (str)</dd>
         &#34;&#34;&#34;Stop listening for transmissions and clean up IPFS connection
         configurations.&#34;&#34;&#34;
         # self.socket.unbind(self.port)
+        if self._terminate:
+            return
         self._terminate = True
         _close_listening_connection(self._listener_name, self.port)
         try:
@@ -2737,6 +2746,8 @@ configurations.</p></div>
     &#34;&#34;&#34;Stop listening for transmissions and clean up IPFS connection
     configurations.&#34;&#34;&#34;
     # self.socket.unbind(self.port)
+    if self._terminate:
+        return
     self._terminate = True
     _close_listening_connection(self._listener_name, self.port)
     try:
@@ -2839,7 +2850,7 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
         if peer_id == ipfs_api.my_id():
             raise InvalidPeer(
                 message=&#34;You cannot use your own IPFS peer ID as your conversation partner.&#34;)
-        if(PRINT_LOG_CONVERSATIONS):
+        if (PRINT_LOG_CONVERSATIONS):
             print(conv_name + &#34;: Starting conversation&#34;)
         self.conv_name = conv_name
         self.data_received_eventhandler = data_received_eventhandler
@@ -3090,7 +3101,8 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
                 except QueueEmpty:  # qeue timeout reached
                     # check if any of the user&#39;s timeouts were reached
                     if abs_timeout and (datetime.utcnow() - start_time).total_seconds() &gt; abs_timeout:
-                        raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;) from None
+                        raise ConvListenTimeout(
+                            &#34;Didn&#39;t receive any files.&#34;) from None
                     elif (datetime.utcnow() - self._last_coms_time).total_seconds() &gt; no_coms_timeout:
                         raise CommunicationTimeout(
                             &#34;Communication timeout reached while waiting for file.&#34;) from None
@@ -3200,6 +3212,8 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
     def terminate(self):
         &#34;&#34;&#34;Stop the conversation and clean up IPFS connection configurations.
         &#34;&#34;&#34;
+        if self._terminate:
+            return
         self._terminate = True
         if self._listener:
             self._listener.terminate()
@@ -3317,7 +3331,7 @@ reattempted when the timeout is reached</dd>
     if peer_id == ipfs_api.my_id():
         raise InvalidPeer(
             message=&#34;You cannot use your own IPFS peer ID as your conversation partner.&#34;)
-    if(PRINT_LOG_CONVERSATIONS):
+    if (PRINT_LOG_CONVERSATIONS):
         print(conv_name + &#34;: Starting conversation&#34;)
     self.conv_name = conv_name
     self.data_received_eventhandler = data_received_eventhandler
@@ -3612,7 +3626,8 @@ until giving up and returning None or raising an exception</dd>
             except QueueEmpty:  # qeue timeout reached
                 # check if any of the user&#39;s timeouts were reached
                 if abs_timeout and (datetime.utcnow() - start_time).total_seconds() &gt; abs_timeout:
-                    raise ConvListenTimeout(&#34;Didn&#39;t receive any files.&#34;) from None
+                    raise ConvListenTimeout(
+                        &#34;Didn&#39;t receive any files.&#34;) from None
                 elif (datetime.utcnow() - self._last_coms_time).total_seconds() &gt; no_coms_timeout:
                     raise CommunicationTimeout(
                         &#34;Communication timeout reached while waiting for file.&#34;) from None
@@ -3748,6 +3763,8 @@ when the timeout is reached</dd>
 <pre><code class="python">def terminate(self):
     &#34;&#34;&#34;Stop the conversation and clean up IPFS connection configurations.
     &#34;&#34;&#34;
+    if self._terminate:
+        return
     self._terminate = True
     if self._listener:
         self._listener.terminate()
@@ -3796,7 +3813,7 @@ and then act upon that decision.</p></div>
 
     def __init__(self, listener_name, eventhandler):
         self._listener_name = listener_name
-        if(PRINT_LOG_CONVERSATIONS):
+        if (PRINT_LOG_CONVERSATIONS):
             print(&#34;Listening for conversations as &#34; + listener_name)
         self.eventhandler = eventhandler
         self._listener = listen_for_transmissions(
@@ -4096,7 +4113,7 @@ request hast been received and accepted)</p></div>
                            name=&#39;FileTransmissionReceiver.progress&#39;
                            ).start()
 
-                if(self.filesize == 0):
+                if (self.filesize == 0):
                     self.finish()
             except:
                 if PRINT_LOG_FILES:
@@ -4241,7 +4258,7 @@ Parameters: (peer_id:str, filesize:int, progress:float)</dd>
                        name=&#39;FileTransmissionReceiver.progress&#39;
                        ).start()
 
-            if(self.filesize == 0):
+            if (self.filesize == 0):
                 self.finish()
         except:
             if PRINT_LOG_FILES:
