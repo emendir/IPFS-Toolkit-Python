@@ -1,6 +1,10 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.25 (2024-10-02)
+- Performance improvements:
+    - ipfs_api.pubsub: no longer uses temporary files, so `OSError Too many open files` errors are less common, increasing possible throughput
+    - ipfs_peers.PeerMonitor: optimised data storage, so `OSError Too many open files` errors are less common, increasing possible throughput
 ## v0.5.24 (2024-08-22)
 - `ipfs_datatransmission`: for various objects, don't throw errors on multiple callings of `.terminate()`
 
