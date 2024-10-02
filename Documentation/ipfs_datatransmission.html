@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="generator" content="pdoc 0.11.1" />
 <title>ipfs_datatransmission API documentation</title>
 <meta name="description" content="This is a module that enables the user to transmit and receive transmissions of data over the Interplanetary File System&#39;s P2P network (libp2p).
 To …" />
@@ -223,6 +223,7 @@ class TransmissionListener:
         &#34;&#34;&#34;
         self._listener_name = listener_name
         self.eventhandler = eventhandler
+        self.port = 0  # not yet set
         self._listener = Thread(target=self._listen, args=(),
                                 name=f&#34;DataTransmissionListener-{listener_name}&#34;)
         self._listener.start()
@@ -329,6 +330,11 @@ class TransmissionListener:
         if self._terminate:
             return
         self._terminate = True
+
+        # if socket hasn&#39;t been initialised yet
+        if not self.port:
+            return
+
         _close_listening_connection(self._listener_name, self.port)
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -515,6 +521,7 @@ class Conversation:
         self.started = Event()
         self._conversation_started = False
         self.data_received_eventhandler = None
+        self.file_listener = None
         self.file_eventhandler = None
         self.file_progress_callback = None
         self.message_queue = Queue()
@@ -1842,107 +1849,6 @@ def _close_listening_connection(name=None, port=None):
 <dt><code>bool</code></dt>
 <dd>whether or not the transmission succeeded</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def transmit_data(
-        data: bytes,
-        peer_id: str,
-        req_lis_name: str,
-        timeout_sec: int = TRANSM_SEND_TIMEOUT_SEC,
-        max_retries: int = TRANSM_REQ_MAX_RETRIES):
-    &#34;&#34;&#34;
-    Transmits the input data (a bytearray of any length) to the computer with the specified IPFS peer ID.
-    Args:
-        data (bytearray): the data to be transmitted to the receiver
-        string peer_id (str): the IPFS peer ID of [the recipient computer to send the data to]
-        string listener_name (str): the name of the IPFS-Data-Transmission-Listener instance running on the recipient computer to send the data to (allows distinguishing multiple IPFS-Data-Transmission-Listeners running on the same computer for different applications)
-        transm_send_timeout_sec (int): connection attempt timeout, multiplied with the maximum number of retries will result in the total time required for a failed attempt
-        transm_req_max_retries (int): how often the transmission should be reattempted when the timeout is reached
-    Returns:
-        bool: whether or not the transmission succeeded
-    &#34;&#34;&#34;
-    if peer_id == ipfs_api.my_id():
-        raise InvalidPeer(
-            message=&#34;You cannot use your own IPFS peer ID as the recipient.&#34;)
-
-    def SendTransmissionRequest():
-        &#34;&#34;&#34;
-        Sends transmission request to the recipient.
-        &#34;&#34;&#34;
-        request_data = __add_integritybyte_to_buffer(ipfs_api.my_id().encode())
-        tries = 0
-
-        # repeatedly try to send transmission request to recipient until a reply is received
-        while max_retries == -1 or tries &lt; max_retries:
-            if PRINT_LOG_TRANSMISSIONS:
-                print(&#34;Sending transmission request to &#34; + str(req_lis_name))
-            sock = _create_sending_connection(peer_id, req_lis_name)
-            # sock.sendall(request_data)
-            sock.settimeout(timeout_sec)
-            _tcp_send_all(sock, request_data)
-            if PRINT_LOG_TRANSMISSIONS:
-                print(&#34;Sent transmission request to &#34; + str(req_lis_name))
-
-            try:
-                # reply = sock.recv(BUFFER_SIZE)
-                reply = _tcp_recv_buffer_timeout(sock, BUFFER_SIZE,
-                                                 timeout=timeout_sec)
-            except socket.timeout:
-                sock.close()
-                _close_sending_connection(peer_id, req_lis_name)
-                raise CommunicationTimeout(
-                    &#34;Received no response from peer while sending transmission request.&#34;)
-
-            # reply = _tcp_recv_all(sock, timeout_sec)
-            # _tcp_recv_all
-            sock.close()
-            del sock
-            _close_sending_connection(peer_id, req_lis_name)
-            if reply:
-                try:
-                    their_trsm_port = reply[30:].decode()  # signal success
-                    if their_trsm_port:
-                        if PRINT_LOG_TRANSMISSIONS:
-                            print(&#34;Transmission request to &#34; +
-                                  str(req_lis_name) + &#34;was received.&#34;)
-                        return their_trsm_port
-                    else:
-                        raise UnreadableReply()
-                except:
-                    raise UnreadableReply()
-            else:
-                if PRINT_LOG_TRANSMISSIONS:
-                    print(&#34;Transmission request send &#34; +
-                          str(req_lis_name) + &#34;timeout_sec reached.&#34;)
-            tries += 1
-        _close_sending_connection(peer_id, req_lis_name)
-        raise CommunicationTimeout(
-            &#34;Received no response from peer while sending transmission request.&#34;)
-
-    their_trsm_port = SendTransmissionRequest()
-    sock = _create_sending_connection(peer_id, their_trsm_port)
-    sock.settimeout(timeout_sec)
-    # sock.sendall(data)  # transmit Data
-    _tcp_send_all(sock, data)
-    if PRINT_LOG_TRANSMISSIONS:
-        print(&#34;Sent Transmission Data&#34;, data)
-    response = sock.recv(BUFFER_SIZE)
-    if response and response == b&#34;Finished!&#34;:
-        # conn.close()
-        sock.close()
-        _close_sending_connection(peer_id, their_trsm_port)
-        if PRINT_LOG_TRANSMISSIONS:
-            print(&#34;: Finished transmission.&#34;)
-        return True  # signal success
-    else:
-        if PRINT_LOG_TRANSMISSIONS:
-            print(&#34;Received unrecognised response:&#34;, response)
-        raise UnreadableReply()
-    # sock.close()
-    # _close_sending_connection(peer_id, their_trsm_port)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.listen_for_transmissions"><code class="name flex">
 <span>def <span class="ident">listen_for_transmissions</span></span>(<span>listener_name, eventhandler)</span>
@@ -1969,30 +1875,6 @@ Parameters: data (bytearray), peer_id (str)</dd>
 <dd>listener object which can be terminated with
 <code>.terminate()</code> or whose <code>.eventhandler</code> attribute can be changed.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def listen_for_transmissions(listener_name, eventhandler):
-    &#34;&#34;&#34;
-    Listens for incoming transmission requests (senders requesting to transmit
-    data to us) and sets up the machinery needed to receive those transmissions.
-    Call `.terminate()` on the returned TransmissionListener object when you
-    no longer need it to clean up IPFS connection configurations.
-
-    Args:
-        listener_name (str): the name of this TransmissionListener (chosen by
-            user, allows distinguishing multiple IPFS-DataTransmission-Listeners
-            running on the same computer for different applications)
-        eventhandler (function): the function that should be called when a
-            transmission of data is received
-            Parameters: data (bytearray), peer_id (str)
-    Returns:
-        TramissionListener: listener object which can be terminated with
-            `.terminate()` or whose `.eventhandler` attribute can be changed.
-    &#34;&#34;&#34;
-    return TransmissionListener(listener_name, eventhandler)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.start_conversation"><code class="name flex">
 <span>def <span class="ident">start_conversation</span></span>(<span>conv_name, peer_id, others_req_listener, data_received_eventhandler=None, file_eventhandler=None, file_progress_callback=None, encryption_callbacks=None, timeout_sec=10, max_retries=3, dir='.')</span>
@@ -2052,74 +1934,6 @@ reattempted when the timeout is reached</dd>
 <dt><code><a title="ipfs_datatransmission.Conversation" href="#ipfs_datatransmission.Conversation">Conversation</a></code></dt>
 <dd>an object through which messages and files can be sent</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def start_conversation(conv_name,
-                       peer_id,
-                       others_req_listener,
-                       data_received_eventhandler=None,
-                       file_eventhandler=None,
-                       file_progress_callback=None,
-                       encryption_callbacks=None,
-                       timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-                       max_retries=TRANSM_REQ_MAX_RETRIES,
-                       dir=&#34;.&#34;):
-    &#34;&#34;&#34;Starts a conversation object with which 2 peers can repetatively make
-    data transmissions to each other asynchronously and bidirectionally.
-    Sends a conversation request to the other peer&#39;s conversation request
-    listener which the other peer must (programmatically) accept (joining the
-    conversation) in order to start conversing.
-    Call `.terminate()` on the returned Conversation object when you
-    no longer need it to clean up IPFS connection configurations.
-    Args:
-        conv_name (str): the name of the IPFS port forwarding connection
-                                (IPFS Libp2pStreamMounting protocol)
-        peer_id (str): the IPFS peer ID of the node to communicate with
-        others_req_listener (str): the name of the ther peer&#39;s conversation
-                                listener object
-        data_received_eventhandler (function): function to be called when we&#39;ve
-                                received a data transmission
-                                Parameters: (data:bytearray)
-        file_eventhandler (function): function to be called when a file is
-                                receive over this conversation
-                                Parameters: (filepath:str, metadata:bytearray)
-        progress_handler (function): eventhandler to send progress (fraction
-                                twix 0-1) every for sending/receiving files
-                                Parameters: (progress:float)
-        encryption_callbacks (tuple): encryption and decryption functions
-                                Tuple Contents: two functions which each take a
-                                a bytearray as a parameter and return a bytearray
-                                (
-                                    function(plaintext:bytearray):bytearray,
-                                    function(cipher:bytearray):bytearray
-                                )
-        transm_send_timeout_sec (int): (low level) data transmission -
-                                connection attempt timeout, multiplied with the
-                                maximum number of retries will result in the
-                                total time required for a failed attempt
-        transm_req_max_retries (int): (low level) data transmission -
-                                how often the transmission should be
-                                reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
-    Returns:
-        Conversation: an object through which messages and files can be sent
-    &#34;&#34;&#34;
-    conv = Conversation()
-    conv.start(conv_name,
-               peer_id,
-               others_req_listener,
-               data_received_eventhandler,
-               file_eventhandler=file_eventhandler,
-               file_progress_callback=file_progress_callback,
-               encryption_callbacks=encryption_callbacks,
-               transm_send_timeout_sec=timeout_sec,
-               transm_req_max_retries=max_retries,
-               dir=dir
-               )
-    return conv</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.join_conversation"><code class="name flex">
 <span>def <span class="ident">join_conversation</span></span>(<span>conv_name, peer_id, others_req_listener, data_received_eventhandler=None, file_eventhandler=None, file_progress_callback=None, encryption_callbacks=None, timeout_sec=10, max_retries=3, dir='.')</span>
@@ -2175,70 +1989,6 @@ reattempted when the timeout is reached</dd>
 <dt><code><a title="ipfs_datatransmission.Conversation" href="#ipfs_datatransmission.Conversation">Conversation</a></code></dt>
 <dd>an object through which messages and files can be sent</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def join_conversation(conv_name,
-                      peer_id,
-                      others_req_listener,
-                      data_received_eventhandler=None,
-                      file_eventhandler=None,
-                      file_progress_callback=None,
-                      encryption_callbacks=None,
-                      timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-                      max_retries=TRANSM_REQ_MAX_RETRIES,
-                      dir=&#34;.&#34;):
-    &#34;&#34;&#34;Join a conversation object started by another peer.
-    Call `.terminate()` on the returned Conversation object when you
-    no longer need it to clean up IPFS connection configurations.
-    Args:
-        conv_name (str): the name of the IPFS port forwarding connection
-                                (IPFS Libp2pStreamMounting protocol)
-        peer_id (str): the IPFS peer ID of the node to communicate with
-        others_req_listener (str): the name of the ther peer&#39;s conversation
-                                listener object
-        data_received_eventhandler (function): function to be called when we&#39;ve
-                                received a data transmission
-                                Parameters: (data:bytearray)
-        file_eventhandler (function): function to be called when a file is
-                                receive over this conversation
-                                Parameters: (filepath:str, metadata:bytearray)
-        progress_handler (function): eventhandler to send progress (fraction
-                                twix 0-1) every for sending/receiving files
-                                Parameters: (progress:float)
-        encryption_callbacks (tuple): encryption and decryption functions
-                                Tuple Contents: two functions which each take a
-                                a bytearray as a parameter and return a bytearray
-                                (
-                                    function(plaintext:bytearray):bytearray,
-                                    function(cipher:bytearray):bytearray
-                                )
-        transm_send_timeout_sec (int): (low level) data transmission -
-                                connection attempt timeout, multiplied with the
-                                maximum number of retries will result in the
-                                total time required for a failed attempt
-        transm_req_max_retries (int): (low level) data transmission -
-                                how often the transmission should be
-                                reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
-    Returns:
-        Conversation: an object through which messages and files can be sent
-    &#34;&#34;&#34;
-    conv = Conversation()
-    conv.join(conv_name,
-              peer_id,
-              others_req_listener,
-              data_received_eventhandler,
-              file_eventhandler=file_eventhandler,
-              file_progress_callback=file_progress_callback,
-              encryption_callbacks=encryption_callbacks,
-              transm_send_timeout_sec=timeout_sec,
-              transm_req_max_retries=max_retries,
-              dir=dir
-              )
-    return conv</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.listen_for_conversations"><code class="name flex">
 <span>def <span class="ident">listen_for_conversations</span></span>(<span>listener_name: str, eventhandler)</span>
@@ -2266,30 +2016,6 @@ Parameters: (conv_name:str, peer_id:str)</dd>
 <dd>an object which listens for incoming conversation
 requests</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def listen_for_conversations(listener_name: str, eventhandler):
-    &#34;&#34;&#34;
-    Listen for incoming conversation requests.
-    Whenever a new conversation request is received, the specified eventhandler
-    is called which must then decide whether or not to join the conversation,
-    and then act upon that decision.
-    Call `.terminate()` on the returned ConversationListener object when you
-    no longer need it to clean up IPFS connection configurations.
-    Args:
-        listener_name (str): the name which this ConversationListener should
-                        have (becomes its IPFS Libp2pStreamMounting protocol)
-        eventhandler (function): the function to be called when a conversation
-                        request is received
-                        Parameters: (conv_name:str, peer_id:str)
-    Returns:
-        ConversationListener: an object which listens for incoming conversation
-                                requests
-    &#34;&#34;&#34;
-    return ConversationListener(listener_name, eventhandler)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.transmit_file"><code class="name flex">
 <span>def <span class="ident">transmit_file</span></span>(<span>filepath, peer_id, others_req_listener, metadata=bytearray(b''), progress_handler=None, encryption_callbacks=None, block_size=1048576, transm_send_timeout_sec=10, transm_req_max_retries=3)</span>
@@ -2338,62 +2064,6 @@ the timeout is reached</dd>
 <dt><code><a title="ipfs_datatransmission.FileTransmitter" href="#ipfs_datatransmission.FileTransmitter">FileTransmitter</a></code></dt>
 <dd>object which manages the filetransmission</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def transmit_file(filepath,
-                  peer_id,
-                  others_req_listener,
-                  metadata=bytearray(),
-                  progress_handler=None,
-                  encryption_callbacks=None,
-                  block_size=BLOCK_SIZE,
-                  transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-                  transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
-                  ):
-    &#34;&#34;&#34;Transmits the provided file to the specified peer.
-    Args:
-        filepath (str): the path of the file to transmit
-        peer_id (str): the IPFS peer ID of the node to communicate with
-        others_req_listener (str): the name of the other peer&#39;s FileListener
-        metadata (bytearray): optional metadata to send to the receiver
-        progress_handler (function): eventhandler to send progress (fraction
-                        twix 0-1) every for sending/receiving files
-                        Parameters: (progress:float)
-        encryption_callbacks (tuple): encryption and decryption functions
-                        Tuple Contents: two functions which each take a
-                        a bytearray as a parameter and return a bytearray
-                        (
-                            function(plaintext:bytearray):bytearray,
-                            function(cipher:bytearray):bytearray
-                        )
-        block_size (int): the FileTransmitter sends the file in chunks. This is
-                        the size of those chunks in bytes (default 1MiB).
-                        Increasing this speeds up transmission but reduces the
-                        frequency of progress update messages.
-        transm_send_timeout_sec (int): (low level) data transmission -
-                        connection attempt timeout, multiplied with the maximum
-                        number of retries will result in the total time
-                        required for a failed attempt
-        transm_req_max_retries (int): (low level) data transmission -
-                        how often the transmission should be reattempted when
-                        the timeout is reached
-    Returns:
-        FileTransmitter: object which manages the filetransmission
-    &#34;&#34;&#34;
-    return FileTransmitter(
-        filepath,
-        peer_id,
-        others_req_listener,
-        metadata=metadata,
-        progress_handler=progress_handler,
-        encryption_callbacks=encryption_callbacks,
-        block_size=block_size,
-        transm_send_timeout_sec=transm_send_timeout_sec,
-        transm_req_max_retries=transm_req_max_retries
-    )</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.listen_for_file_transmissions"><code class="name flex">
 <span>def <span class="ident">listen_for_file_transmissions</span></span>(<span>listener_name, eventhandler, progress_handler=None, dir='.', encryption_callbacks=None)</span>
@@ -2434,54 +2104,6 @@ function(cipher:bytearray):bytearray
 <dd>an object which listens for incoming file
 requests</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def listen_for_file_transmissions(listener_name,
-                                  eventhandler,
-                                  progress_handler=None,
-                                  dir=&#34;.&#34;,
-                                  encryption_callbacks=None):
-    &#34;&#34;&#34;Listens to incoming file transmission requests.
-    Whenever a file is received, the specified eventhandler is called.
-    Call `.terminate()` on the returned ConversationListener object when you
-    no longer need it to clean up IPFS connection configurations.
-    Args:
-        listener_name (str): name of this listener object, used by file sender
-                            to adress this listener
-        eventhandler (function): function to be called when a file is received
-                            Parameters: (peer_id:str, path:str, metadata:bytes)
-        progress_handler (function): function to be called whenever a block of
-                            data is received during a file transmission
-                            progress is a value between 0 and 1
-                            Parameters:
-                                (peer_id:str, filesize:int, progress:float)
-        dir (str): the directory in which received files should be written
-        encryption_callbacks (tuple): encryption and decryption functions
-                            Tuple Contents: two functions which each take a
-                            a bytearray as a parameter and return a bytearray
-                            (
-                                function(plaintext:bytearray):bytearray,
-                                function(cipher:bytearray):bytearray
-                            )
-    Returns:
-        ConversationListener: an object which listens for incoming file
-                            requests
-    &#34;&#34;&#34;
-    def request_handler(conv_name, peer_id):
-        ft = FileTransmissionReceiver()
-        conv = Conversation()
-        ft.setup(conv, eventhandler, progress_handler=progress_handler, dir=dir)
-        conv.join(conv_name,
-                  peer_id,
-                  conv_name,
-                  ft.on_data_received,
-                  encryption_callbacks=encryption_callbacks
-                  )
-
-    return ConversationListener(listener_name, request_handler)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.call_progress_callback"><code class="name flex">
 <span>def <span class="ident">call_progress_callback</span></span>(<span>callback, peer_id, filename, filesize, progress)</span>
@@ -2490,71 +2112,18 @@ requests</dd>
 <div class="desc"><p>Calls the specified callback function with part of all of the rest of
 the parameters, depending on how many parameters the callback takes.
 The callback can take between 1 and 4 parameters</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def call_progress_callback(callback, peer_id, filename, filesize, progress):
-    &#34;&#34;&#34;Calls the specified callback function with part of all of the rest of
-    the parameters, depending on how many parameters the callback takes.
-    The callback can take between 1 and 4 parameters&#34;&#34;&#34;
-    if len(signature(callback).parameters) == 1:
-        callback(progress)
-    elif len(signature(callback).parameters) == 2:
-        callback(filename, progress)
-    elif len(signature(callback).parameters) == 3:
-        callback(filename, filesize, progress)
-    elif len(signature(callback).parameters) == 4:
-        callback(peer_id, filename, filesize, progress)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.listen_to_buffers"><code class="name flex">
 <span>def <span class="ident">listen_to_buffers</span></span>(<span>eventhandler, proto, buffer_size=4096, monitoring_interval=2, status_eventhandler=None, eventhandlers_on_new_threads=True)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def listen_to_buffers(eventhandler,
-                      proto,
-                      buffer_size=BUFFER_SIZE,
-                      monitoring_interval=2,
-                      status_eventhandler=None,
-                      eventhandlers_on_new_threads=True):
-    return BufferReceiver(
-        eventhandler,
-        proto,
-        buffer_size=buffer_size,
-        monitoring_interval=monitoring_interval,
-        status_eventhandler=status_eventhandler,
-        eventhandlers_on_new_threads=eventhandlers_on_new_threads
-    )</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.listen_to_buffers_on_port"><code class="name flex">
 <span>def <span class="ident">listen_to_buffers_on_port</span></span>(<span>eventhandler, port=0, buffer_size=4096, monitoring_interval=2, status_eventhandler=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def listen_to_buffers_on_port(eventhandler,
-                              port=0,
-                              buffer_size=BUFFER_SIZE,
-                              monitoring_interval=2,
-                              status_eventhandler=None):
-    return BufferReceiver(
-        eventhandler,
-        port,
-        buffer_size,
-        monitoring_interval,
-        status_eventhandler
-    )</code></pre>
-</details>
 </dd>
 </dl>
 </section>
@@ -2608,6 +2177,7 @@ Parameters: data (bytearray), peer_id (str)</dd>
         &#34;&#34;&#34;
         self._listener_name = listener_name
         self.eventhandler = eventhandler
+        self.port = 0  # not yet set
         self._listener = Thread(target=self._listen, args=(),
                                 name=f&#34;DataTransmissionListener-{listener_name}&#34;)
         self._listener.start()
@@ -2714,6 +2284,11 @@ Parameters: data (bytearray), peer_id (str)</dd>
         if self._terminate:
             return
         self._terminate = True
+
+        # if socket hasn&#39;t been initialised yet
+        if not self.port:
+            return
+
         _close_listening_connection(self._listener_name, self.port)
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -2738,30 +2313,6 @@ Parameters: data (bytearray), peer_id (str)</dd>
 <dd>
 <div class="desc"><p>Stop listening for transmissions and clean up IPFS connection
 configurations.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def terminate(self):
-    &#34;&#34;&#34;Stop listening for transmissions and clean up IPFS connection
-    configurations.&#34;&#34;&#34;
-    # self.socket.unbind(self.port)
-    if self._terminate:
-        return
-    self._terminate = True
-    _close_listening_connection(self._listener_name, self.port)
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((&#34;127.0.0.1&#34;, self.port))
-        # sock.sendall(&#34;close&#34;.encode())
-        _tcp_send_all(sock, &#34;close&#34;.encode())
-
-        # _tcp_recv_all(sock)
-        sock.close()
-        del sock
-    except:
-        pass</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -2797,6 +2348,7 @@ data transmissions to each other asynchronously and bidirectionally.</p></div>
         self.started = Event()
         self._conversation_started = False
         self.data_received_eventhandler = None
+        self.file_listener = None
         self.file_eventhandler = None
         self.file_progress_callback = None
         self.message_queue = Queue()
@@ -3279,104 +2831,6 @@ reattempted when the timeout is reached</dd>
 <dt><strong><code>dir</code></strong> :&ensp;<code>str</code></dt>
 <dd>the path where received files should be downloaded to</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def start(self,
-          conv_name,
-          peer_id,
-          others_req_listener,
-          data_received_eventhandler=None,
-          file_eventhandler=None,
-          file_progress_callback=None,
-          encryption_callbacks=None,
-          transm_send_timeout_sec=_transm_send_timeout_sec,
-          transm_req_max_retries=_transm_req_max_retries,
-          dir=&#34;.&#34;):
-    &#34;&#34;&#34;Initialises this conversation object so that it can be used.
-    Code execution blocks until the other peer joins the conversation or
-    timeout is reached.
-    Args:
-        conv_name (str): the name of the IPFS port forwarding connection
-                        (IPFS Libp2pStreamMounting protocol)
-        peer_id (str): the IPFS peer ID of the node to communicate with
-        others_req_listener (str): the name of the ther peer&#39;s conversation
-                        listener object
-        data_received_eventhandler (function): function to be called when
-                        we&#39;ve received a data transmission
-                        Parameters: (data:bytearray)
-        file_eventhandler (function): function to be called when a file is
-                        receive over this conversation
-                        Parameters: (filepath:str, metadata:bytearray)
-        progress_handler (function): eventhandler to send progress (float
-                        twix 0-1) every for sending/receiving files
-                        Parameters: (progress:float)
-        encryption_callbacks (tuple): encryption and decryption functions
-                        Tuple Contents: two functions which each take a
-                        a bytearray as a parameter and return a bytearray
-                        (
-                            function(plaintext:bytearray):bytearray,
-                            function(cipher:bytearray):bytearray
-                        )
-        transm_send_timeout_sec (int): (low level) data transmission
-                        connection attempt timeout, multiplied with the
-                        maximum number of retries will result in the
-                        total time required for a failed attempt
-        transm_req_max_retries (int): (low level) data
-                        transmission how often the transmission should be
-                        reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
-    &#34;&#34;&#34;
-    if peer_id == ipfs_api.my_id():
-        raise InvalidPeer(
-            message=&#34;You cannot use your own IPFS peer ID as your conversation partner.&#34;)
-    if (PRINT_LOG_CONVERSATIONS):
-        print(conv_name + &#34;: Starting conversation&#34;)
-    self.conv_name = conv_name
-    self.data_received_eventhandler = data_received_eventhandler
-    self.file_eventhandler = file_eventhandler
-    self.file_progress_callback = file_progress_callback
-    if encryption_callbacks:
-        self.__encryption_callback = encryption_callbacks[0]
-        self.__decryption_callback = encryption_callbacks[1]
-    self._transm_send_timeout_sec = transm_send_timeout_sec
-    self._transm_req_max_retries = transm_req_max_retries
-    self.peer_id = peer_id
-    if PRINT_LOG_CONVERSATIONS:
-        print(conv_name + &#34;: sending conversation request&#34;)
-    self._listener = listen_for_transmissions(conv_name,
-                                              self._hear
-                                              )
-    self.file_listener = listen_for_file_transmissions(
-        f&#34;{conv_name}:files&#34;,
-        self._file_received,
-        progress_handler=self._on_file_progress_received,
-        dir=dir,
-        encryption_callbacks=encryption_callbacks
-    )
-    # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
-    data = bytearray(&#34;I want to start a conversation&#34;.encode(
-        &#39;utf-8&#39;)) + bytearray([255]) + bytearray(conv_name.encode(&#39;utf-8&#39;))
-    try:
-        transmit_data(data,
-                      peer_id,
-                      others_req_listener,
-                      self._transm_send_timeout_sec,
-                      self._transm_req_max_retries
-                      )
-    except Exception as e:
-        self.terminate()
-        raise e
-    self._last_coms_time = datetime.utcnow()
-    if PRINT_LOG_CONVERSATIONS:
-        print(conv_name + &#34;: sent conversation request&#34;)
-    success = self.started.wait(transm_send_timeout_sec)
-    if not success:
-        raise CommunicationTimeout(
-            f&#34;Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.&#34;)
-    return True     # signal success</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.Conversation.join"><code class="name flex">
 <span>def <span class="ident">join</span></span>(<span>self, conv_name, peer_id, others_trsm_listener, data_received_eventhandler=None, file_eventhandler=None, file_progress_callback=None, encryption_callbacks=None, transm_send_timeout_sec=10, transm_req_max_retries=3, dir='.')</span>
@@ -3428,90 +2882,6 @@ reattempted when the timeout is reached</dd>
 <dt><strong><code>dir</code></strong> :&ensp;<code>str</code></dt>
 <dd>the path where received files should be downloaded to</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def join(self,
-         conv_name,
-         peer_id,
-         others_trsm_listener,
-         data_received_eventhandler=None,
-         file_eventhandler=None,
-         file_progress_callback=None,
-         encryption_callbacks=None,
-         transm_send_timeout_sec=_transm_send_timeout_sec,
-         transm_req_max_retries=_transm_req_max_retries,
-         dir=&#34;.&#34;):
-    &#34;&#34;&#34;Joins a conversation which another peer started, given their peer ID
-    and conversation&#39;s transmission-listener&#39;s name.
-    Used by a conversation listener.
-    See listen_for_conversations for usage.
-    Args:
-        conv_name (str): the name of the IPFS port forwarding connection
-                        (IPFS Libp2pStreamMounting protocol)
-        peer_id (str): the IPFS peer ID of the node to communicate with
-        others_req_listener (str): the name of the ther peer&#39;s conversation
-                        listener object
-        data_received_eventhandler (function): function to be called when
-                        we&#39;ve received a data transmission
-                        Parameters: (data:bytearray)
-        file_eventhandler (function): function to be called when a file is
-                        receive over this conversation
-                        Parameters: (filepath:str, metadata:bytearray)
-        progress_handler (function): eventhandler to send progress (float
-                        twix 0-1) every for sending/receiving files
-                        Parameters: (progress:float)
-        encryption_callbacks (tuple): encryption and decryption functions
-                        Tuple Contents: two functions which each take a
-                        a bytearray as a parameter and return a bytearray
-                        (
-                            function(plaintext:bytearray):bytearray,
-                            function(cipher:bytearray):bytearray
-                        )
-        transm_send_timeout_sec (int): (low level) data transmission
-                        connection attempt timeout, multiplied with the
-                        maximum number of retries will result in the
-                        total time required for a failed attempt
-        transm_req_max_retries (int): (low level) data
-                        transmission how often the transmission should be
-                        reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
-    &#34;&#34;&#34;
-    self.conv_name = conv_name
-    if PRINT_LOG_CONVERSATIONS:
-        print(conv_name + &#34;: Joining conversation &#34;
-              + others_trsm_listener)
-    self.data_received_eventhandler = data_received_eventhandler
-    self.file_eventhandler = file_eventhandler
-    self.file_progress_callback = file_progress_callback
-    if encryption_callbacks:
-        self.__encryption_callback = encryption_callbacks[0]
-        self.__decryption_callback = encryption_callbacks[1]
-    self._transm_send_timeout_sec = transm_send_timeout_sec
-    self._transm_req_max_retries = transm_req_max_retries
-    self._listener = listen_for_transmissions(conv_name,
-                                              self._hear,
-                                              )
-    self.file_listener = listen_for_file_transmissions(
-        f&#34;{conv_name}:files&#34;, self._file_received,
-        progress_handler=self._on_file_progress_received,
-        dir=dir,
-        encryption_callbacks=encryption_callbacks
-    )
-
-    self.others_trsm_listener = others_trsm_listener
-    self.peer_id = peer_id
-    data = bytearray(&#34;I&#39;m listening&#34;.encode(
-        &#39;utf-8&#39;)) + bytearray([255]) + bytearray(conv_name.encode(&#39;utf-8&#39;))
-    self._conversation_started = True
-    transmit_data(data, peer_id, others_trsm_listener)
-    self._last_coms_time = datetime.utcnow()
-    if PRINT_LOG_CONVERSATIONS:
-        print(conv_name + &#34;: Joined conversation &#34;
-              + others_trsm_listener)
-    return True  # signal success</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.Conversation.listen"><code class="name flex">
 <span>def <span class="ident">listen</span></span>(<span>self, timeout=None)</span>
@@ -3532,38 +2902,6 @@ raising an exception</dd>
 <dt><code>bytearray</code></dt>
 <dd>received data</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def listen(self, timeout=None):
-    &#34;&#34;&#34;Waits until the conversation peer sends a message, then returns that
-    message. Can be used as an alternative to specifying an
-    data_received_eventhandler to process received messages,
-    or both can be used in parallel.
-    Args:
-        timeout (int): how many seconds to wait until giving up and
-                        raising an exception
-    Returns:
-        bytearray: received data
-    &#34;&#34;&#34;
-    if self._terminate:
-        return
-    if not timeout:
-        data = self.message_queue.get()
-    else:
-        try:
-            data = self.message_queue.get(timeout=timeout)
-        except:  # timeout reached
-            raise ConvListenTimeout(&#34;Didn&#39;t receive any data.&#34;) from None
-
-    if data:
-        return data
-    else:
-        if PRINT_LOG_CONVERSATIONS:
-            print(&#34;Conv.listen: received nothing restarting Event Wait&#34;)
-        self.listen()</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.Conversation.listen_for_file"><code class="name flex">
 <span>def <span class="ident">listen_for_file</span></span>(<span>self, abs_timeout=None, no_coms_timeout=None)</span>
@@ -3583,61 +2921,6 @@ until giving up and returning None or raising an exception</dd>
 <dt><code>str</code></dt>
 <dd>the path of the received file</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def listen_for_file(self, abs_timeout=None, no_coms_timeout=None):
-    &#34;&#34;&#34;
-    Args:
-        abs_timeout (int): how many seconds to wait for file reception to
-            finish until giving up and raising an exception
-        no_coms_timeout (int): how many seconds of no signal from peer
-            until giving up and returning None or raising an exception
-    Returns:
-        str: the path of the received file
-    &#34;&#34;&#34;
-    start_time = datetime.utcnow()
-    if not (abs_timeout or no_coms_timeout):    # if no timeouts are specified
-        data = self._file_queue.get()
-    else:   # timeouts are specified
-        while True:
-            # calculate timeouts relative to current time
-            if no_coms_timeout:
-                # time left till next coms timeout check
-                _no_coms_timeout = no_coms_timeout - \
-                    (datetime.utcnow() - self._last_coms_time).total_seconds()
-            if abs_timeout:
-                # time left till absolute timeout would be reached
-                _abs_timeout = abs_timeout - \
-                    (datetime.utcnow() - start_time).total_seconds()
-
-            # Choose the timeout we need to wait for
-            timeout = None
-            if not abs_timeout:
-                timeout = _no_coms_timeout
-            elif not no_coms_timeout:
-                timeout = _abs_timeout
-            else:
-                timeout = min(_no_coms_timeout, _abs_timeout)
-            try:
-                data = self._file_queue.get(timeout=timeout)
-                break
-            except QueueEmpty:  # qeue timeout reached
-                # check if any of the user&#39;s timeouts were reached
-                if abs_timeout and (datetime.utcnow() - start_time).total_seconds() &gt; abs_timeout:
-                    raise ConvListenTimeout(
-                        &#34;Didn&#39;t receive any files.&#34;) from None
-                elif (datetime.utcnow() - self._last_coms_time).total_seconds() &gt; no_coms_timeout:
-                    raise CommunicationTimeout(
-                        &#34;Communication timeout reached while waiting for file.&#34;) from None
-    if data:
-        return data
-    else:
-        if PRINT_LOG_CONVERSATIONS:
-            print(&#34;Conv.FileListen: received nothign restarting Event Wait&#34;)
-        self.listen_for_file(timeout)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.Conversation.say"><code class="name flex">
 <span>def <span class="ident">say</span></span>(<span>self, data, timeout_sec=10, max_retries=3)</span>
@@ -3661,131 +2944,24 @@ when the timeout is reached</dd>
 <dt><code>bool success</code></dt>
 <dd>whether or not the transmission succeeded</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def say(self,
-        data,
-        timeout_sec=_transm_send_timeout_sec,
-        max_retries=_transm_req_max_retries
-        ):
-    &#34;&#34;&#34;
-    Transmits the provided data (a bytearray of any length) to this
-    conversation&#39;s peer.
-    Args:
-        bytearray data: the data to be transmitted to the receiver
-        timeout_sec: connection attempt timeout, multiplied with the
-                    maximum number of retries will result in the
-                    total time required for a failed attempt
-        max_retries: how often the transmission should be reattempted
-                    when the timeout is reached
-    Returns:
-        bool success: whether or not the transmission succeeded
-    &#34;&#34;&#34;
-    while not self._conversation_started:
-        if PRINT_LOG:
-            print(&#34;Wanted to say something but conversation was not yet started&#34;)
-        time.sleep(0.01)
-    if self.__encryption_callback:
-        if PRINT_LOG_CONVERSATIONS:
-            print(&#34;Conv.say: encrypting message&#34;)
-        data = self.__encryption_callback(data)
-    transmit_data(data, self.peer_id, self.others_trsm_listener,
-                  timeout_sec, max_retries)
-    self._last_coms_time = datetime.utcnow()
-    return True</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.Conversation.transmit_file"><code class="name flex">
 <span>def <span class="ident">transmit_file</span></span>(<span>self, filepath, metadata=bytearray(b''), progress_handler=None, block_size=1048576, transm_send_timeout_sec=10, transm_req_max_retries=3)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Transmits the provided file to the other computer in this conversation.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def transmit_file(self,
-                  filepath,
-                  metadata=bytearray(),
-                  progress_handler=file_progress_callback,
-                  block_size=BLOCK_SIZE,
-                  transm_send_timeout_sec=_transm_send_timeout_sec,
-                  transm_req_max_retries=_transm_req_max_retries
-                  ):
-    &#34;&#34;&#34;
-    Transmits the provided file to the other computer in this conversation.
-
-    &#34;&#34;&#34;
-    while not self._conversation_started:
-        if PRINT_LOG:
-            print(&#34;Wanted to say something but conversation was not yet started&#34;)
-        time.sleep(0.01)
-    if PRINT_LOG_CONVERSATIONS:
-        print(&#34;Transmitting file to &#34;,
-              f&#34;{self.others_trsm_listener}:files&#34;)
-
-    def _progress_handler(peer_id: str, filename: str, filesize: str, progress):
-        self._last_coms_time = datetime.utcnow()
-        if progress_handler:
-            # run callback on a new thread, specifying only as many parameters as the callback wants
-            Thread(target=call_progress_callback,
-                   args=(progress_handler,
-                         peer_id,
-                         filename,
-                         filesize,
-                         progress),
-                   name=&#39;Conversation.progress_handler&#39;
-                   ).start()
-    return transmit_file(
-        filepath,
-        self.peer_id,
-        f&#34;{self.others_trsm_listener}:files&#34;,
-        metadata,
-        _progress_handler,
-        encryption_callbacks=(self.__encryption_callback,
-                              self.__decryption_callback),
-        block_size=block_size,
-        transm_send_timeout_sec=transm_send_timeout_sec,
-        transm_req_max_retries=transm_req_max_retries)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.Conversation.terminate"><code class="name flex">
 <span>def <span class="ident">terminate</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Stop the conversation and clean up IPFS connection configurations.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def terminate(self):
-    &#34;&#34;&#34;Stop the conversation and clean up IPFS connection configurations.
-    &#34;&#34;&#34;
-    if self._terminate:
-        return
-    self._terminate = True
-    if self._listener:
-        self._listener.terminate()
-    if self.file_listener:
-        self.file_listener.terminate()</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.Conversation.close"><code class="name flex">
 <span>def <span class="ident">close</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Stop the conversation and clean up IPFS connection configurations.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def close(self):
-    &#34;&#34;&#34;Stop the conversation and clean up IPFS connection configurations.
-    &#34;&#34;&#34;
-    self.terminate()</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -3852,16 +3028,6 @@ and then act upon that decision.</p></div>
 <dd>
 <div class="desc"><p>Stop listening for conversation requests and clean up IPFS
 connection configurations.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def terminate(self):
-    &#34;&#34;&#34;Stop listening for conversation requests and clean up IPFS
-    connection configurations.
-    &#34;&#34;&#34;
-    self._listener.terminate()</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -4189,149 +3355,24 @@ of data is received during file transmission.
 progress is a value between 0 and 1
 Parameters: (peer_id:str, filesize:int, progress:float)</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def setup(self, conversation, eventhandler, progress_handler=None, dir=&#34;.&#34;):
-    &#34;&#34;&#34;Configure this object to make it work.
-    Args:
-        conversation (Conversation): the Conversation object with which to
-                    communicate with the transmitter
-        eventhandler (function): function to be called when a file is
-                    received
-                    Parameters: (peer_id:str, path:str, metadata:bytes)
-        progress_handler (function): function to be called whenever a block
-                    of data is received during file transmission.
-                    progress is a value between 0 and 1
-                    Parameters: (peer_id:str, filesize:int, progress:float)
-
-    &#34;&#34;&#34;
-    if PRINT_LOG_FILES:
-        print(&#34;FileReception: &#34;
-              + &#34;: Preparing to receive file&#34;)
-
-    self.eventhandler = eventhandler
-    self.progress_handler = progress_handler
-    self.conv = conversation
-    self.dir = dir
-    if PRINT_LOG_FILES:
-        print(&#34;FileReception: &#34;
-              + &#34;: responded to sender, ready to receive&#34;)
-
-    self.status = &#34;receiving&#34;</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.FileTransmissionReceiver.on_data_received"><code class="name flex">
 <span>def <span class="ident">on_data_received</span></span>(<span>self, conv, data)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def on_data_received(self, conv, data):
-    if not self.transmission_started:
-        try:
-            filesize, filename, metadata = _split_by_255(data)
-            self.filesize = _from_b255_no_0s(filesize)
-            self.filename = filename.decode(&#39;utf-8&#39;)
-            self.metadata = metadata
-            self.writer = open(os.path.join(
-                self.dir, self.filename + &#34;.PART&#34;), &#34;wb&#34;)
-            self.transmission_started = True
-            self.conv.say(&#34;ready&#34;.encode())
-            self.writtenbytes = 0
-            if PRINT_LOG_FILES:
-                print(&#34;FileReception: &#34; + self.filename
-                      + &#34;: ready to receive file&#34;)
-            if self.progress_handler:
-                # run callback on a new thread, specifying only as many parameters as the callback wants
-                Thread(target=call_progress_callback,
-                       args=(self.progress_handler,
-                             self.conv.peer_id,
-                             self.filename,
-                             self.filesize,
-                             0
-                             ),
-                       name=&#39;FileTransmissionReceiver.progress&#39;
-                       ).start()
-
-            if (self.filesize == 0):
-                self.finish()
-        except:
-            if PRINT_LOG_FILES:
-                print(&#34;Received unreadable data on FileTransmissionListener &#34;)
-                traceback.print_exc()
-
-    else:
-        self.writer.write(data)
-        self.writtenbytes += len(data)
-
-        if self.progress_handler:
-            # run callback on a new thread, specifying only as many parameters as the callback wants
-            Thread(target=call_progress_callback,
-                   args=(self.progress_handler,
-                         self.conv.peer_id,
-                         self.filename,
-                         self.filesize,
-                         self.writtenbytes / self.filesize
-                         ),
-                   name=&#39;FileTransmissionReceiver.progress&#39;
-                   ).start()
-
-        if PRINT_LOG_FILES:
-            print(&#34;FileTransmission: &#34; + self.filename
-                  + &#34;: received data &#34; + str(self.writtenbytes) + &#34;/&#34; + str(self.filesize))
-
-        if self.writtenbytes == self.filesize:
-            self.finish()
-        elif self.writtenbytes &gt; self.filesize:
-            self.writer.close()
-            raise UnreadableReply(
-                &#34;Something weird happened, filesize is larger than expected.&#34;)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.FileTransmissionReceiver.finish"><code class="name flex">
 <span>def <span class="ident">finish</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def finish(self):
-    self.writer.close()
-    shutil.move(os.path.join(self.dir, self.filename + &#34;.PART&#34;),
-                os.path.join(self.dir, self.filename))
-    if PRINT_LOG:
-        print(&#34;FileReception: &#34; + self.filename
-              + &#34;: Transmission finished.&#34;)
-    self.status = &#34;finished&#34;
-    self.conv.close()
-    if self.eventhandler:
-        filepath = os.path.abspath(os.path.join(
-            self.dir, self.filename))
-        if signature(self.eventhandler).parameters[&#34;metadata&#34;]:
-            self.eventhandler(self.conv.peer_id, filepath, self.metadata)
-        else:
-            self.eventhandler(self.conv.peer_id, filepath)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.FileTransmissionReceiver.terminate"><code class="name flex">
 <span>def <span class="ident">terminate</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def terminate(self):
-    self.conv.terminate()</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -4372,30 +3413,12 @@ Parameters: (peer_id:str, filesize:int, progress:float)</dd>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def send_buffer(self, data):
-    try:
-        self.sock.send(data)
-    except:
-        self.sock = _create_sending_connection(self.peer_id, self.proto)
-        self.sock.send(data)</code></pre>
-</details>
 </dd>
 <dt id="ipfs_datatransmission.BufferSender.terminate"><code class="name flex">
 <span>def <span class="ident">terminate</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def terminate(self):
-    _close_sending_connection(self.peer_id, self.proto)</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -4442,14 +3465,6 @@ Parameters: (peer_id:str, filesize:int, progress:float)</dd>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def terminate(self):
-    _close_listening_connection(self.proto, self._listener.port)
-    self._listener.terminate()</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -4719,7 +3734,7 @@ communicating.</p></div>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
 </footer>
 </body>
 </html>
