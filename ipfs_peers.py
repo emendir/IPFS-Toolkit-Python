@@ -1,3 +1,4 @@
+
 """"""
 
 
@@ -225,20 +226,26 @@ class PeerMonitor:
             #     self.save()
             #     self.__save_event.clear()
             if self.__save:
-                self.save()
+                self._save()
                 self.__save = False
             time.sleep(1)
 
     def save(self):
-        if threading.current_thread().name != "PeerMonitor.__file_manager":
-            self.__save = True
-            return
+        self.__save = True
+
+    def _save(self):
         with self.__save_lock:
-            with open(self.__filepath, 'w+') as file:
-                data = {
-                    'peers': [peer.serialise() for peer in self.__peers]
-                }
-                file.write(json.dumps(data))
+            try:
+                with open(self.__filepath, 'w+') as file:
+                    data = {
+                        'peers': [peer.serialise() for peer in self.__peers]
+                    }
+                    file.write(json.dumps(data))
+            except OSError as e:
+                if "Too many open files" in str(e):
+                    print(e)
+                else:
+                    raise e
         # self.__save_event.clear()
         self.__save = False
 
@@ -266,6 +273,7 @@ class PeerMonitor:
                 self.__peers = [
                     peer for peer in self.__peers if peer.multiaddrs()]
 
+            time.sleep(1)
             self.save()
 
     def find_all_peers(self):

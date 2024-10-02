@@ -3,6 +3,7 @@
 # To use it you must have IPFS running on your computer.
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
+from io import BytesIO
 from threading import Thread
 import logging
 import ipfs_lns
@@ -562,10 +563,10 @@ def pubsub_publish(topic, data):
     if isinstance(data, str) and not os.path.exists(data):
         data = data.encode()
     if isinstance(data, bytes) or isinstance(data, bytearray):
-        with tempfile.NamedTemporaryFile() as tp:
-            tp.write(data)
-            tp.flush()
-            http_client.pubsub.publish(topic, tp.name)
+        # Use an in-memory BytesIO object instead of a temporary file
+        with BytesIO(data) as data_stream:
+            # Call _publish with the BytesIO object
+            http_client.pubsub.publish(topic, data_stream)
     else:
         http_client.pubsub.publish(topic, data)
 
