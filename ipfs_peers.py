@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 FORGET_AFTER_HOURS = 200
 SUCCESSIVE_REGISTER_IGNORE_DUR_SEC = 60
 CONNECTION_ATTEMPT_INTERVAL_SEC = 5
+FILE_WRITE_INTERVAL_SEC = 1
 
 
 class Peer:
@@ -150,6 +151,8 @@ class PeerMonitor:
     forget_after_hrs = FORGET_AFTER_HOURS
     connection_attempt_interval_sec = CONNECTION_ATTEMPT_INTERVAL_SEC
     successive_register_ignore_dur_sec = SUCCESSIVE_REGISTER_IGNORE_DUR_SEC
+    # in which intervall the updated data should be written the the file
+    file_write_interval_sec = FILE_WRITE_INTERVAL_SEC
     __peers = []  # list(Peer)
     __terminate = False
     __save_lock = Lock()
@@ -228,7 +231,7 @@ class PeerMonitor:
             if self.__save:
                 self._save()
                 self.__save = False
-            time.sleep(1)
+            time.sleep(self.file_write_interval_sec)
 
     def save(self):
         self.__save = True
