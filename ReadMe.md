@@ -43,7 +43,7 @@ With version 0.5.0, the underlying communication protocol on which all of the fe
 
 
 
-### Prerequsites
+### Prerequisites
 IPFS-Toolkit is made for interacting with IPFS in the Python programming language. One configuration must be applied to IPFS in order to use IPFS-Toolkit's main features.
 - __Install IPFS__ (Desktop version or CLI, doesn't matter).
     https://docs.ipfs.io/install/
@@ -64,16 +64,7 @@ IPFS-Toolkit is made for interacting with IPFS in the Python programming languag
 - If you want to use the source code, install the following prerequisite Python modules:  
   (depending on your Python installation you may need to use `pip` instead of `pip3` in the following commands)  
 ```bash
-pip3 install setuptools  
-pip3 install wheel  
-pip3 install multiaddr  
-pip3 install appdirs  
-pip3 install multiaddr  
-pip3 install appdirs  
-pip3 install idna  
-pip3 install httpcore  
-pip3 install httpx
-pip3 install zmq
+pip3 install appdirs httpcore httpx idna multiaddr setuptools wheel zmq
 ```
 
 # Modules Contained in IPFS-Toolkit
@@ -128,9 +119,9 @@ This module has three main pairs functions for use by the user:
 See the _Examples_ folder for the different ways of using these functions. They are designed in a way that makes them easy to use for simple applications but feature-rich for more demanding ones, such as encryption integration and access to low-level protocol settings.
 
 ### Listener Functions:
-The listener functions (listen_for_transmissions, listen_for_file_transmissions and listen_for_conversations) produce Listener objects () that run on their own threads waiting for incoming data transmission or conversation requests. When another computer wants to send the first computer somthing, the other computer sends a transmission request which the Listener object receives and reacts to by creating a Transmission reception object () which runs on its own separate thread to receive the transmission, or in the case of the conversation listener, calls its user-defined eventhandler so that the conversation can be joined or ignored.
-This system of receiving data transmissions/conversations allows a computer to receive multiple transmission addressed to the same listener simultaneously.
-Multiple Listeners of the same type (the types being DataTransmission, FileTransmission, or Conversation) can be run simultaneously and independently, for example by different programs. Those different listeners (instances of listen_for_transmissions) must me named to distinguish them from each other for addressing purposes. This name is the "listener_name" parameter in the listener functions. The name is chosen by the user when creating the listener (e.g. when calling ListenForTransmission()), and must be provided when starting a transmission (e.g. when calling transmit_data()).
+The listener functions (listen_for_transmissions, listen_for_file_transmissions, and listen_for_conversations) produce Listener objects () that run on their own threads waiting for incoming data transmission or conversation requests. When another computer wants to send the first computer something, the other computer sends a transmission request which the Listener object receives and reacts to by creating a Transmission reception object () which runs on its own separate thread to receive the transmission, or in the case of the conversation listener, calls its user-defined eventhandler so that the conversation can be joined or ignored.
+This system of receiving data transmissions/conversations allows a computer to receive multiple transmissions addressed to the same listener simultaneously.
+Multiple Listeners of the same type (the types being DataTransmission, FileTransmission, or Conversation) can be run simultaneously and independently, for example by different programs. Those different listeners (instances of listen_for_transmissions) must be named to distinguish them from each other for addressing purposes. This name is the "listener_name" parameter in the listener functions. The name is chosen by the user when creating the listener (e.g. when calling ListenForTransmission()) and must be provided when starting a transmission (e.g. when calling transmit_data()).
 
 ## IPFS-LNS:
 `import ipfs_lns`
@@ -142,16 +133,16 @@ Basic usage:
 ```python
 import ipfs_api  
 
-# check connection to peer of peerID "QmHash" and whom we call "Bob", add him to our list of known peers ("contacts") if he is not already added  
+# check the connection to the peer of peerID "QmHash" and whom we call "Bob", add him to our list of known peers ("contacts") if he is not already added  
 ipfs_api.check_peer_connection("QmHash", "Bob") 
 
 import ipfs_lns
 peerID = ipfs_lns.lookup_contact("Bob") # get the contact 'Bob's IPFS peer ID
 ```
 # IPFS Technicalities:
-How does IPFS-DataTransmission use IPFS to to send data to another computer? After all, IPFS is a file system and made for sharing and storing files, creating a content addressed internet. Does it really provide the functionality for two computers to communicate directly which each other?  
+How does IPFS-DataTransmission use IPFS to send data to another computer? After all, IPFS is a file system made for sharing and storing files, creating a content addressed internet. Does it really provide the functionality for two computers to communicate directly with each other?  
 Yes, IPFS does provide that functionality, although as of November 2021 that is still an experimental feature. That's why you have to configure IPFS to enable that feature as described in Prerequisites.txt.  
-After all, IPFS relies on peers sending data to each other over its decentralised network using a communication technology called libp2p. IPFS-DataTransmission essentially uses the libp2p module inside of the IPFS process running on the computer to communicate to other computers via an access point to the module which IPFS provides, the experimental feature which IPFS calls Libp2pStreamMounting. Libp2pStreamMounting works by allowing the user to set up a port forwarding system on the computer between the user's program (in this case IPFS-DataTransmission) and the libp2p process inside of IPFS. After setting up this port forwarding the user (in this case the IPFS-DataTransmission script) can communicate to the chosen local port on their computer, and IPFS forwards that communication to the libp2p module runnning inside of IPFS on the other computer, which forwards it in turn to a preconfigured port on that computer, to be listened to by the user (in this case an IPFS-DataTransmission Listener object).  
+After all, IPFS relies on peers sending data to each other over its decentralized network using a communication technology called libp2p. IPFS-DataTransmission essentially uses the libp2p module inside of the IPFS process running on the computer to communicate to other computers via an access point to the module that IPFS provides, the experimental feature that IPFS calls Libp2pStreamMounting. Libp2pStreamMounting works by allowing the user to set up a port forwarding system on the computer between the user's program (in this case IPFS-DataTransmission) and the libp2p process inside of IPFS. After setting up this port forwarding the user (in this case the IPFS-DataTransmission script) can communicate to the chosen local port on their computer, and IPFS forwards that communication to the libp2p module running inside of IPFS on the other computer, which forwards it in turn to a preconfigured port on that computer, to be listened to by the user (in this case an IPFS-DataTransmission Listener object).  
 Because the Python API for interacting with IPFS (ipfshttpclient) doesn't yet support this experimental feature, I have updated the module myself, the result of which is the ipfshttpclient2 folder in this code project, which will remain part of this project until the changes are integrated into the official ipfshttpclient module.
 
 # Links
