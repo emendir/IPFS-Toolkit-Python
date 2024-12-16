@@ -317,7 +317,7 @@ def get_peer_multiaddrs(peer_id):
         reach the given peer
     """
     try:
-        response = http_client.dht.findpeer(peer_id)
+        response = http_client.routing.findpeer(peer_id)
         return response["Responses"][0]["Addrs"]
     except:
         return []
@@ -345,7 +345,7 @@ def find_peer(peer_id: str):
         str: the multiaddress of the connected node
     """
     try:
-        response = http_client.dht.findpeer(peer_id)
+        response = http_client.routing.findpeer(peer_id)
         if (len(response["Responses"][0]["Addrs"]) > 0):
             return response
     except:
@@ -375,7 +375,7 @@ def find_providers(cid):
     Returns:
         list: the peer IDs of the IPFS nodes who provide the file
     """
-    responses = http_client.dht.findprovs(cid)
+    responses = http_client.routing.findprovs(cid)
     peers = []
     for response in responses:
         if not isinstance(response, ipfshttpclient.client.base.ResponseBase):

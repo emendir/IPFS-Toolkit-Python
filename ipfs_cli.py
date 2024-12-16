@@ -311,7 +311,7 @@ def list_peer_multiaddrs():
 
 
 def find_peer(ID: str):
-    response = run_command([ipfs_cmd, "dht", "findpeer", ID])
+    response = run_command([ipfs_cmd, "routing", "findpeer", ID])
     return {"Responses": [{"ID": ID, "Addrs": response.split("\n")}]}
 
 # Returns the IPFS ID of the currently running IPFS node
