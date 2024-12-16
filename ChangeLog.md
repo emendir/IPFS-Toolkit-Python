@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.27 (2024-12-16)
+- migrated from using ipfs.dht to ipfs.routing API endpoints
+ 
 ## v0.5.26 (2024-10-06)
 - ipfs_peers.PeerMonitor: `file_write_interval_sec` attribute
 
