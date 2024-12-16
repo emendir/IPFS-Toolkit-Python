@@ -62,12 +62,12 @@ class Node:
             save_contacts()
 
     def try_to_connect(self):
-        """Tries to connect to this IPFS peer using 'ipfs dht findpeer ...'
+        """Tries to connect to this IPFS peer using 'ipfs routing findpeer ...'
         and 'ipfs swarm connect ...' with remembered multiaddresses.
         Note: Can take a long time time run. You generally want to use
         check_connection() instead of try_to_connect(), that function runs this
         function if it is not already running"""
-        # first trying 'ipfs dht findpeer ...'
+        # first trying 'ipfs routing findpeer ...'
         try:
             response = ipfs_api.find_peer(self.id)
             if(len(response.get("Responses")[0].get("Addrs")) > 0):  # if connections succeeds
@@ -84,7 +84,7 @@ class Node:
                 if proc.stdout.readline()[-8:-1].decode() == 'success':
                     self.remember_multiaddrs()
                     return True
-            # if we still haven't found him, try 'ipfs dht findpeer ' one more time
+            # if we still haven't found him, try 'ipfs routing findpeer ' one more time
             try:
                 response = ipfs_api.find_peer(self.id)
                 if(len(response.get("Responses")[0].get("Addrs")) > 0):

@@ -94,7 +94,7 @@ Examples:
 ```Python
 import ipfs_api
 ipfs_api.http_client.add("helloworld.txt")
-ipfs_api.http_client.dht.findpeer("QMHash")
+ipfs_api.http_client.routing.findpeer("QMHash")
 ipfs_api.http_client.swarm.peers()
 ```
 
