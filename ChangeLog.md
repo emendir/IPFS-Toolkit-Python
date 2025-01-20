@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.27 (2025-01-20)
+- removed ipfs_http_client2.client.object, as it caused issues in python-for-android and the IPFS RPC endpoint is deprecated anyway
+
 ## v0.5.27 (2024-12-16)
 - migrated from using ipfs.dht to ipfs.routing API endpoints
  

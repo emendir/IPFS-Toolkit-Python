@@ -127,8 +127,7 @@ class RefsSection(base.SectionBase):
 	def __call__(self, cid: base.cid_t, **kwargs: base.CommonArgs):
 		"""Returns the hashes of objects referenced by the given hash
 		
-		**This API is subject to future change or removal!** You likely want to
-		use :meth:`~ipfshttpclient.object.links` instead.
+		**This API is subject to future change or removal!**
 		
 		.. code-block:: python
 		
