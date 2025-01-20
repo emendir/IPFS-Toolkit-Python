@@ -120,10 +120,6 @@ class Section(base.SectionBase):
         The new object will have the same links as the previous object, but with
         the provided data appended to it.
 
-        .. code-block:: python
-
-                >>> client.object.patch.append_data("QmZZmY … fTqm", io.BytesIO(b"bla"))
-                {'Hash': 'QmR79zQQj2aDfnrNgczUhvf2qWapEfQ82YQRt3QjrbhSb2'}
 
         Parameters
         ----------
