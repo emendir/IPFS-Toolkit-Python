@@ -5,7 +5,6 @@
 
 from io import BytesIO
 from threading import Thread
-import logging
 import ipfs_lns
 import traceback
 import os.path

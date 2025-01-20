@@ -38,7 +38,6 @@ if True:    # stop my IDE from rearranging imports
     from . import key
     from . import miscellaneous
     from . import name
-    from . import object
     from . import p2p
     from . import pin
     from . import pubsub
@@ -190,7 +189,6 @@ class Client(files.Base, miscellaneous.Base):
     dht = base.SectionProperty(dht.Section)
     key = base.SectionProperty(key.Section)
     name = base.SectionProperty(name.Section)
-    object = base.SectionProperty(object.Section)
     p2p = base.SectionProperty(p2p.Section)
     pin = base.SectionProperty(pin.Section)
     pubsub = base.SectionProperty(pubsub.Section)
