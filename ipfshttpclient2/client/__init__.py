@@ -179,7 +179,8 @@ class Client(files.Base, miscellaneous.Base):
     """
 
     # Fix up docstring so that Sphinx doesn't ignore the constructors parameter list
-    __doc__ += "\n\n" + "\n".join(l[1:] for l in base.ClientBase.__init__.__doc__.split("\n"))
+    if base.ClientBase.__init__.__doc__:
+        __doc__ += "\n\n" + "\n".join(l[1:] for l in base.ClientBase.__init__.__doc__.split("\n"))
 
     bitswap = base.SectionProperty(bitswap.Section)
     block = base.SectionProperty(block.Section)
