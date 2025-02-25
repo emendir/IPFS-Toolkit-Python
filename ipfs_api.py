@@ -595,6 +595,38 @@ def pubsub_peers(topic: str):
     return http_client.pubsub.peers(topic=_encode_base64_url(topic.encode()))["Strings"]
 
 
+def add_swarm_filter(filter_multiaddr):
+    try:
+        http_client.swarm.filters.add(filter_multiaddr)
+    except ipfshttpclient.exceptions.ErrorResponse:
+        # this error always gets thrown, isn't a problem
+        pass
+    if filter_multiaddr not in get_swarm_filters():
+        raise SwarmFiltersUpdateError()
+
+
+def rm_swarm_filter(filter_multiaddr):
+    try:
+        http_client.swarm.filters.rm(filter_multiaddr)
+    except ipfshttpclient.exceptions.ErrorResponse:
+        # this error always gets thrown, isn't a problem
+        pass
+    if filter_multiaddr in get_swarm_filters():
+        raise SwarmFiltersUpdateError()
+
+
+def get_swarm_filters():
+    _filters = dict(http_client.swarm.filters.list())['Strings']
+    return set(_filters) if _filters is not None else set()
+
+
+class SwarmFiltersUpdateError(Exception):
+    def_message = "Failed to add/remove filter"
+
+    def __str__(self):
+        return self.def_message
+
+
 def _decode_base64_url(data: str):
     """Performs the URL-Safe multibase decoding required by some functions (since IFPS v0.11.0) on strings"""
     if isinstance(data, bytes):

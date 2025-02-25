@@ -1,6 +1,8 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.30 (2025-02-25)
+- ipfs_api: added `add_swarm_filter()`, `rm_swarm_filter()` & `get_swarm_filters()`
 ## v0.5.29 (2025-01-23)
 - ipfshttpcient2: fixed kivy compatibility issue
 
