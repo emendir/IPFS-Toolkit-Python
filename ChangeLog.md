@@ -1,6 +1,9 @@
 # IPFS-Toolkit Progressive ChangeLog 
 This library is still under development and is currently being tested in various use-case projects. Due to its early stage of development, many successive versions of this library are not fully backward-compatible with their previous versions.
 
+## v0.5.32 (2025-02-27)
+- ipfs_datatransmission: support for non-localhost address for local IPFS node
+
 ## v0.5.31 (2025-02-27)
 - ipfs_api: libp2p stream mounting: support for non-localhost address for local IPFS node
 

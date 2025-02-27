@@ -5,6 +5,7 @@ Configure IPFS to enable all this:
 ipfs config --json Experimental.Libp2pStreamMounting true
 """
 # from pdb import set_trace as debug
+from ipfs_api import _ipfs_host_ip
 import shutil
 from queue import Queue, Empty as QueueEmpty
 import socket
@@ -221,7 +222,7 @@ class TransmissionListener:
                 print(
                     self._listener_name + ": Received transmission request.")
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.bind(("127.0.0.1", 0))
+            sock.bind((_ipfs_host_ip(), 0))
             our_port = sock.getsockname()[1]
             _create_listening_connection(str(our_port), our_port)
             sock.listen()
@@ -268,7 +269,7 @@ class TransmissionListener:
         if PRINT_LOG_TRANSMISSIONS:
             print("Creating Listener")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind(("127.0.0.1", 0))
+        self.socket.bind((_ipfs_host_ip(), 0))
         self.port = self.socket.getsockname()[1]
         _create_listening_connection(self._listener_name, self.port)
 
@@ -305,7 +306,7 @@ class TransmissionListener:
         _close_listening_connection(self._listener_name, self.port)
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect(("127.0.0.1", self.port))
+            sock.connect((_ipfs_host_ip(), self.port))
             # sock.sendall("close".encode())
             _tcp_send_all(sock, "close".encode())
 
@@ -1417,7 +1418,7 @@ class _ListenerTCP(threading.Thread):
         self.sock = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
 
-        self.sock.bind(("127.0.0.1", self.port))
+        self.sock.bind((_ipfs_host_ip(), self.port))
         # in case it had been 0 (requesting automatic port assiggnent)
         self.port = self.sock.getsockname()[1]
 
@@ -1732,7 +1733,7 @@ def _create_sending_connection(peer_id: str, protocol: str, port=None):
         for prt in sending_ports:   # trying ports until we find a free one
             try:
                 ipfs_api.create_tcp_sending_connection(protocol, prt, peer_id)
-                sock.connect(("127.0.0.1", prt))
+                sock.connect((_ipfs_host_ip(), prt))
                 return sock
             except Exception as e:   # ignore errors caused by port already in use
                 if not "bind: address already in use" in str(e):
@@ -1741,7 +1742,7 @@ def _create_sending_connection(peer_id: str, protocol: str, port=None):
     else:
         try:
             ipfs_api.create_tcp_sending_connection(protocol, port, peer_id)
-            sock.connect(("127.0.0.1", prt))
+            sock.connect((_ipfs_host_ip(), prt))
             return sock
         except Exception as e:
             raise IPFS_Error(str(e))
@@ -1766,7 +1767,9 @@ def _create_listening_connection(protocol, port, force=True):
                 print(f"listening as \"{protocol}\" on {port}")
         except:
             raise IPFS_Error(
-                "Error registering listening connection to IPFS: /x/" + protocol + "/ip4/127.0.0.1/udp/" + str(port))
+                "Error registering listening connection to IPFS: "
+                f"/x/{protocol}/ip4/{_ipfs_host_ip()}/udp/{port}"
+            )
 
     connections_listen.append((protocol, port))
     return port
