@@ -3,6 +3,9 @@
 # To use it you must have IPFS running on your computer.
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
+import socket
+from urllib.parse import ParseResult
+from urllib.parse import urlparse
 from io import BytesIO
 from threading import Thread
 import ipfs_lns
@@ -396,7 +399,9 @@ def create_tcp_listening_connection(name: str, port: int):
     """
     if name[:3] != "/x/":
         name = "/x/" + name
-    http_client.p2p.listen(name, "/ip4/127.0.0.1/tcp/" + str(port))
+    http_client.p2p.listen(
+        name, f"/ip4/{_ipfs_host_ip()}/tcp/{port}"
+    )
 
 
 def create_tcp_sending_connection(name: str, port, peerID):
@@ -409,8 +414,9 @@ def create_tcp_sending_connection(name: str, port, peerID):
     """
     if name[:3] != "/x/":
         name = "/x/" + name
-    http_client.p2p.forward(name, "/ip4/127.0.0.1/tcp/"
-                            + str(port), "/p2p/" + peerID)
+    http_client.p2p.forward(
+        name, f"/ip4/{_ipfs_host_ip()}/tcp/{port}",f"/p2p/{peerID}"
+    )
 
 
 def close_all_tcp_connections(listeners_only=False):
@@ -434,7 +440,7 @@ def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: st
     if name and name[:3] != "/x/":
         name = "/x/" + name
     if port and isinstance(port, int):
-        listenaddress = f"/ip4/127.0.0.1/tcp/{port}"
+        listenaddress = f"/ip4/{_ipfs_host_ip()}/tcp/{port}"
     else:
         listenaddress = port
     if peer_id and peer_id[:5] != "/p2p/":
@@ -453,7 +459,7 @@ def close_tcp_listening_connection(name: str = None, port: str = None):
     if name and name[:3] != "/x/":
         name = "/x/" + name
     if port and isinstance(port, int):
-        targetaddress = f"/ip4/127.0.0.1/tcp/{port}"
+        targetaddress = f"/ip4/{_ipfs_host_ip()}/tcp/{port}"
     else:
         targetaddress = port
     http_client.p2p.close(False, name, None, targetaddress)
@@ -666,6 +672,16 @@ def wait_till_ipfs_is_running(timeout_sec=None):
         count += 1
         if timeout_sec and count == timeout_sec:
             raise TimeoutError()
+
+
+def _ipfs_api_url() -> ParseResult:
+    url = http_client._client._base_url
+    return urlparse(url)
+
+
+def _ipfs_host_ip() -> str:
+    ip_address = socket.gethostbyname(_ipfs_api_url().hostname)
+    return ip_address
 
 
 def try_run_ipfs():
