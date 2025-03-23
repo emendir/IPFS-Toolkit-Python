@@ -1,8 +1,5 @@
 import os
-
-import subprocess
 from termcolor import colored
-from datetime import datetime
 
 
 def build_docker(verbose=True):

@@ -11,7 +11,7 @@ from queue import Queue, Empty as QueueEmpty
 import socket
 import threading
 from threading import Thread, Event
-from datetime import datetime
+from datetime import datetime, UTC
 import time
 import traceback
 import os
@@ -580,7 +580,7 @@ class Conversation:
         except Exception as e:
             self.terminate()
             raise e
-        self._last_coms_time = datetime.utcnow()
+        self._last_coms_time = datetime.now(UTC)
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + ": sent conversation request")
         success = self.started.wait(transm_send_timeout_sec)
@@ -663,7 +663,7 @@ class Conversation:
             'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
         self._conversation_started = True
         transmit_data(data, peer_id, others_trsm_listener)
-        self._last_coms_time = datetime.utcnow()
+        self._last_coms_time = datetime.now(UTC)
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + ": Joined conversation "
                   + others_trsm_listener)
@@ -682,7 +682,7 @@ class Conversation:
         if not data:
             print("CONV.HEAR: RECEIVED NONE")
             return
-        self._last_coms_time = datetime.utcnow()
+        self._last_coms_time = datetime.now(UTC)
 
         if not self._conversation_started:
             info = _split_by_255(data)
@@ -746,7 +746,7 @@ class Conversation:
 
     def _file_received(self, peer, filepath, metadata):
         """Receives this conversation's file transmissions."""
-        self._last_coms_time = datetime.utcnow()
+        self._last_coms_time = datetime.now(UTC)
 
         if PRINT_LOG_CONVERSATIONS:
             print(f"{self.conv_name}: Received file: ", filepath)
@@ -765,7 +765,7 @@ class Conversation:
         Returns:
             str: the path of the received file
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         if not (abs_timeout or no_coms_timeout):    # if no timeouts are specified
             data = self._file_queue.get()
         else:   # timeouts are specified
@@ -774,11 +774,11 @@ class Conversation:
                 if no_coms_timeout:
                     # time left till next coms timeout check
                     _no_coms_timeout = no_coms_timeout - \
-                        (datetime.utcnow() - self._last_coms_time).total_seconds()
+                        (datetime.now(UTC) - self._last_coms_time).total_seconds()
                 if abs_timeout:
                     # time left till absolute timeout would be reached
                     _abs_timeout = abs_timeout - \
-                        (datetime.utcnow() - start_time).total_seconds()
+                        (datetime.now(UTC) - start_time).total_seconds()
 
                 # Choose the timeout we need to wait for
                 timeout = None
@@ -793,10 +793,10 @@ class Conversation:
                     break
                 except QueueEmpty:  # qeue timeout reached
                     # check if any of the user's timeouts were reached
-                    if abs_timeout and (datetime.utcnow() - start_time).total_seconds() > abs_timeout:
+                    if abs_timeout and (datetime.now(UTC) - start_time).total_seconds() > abs_timeout:
                         raise ConvListenTimeout(
                             "Didn't receive any files.") from None
-                    elif (datetime.utcnow() - self._last_coms_time).total_seconds() > no_coms_timeout:
+                    elif (datetime.now(UTC) - self._last_coms_time).total_seconds() > no_coms_timeout:
                         raise CommunicationTimeout(
                             "Communication timeout reached while waiting for file.") from None
         if data:
@@ -807,7 +807,7 @@ class Conversation:
             self.listen_for_file(timeout)
 
     def _on_file_progress_received(self, peer_id: str, filename: str, filesize: str, progress):
-        self._last_coms_time = datetime.utcnow()
+        self._last_coms_time = datetime.now(UTC)
         if self.file_progress_callback:
             # run callback on a new thread, specifying only as many parameters as the callback wants
             Thread(target=call_progress_callback,
@@ -855,7 +855,7 @@ class Conversation:
             data = self.__encryption_callback(data)
         transmit_data(data, self.peer_id, self.others_trsm_listener,
                       timeout_sec, max_retries)
-        self._last_coms_time = datetime.utcnow()
+        self._last_coms_time = datetime.now(UTC)
         return True
 
     def transmit_file(self,
@@ -879,7 +879,7 @@ class Conversation:
                   f"{self.others_trsm_listener}:files")
 
         def _progress_handler(peer_id: str, filename: str, filesize: str, progress):
-            self._last_coms_time = datetime.utcnow()
+            self._last_coms_time = datetime.now(UTC)
             if progress_handler:
                 # run callback on a new thread, specifying only as many parameters as the callback wants
                 Thread(target=call_progress_callback,
@@ -1400,7 +1400,7 @@ class _ListenerTCP(threading.Thread):
     buffer_size = BUFFER_SIZE
     _terminate = False
     sock = None
-    last_time_recv = datetime.utcnow()
+    last_time_recv = datetime.now(UTC)
 
     def __init__(self,
                  eventhandler,
@@ -1425,7 +1425,7 @@ class _ListenerTCP(threading.Thread):
         if status_eventhandler != None:
             self.status_eventhandler = status_eventhandler
             self.monitoring_interval = monitoring_interval
-            self.last_time_recv = datetime.utcnow()
+            self.last_time_recv = datetime.now(UTC)
             self.status_monitor_thread = Thread(
                 target=self.status_monitor, args=(), name='ListenerTP.status_monitor')
             self.status_monitor_thread.start()
@@ -1441,7 +1441,7 @@ class _ListenerTCP(threading.Thread):
 
         while True:
             data = conn.recv(self.buffer_size)
-            self.last_time_recv = datetime.utcnow()
+            self.last_time_recv = datetime.now(UTC)
             if (self._terminate == True):
                 if PRINT_LOG_CONNECTIONS:
                     print("listener terminated")
@@ -1467,9 +1467,9 @@ class _ListenerTCP(threading.Thread):
             if self._terminate:
                 break
             time.sleep(self.monitoring_interval)
-            if (datetime.utcnow() - self.last_time_recv).total_seconds() > self.monitoring_interval:
+            if (datetime.now(UTC) - self.last_time_recv).total_seconds() > self.monitoring_interval:
                 self.status_eventhandler(
-                    (datetime.utcnow() - self.last_time_recv).total_seconds())
+                    (datetime.now(UTC) - self.last_time_recv).total_seconds())
 
     # thread =  multiprocessing.Process(target = ListenIndefinately, args= ())
     # thread.start()
