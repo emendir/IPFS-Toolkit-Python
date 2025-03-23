@@ -19,7 +19,7 @@ from threading import Event
 import time
 from termcolor import colored
 from datetime import timedelta
-from datetime import datetime
+from datetime import datetime, UTC
 # import sys
 # import subprocess
 # import threading
@@ -146,12 +146,12 @@ def pins(cids_only: bool = False, cache_age_s: int = None):
             depends on the cids_only parameter (see above)
     """
     global __pins_cache
-    if __pins_cache and cache_age_s and (datetime.utcnow() - __pins_cache['date']).total_seconds() < cache_age_s:
+    if __pins_cache and cache_age_s and (datetime.now(UTC) - __pins_cache['date']).total_seconds() < cache_age_s:
         data = __pins_cache['data']
     else:
         data = http_client.pin.ls()['Keys'].as_json()
         __pins_cache = {
-            "date": datetime.utcnow(),
+            "date": datetime.now(UTC),
             "data": data
         }
     if cids_only:

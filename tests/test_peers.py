@@ -1,7 +1,7 @@
 import shutil
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, UTC
 import sys
 import os
 from termcolor import colored
@@ -124,7 +124,7 @@ def test_load_peer_monitor():
 
 def test_autoconnect():
     print(mark((monitor2.peers()[0].multiaddrs()[0][1] -
-          datetime.utcnow()).total_seconds() < 1), "Autoconnection")
+          datetime.now(UTC)).total_seconds() < 1), "Autoconnection")
 
 
 def test_find_all_peers():
@@ -143,7 +143,7 @@ def test_entry_deletion():
     print(mark(len(monitor2.peers()) == 1), "Forget peer not malfunctioning")
     # do another autoconnect test, making sure the mutltiaddr date was updated
     print(mark((monitor2.peers()[0].multiaddrs()[0][1] -
-          datetime.utcnow()).total_seconds() < 3), "Autoconnection still working")
+          datetime.now(UTC)).total_seconds() < 3), "Autoconnection still working")
     # take peer offline, then wait some cycles and enough time for the IPFS
     # daemon to realise the connection loss and check if peer was forgoten
     docker_peer.stop()

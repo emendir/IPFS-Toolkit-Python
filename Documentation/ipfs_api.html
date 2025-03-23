@@ -31,6 +31,9 @@
 # To use it you must have IPFS running on your computer.
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
+import socket
+from urllib.parse import ParseResult
+from urllib.parse import urlparse
 from io import BytesIO
 from threading import Thread
 import ipfs_lns
@@ -44,7 +47,7 @@ from threading import Event
 import time
 from termcolor import colored
 from datetime import timedelta
-from datetime import datetime
+from datetime import datetime, UTC
 # import sys
 # import subprocess
 # import threading
@@ -171,12 +174,12 @@ def pins(cids_only: bool = False, cache_age_s: int = None):
             depends on the cids_only parameter (see above)
     &#34;&#34;&#34;
     global __pins_cache
-    if __pins_cache and cache_age_s and (datetime.utcnow() - __pins_cache[&#39;date&#39;]).total_seconds() &lt; cache_age_s:
+    if __pins_cache and cache_age_s and (datetime.now(UTC) - __pins_cache[&#39;date&#39;]).total_seconds() &lt; cache_age_s:
         data = __pins_cache[&#39;data&#39;]
     else:
         data = http_client.pin.ls()[&#39;Keys&#39;].as_json()
         __pins_cache = {
-            &#34;date&#34;: datetime.utcnow(),
+            &#34;date&#34;: datetime.now(UTC),
             &#34;data&#34;: data
         }
     if cids_only:
@@ -424,7 +427,9 @@ def create_tcp_listening_connection(name: str, port: int):
     &#34;&#34;&#34;
     if name[:3] != &#34;/x/&#34;:
         name = &#34;/x/&#34; + name
-    http_client.p2p.listen(name, &#34;/ip4/127.0.0.1/tcp/&#34; + str(port))
+    http_client.p2p.listen(
+        name, f&#34;/ip4/{_ipfs_host_ip()}/tcp/{port}&#34;
+    )
 
 
 def create_tcp_sending_connection(name: str, port, peerID):
@@ -437,8 +442,9 @@ def create_tcp_sending_connection(name: str, port, peerID):
     &#34;&#34;&#34;
     if name[:3] != &#34;/x/&#34;:
         name = &#34;/x/&#34; + name
-    http_client.p2p.forward(name, &#34;/ip4/127.0.0.1/tcp/&#34;
-                            + str(port), &#34;/p2p/&#34; + peerID)
+    http_client.p2p.forward(
+        name, f&#34;/ip4/{_ipfs_host_ip()}/tcp/{port}&#34;,f&#34;/p2p/{peerID}&#34;
+    )
 
 
 def close_all_tcp_connections(listeners_only=False):
@@ -462,7 +468,7 @@ def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: st
     if name and name[:3] != &#34;/x/&#34;:
         name = &#34;/x/&#34; + name
     if port and isinstance(port, int):
-        listenaddress = f&#34;/ip4/127.0.0.1/tcp/{port}&#34;
+        listenaddress = f&#34;/ip4/{_ipfs_host_ip()}/tcp/{port}&#34;
     else:
         listenaddress = port
     if peer_id and peer_id[:5] != &#34;/p2p/&#34;:
@@ -481,7 +487,7 @@ def close_tcp_listening_connection(name: str = None, port: str = None):
     if name and name[:3] != &#34;/x/&#34;:
         name = &#34;/x/&#34; + name
     if port and isinstance(port, int):
-        targetaddress = f&#34;/ip4/127.0.0.1/tcp/{port}&#34;
+        targetaddress = f&#34;/ip4/{_ipfs_host_ip()}/tcp/{port}&#34;
     else:
         targetaddress = port
     http_client.p2p.close(False, name, None, targetaddress)
@@ -694,6 +700,16 @@ def wait_till_ipfs_is_running(timeout_sec=None):
         count += 1
         if timeout_sec and count == timeout_sec:
             raise TimeoutError()
+
+
+def _ipfs_api_url() -&gt; ParseResult:
+    url = http_client._client._base_url
+    return urlparse(url)
+
+
+def _ipfs_host_ip() -&gt; str:
+    ip_address = socket.gethostbyname(_ipfs_api_url().hostname)
+    return ip_address
 
 
 def try_run_ipfs():

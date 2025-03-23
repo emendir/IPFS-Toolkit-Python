@@ -9,7 +9,7 @@ from threading import Thread, Lock
 import os
 import json
 import ipfs_api
-from datetime import datetime, timedelta
+from datetime import datetime, UTC, timedelta
 
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
@@ -54,13 +54,13 @@ class Peer:
             bool: whether or not the event was registered
         """
         # skip registering if last register wasn't very long ago
-        if self.last_seen() and (datetime.utcnow() - self.last_seen()).total_seconds() < successive_register_ignore_dur_sec:
+        if self.last_seen() and (datetime.now(UTC) - self.last_seen()).total_seconds() < successive_register_ignore_dur_sec:
             return False
         with self.__multi_addrs_lock:
             multiaddrs = ipfs_api.get_peer_multiaddrs(self.__peer_id)
             if not ipfs_api.is_peer_connected(self.__peer_id):
                 return False
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
             if multiaddrs:
                 self.__last_seen = now
             else:
@@ -268,7 +268,7 @@ class PeerMonitor:
                     time.sleep(1)
 
             # make peers forget old multiaddresses
-            threshhold_time = datetime.utcnow() - timedelta(hours=self.forget_after_hrs)
+            threshhold_time = datetime.now(UTC) - timedelta(hours=self.forget_after_hrs)
             for peer in self.__peers:
                 peer.forget_old_entries(threshhold_time)
             # forget old peers
@@ -318,4 +318,5 @@ def time_to_string(_time: datetime):
 def string_to_time(string):
     if not string:
         return None
-    return datetime.strptime(string, TIME_FORMAT)
+    dt = datetime.strptime(string, TIME_FORMAT)
+    return dt.replace(tzinfo=UTC)

@@ -3,7 +3,7 @@ import os
 import threading
 import sys
 from termcolor import colored
-from datetime import datetime
+from datetime import datetime, UTC
 if True:
     sys.path.insert(0, "..")
     import ipfs_api
@@ -53,9 +53,9 @@ def test_pubsub():
     success = received_msg.decode() == "Hello there!"
 
     print(mark(success), "PubSub communication")
-    term_start = datetime.utcnow()
+    term_start = datetime.now(UTC)
     sub.terminate(True)
-    term_end = datetime.utcnow()
+    term_end = datetime.now(UTC)
     term_dur = (term_end - term_start).total_seconds()
     time.sleep(30)
     success = len(threading.enumerate()) == 1

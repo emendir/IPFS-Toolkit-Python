@@ -22,7 +22,7 @@ run the following commands to stop and remove the unterminated container:
 
 # import ipfs_datatransmission
 from threading import Thread
-from datetime import datetime
+from datetime import datetime, UTC
 from matplotlib import pyplot
 from random import randrange
 import time
@@ -73,15 +73,15 @@ def test_transmission_speed(buffer_size):
 
     try:
         # transmit data, counting how long it takes
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         ipfs_datatransmission.transmit_data(TEST_DATA, docker_peer.ipfs_id, 'speed-test')
-        finish_time = datetime.utcnow()
+        finish_time = datetime.now(UTC)
     except:
         print("Retrying transmission")
         # transmit data, counting how long it takes
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         ipfs_datatransmission.transmit_data(TEST_DATA, docker_peer.ipfs_id, 'speed-test')
-        finish_time = datetime.utcnow()
+        finish_time = datetime.now(UTC)
     return (finish_time-start_time).total_seconds()
 
 
