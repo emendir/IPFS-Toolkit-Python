@@ -1,6 +1,29 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "ipfs_toolkit"
+version = "0.5.33"
+description = "A set of tools  for working with IPFS in Python: a programmer-friendly API wrapper, P2P data-transmission machinery, and accelerated connections to known peers"
+readme = {file = "ReadMe.md", content-type = "text/markdown"}
+requires-python = ">=3.6"
+authors = [
+    {name = "emendir"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh#IPFS-Toolkit"
+Github = "https://github.com/emendir/IPFS-Toolkit-Python"
+# Source Code on IPNS = "https://ipfs.io/ipns/k2k4r8k7h909zdodsvbxe32sahpfdkqcqqn1npblummw4df6iv7dj5xh"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
