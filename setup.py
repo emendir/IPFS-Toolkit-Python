@@ -26,9 +26,11 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
+    package_dir={'': 'src'},
     py_modules=['ipfs_api', 'ipfs_datatransmission', 'ipfs_lns',
-                'ipfs_cli', 'ipfs_peers', 'IPFS_API', 'IPFS_LNS', 'IPFS_DataTransmission'],
-    packages=setuptools.find_packages(),
+                'ipfs_cli', 'ipfs_peers'],
+    packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
-    install_requires=[line.strip() for line in open("requirements.txt").readlines()],
+    install_requires=[line.strip()
+                      for line in open("requirements.txt").readlines()],
 )

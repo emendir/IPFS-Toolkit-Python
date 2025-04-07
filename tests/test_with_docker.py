@@ -47,7 +47,7 @@ else:
 
 
 if True:
-    sys.path.insert(0, os.path.join((os.path.dirname(__file__)),".."))
+    sys.path.insert(0, os.path.join((os.path.dirname(__file__)),"..","src"))
     if TEST_CLI:
         import ipfs_cli as ipfs_api
     else:

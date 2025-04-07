@@ -5,7 +5,7 @@ import sys
 from termcolor import colored
 from datetime import datetime, UTC
 if True:
-    sys.path.insert(0, "..")
+    sys.path.insert(0, os.path.join((os.path.dirname(__file__)),"..","src"))
     import ipfs_api
 
 DELETE_ALL_IPFS_DOCKERS = True
