@@ -30,6 +30,5 @@ setuptools.setup(
                 'ipfs_cli', 'ipfs_peers', 'IPFS_API', 'IPFS_LNS', 'IPFS_DataTransmission'],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
-    install_requires=['multiaddr', 'appdirs', 'idna',
-                      'httpcore', 'httpx', 'requests', 'varint', 'termcolor'],
+    install_requires=[line.strip() for line in open("requirements.txt").readlines()],
 )

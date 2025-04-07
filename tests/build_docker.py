@@ -5,7 +5,7 @@ from termcolor import colored
 def build_docker(verbose=True):
     print("Building docker image...")
     cwd = os.getcwd()
-    os.chdir("..")
+    os.chdir(os.path.join(os.path.dirname(__file__), ".."))
     args_str = ""
     if not verbose:
         args_str += " >/dev/null"
