@@ -39,6 +39,7 @@ class DockerContainer():
 
         self.ipfs_id = ""
         # wait till IPFS is running and till we can reach it
+        # print("IPFS-Docker: Waiting for IPFS to come online...")
         while not self.ipfs_id or not ipfs_api.find_peer(self.ipfs_id):
             time.sleep(1)
             self.ipfs_id = subprocess.run(
@@ -48,6 +49,8 @@ class DockerContainer():
                 text=True,
                 check=False
             ).stdout
+        # print("IPFS-Docker: IPFS is online!")
+        
 
     def run_python_code(self, python_code):
         command = f"docker exec {self.container_id} /usr/bin/python3 -c \"{python_code}\""

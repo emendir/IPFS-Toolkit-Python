@@ -2,7 +2,6 @@ from ipfs_toolkit_generics import BaseClient, BaseTcp
 class RemoteTcp(BaseTcp):
     def __init__(self, node:BaseClient):
         self._node = node
-        self._repo_path = self._node._repo_path
         self._http_client = self._node._http_client
         
     def open_listener(self,name: str, port: int):

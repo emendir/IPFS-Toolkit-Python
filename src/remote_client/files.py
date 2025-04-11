@@ -25,8 +25,7 @@ class RemoteFiles(BaseFiles):
 
     def __init__(self, node:BaseClient):
         self._node = node
-        self._repo_path = self._node._repo_path
-        self._http_client = self._node.http_client
+        self._http_client = self._node._http_client
         # LRUCache with a custom size-based eviction policy
         self.ipfs_content_cache = LRUCache(
             maxsize=MAX_CACHE_SIZE, getsizeof=_getsizeof_cache_entry)

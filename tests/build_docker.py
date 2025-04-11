@@ -1,5 +1,5 @@
 import os
-from termcolor import colored
+from termcolor import colored as coloured
 
 
 def build_docker(verbose=True):
@@ -12,8 +12,9 @@ def build_docker(verbose=True):
     exit_code = os.system("tests/build_docker.sh" + args_str)
     os.chdir(cwd)
     if exit_code == 1:
-        print(colored("Docker image udpate failed!", "red"))
+        print(coloured("Docker image udpate failed!", "red"))
         return False
+    print(coloured("Built docker container!", "green"))
 
 
 if __name__ == '__main__':

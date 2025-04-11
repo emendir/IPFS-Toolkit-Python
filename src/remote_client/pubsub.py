@@ -1,5 +1,5 @@
 import os
-from ipfs_toolkit_generics import BaseClient, BasePubSub
+from ipfs_toolkit_generics import BaseClient, BasePubSub, BasePubsubListener
 
 from io import BytesIO
 from threading import Thread
@@ -14,7 +14,6 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 class RemotePubSub(BasePubSub):
     def __init__(self, node:BaseClient):
         self._node = node
-        self._repo_path = self._node._repo_path
         self._http_client = self._node._http_client
     def publish(self, topic, data):
         """Publishes te specified data to the specified IPFS-PubSub topic.
@@ -65,7 +64,7 @@ class RemotePubSub(BasePubSub):
         """
         return self._http_client.pubsub.peers(topic=_encode_base64_url(topic.encode()))["Strings"]
 
-class PubsubListener():
+class PubsubListener(BasePubsubListener):
     """Listener object for PubSub subscriptions."""
     _terminate = False
     __listening = False

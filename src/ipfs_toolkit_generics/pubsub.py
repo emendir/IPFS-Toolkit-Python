@@ -11,3 +11,5 @@ class BasePubSub:
     @abstractmethod
     def peers(self, topic: str):
         pass
+class BasePubsubListener:
+    pass

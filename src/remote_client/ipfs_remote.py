@@ -3,6 +3,7 @@ from ipfs_toolkit_generics import BaseClient
 from .files import RemoteFiles
 from .pubsub import RemotePubSub
 from .tcp import RemoteTcp
+from .peers import RemotePeers
 import ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 import socket
@@ -15,6 +16,7 @@ class IpfsRemote(BaseClient):
         self._pubsub = RemotePubSub(self)
         self._tcp = RemoteTcp(self)
         self._files = RemoteFiles(self)
+        self._peers = RemotePeers(self)
     @property
     def tcp(self)->RemoteTcp:
         return self._tcp
@@ -24,6 +26,9 @@ class IpfsRemote(BaseClient):
     @property
     def files(self)->RemoteFiles:
         return self._files
+    @property
+    def peers (self)->RemotePeers:
+        return self._peers
     def _ipfs_api_url(self) -> ParseResult:
         url = self._http_client._client._base_url
         return urlparse(url)
@@ -33,7 +38,7 @@ class IpfsRemote(BaseClient):
         ip_address = socket.gethostbyname(self._ipfs_api_url().hostname)
         return ip_address
 
-    def my_id(self):
+    def peer_id(self):
         """Returns this IPFS node's peer ID.
         Returns:
             str: the peer ID of this node

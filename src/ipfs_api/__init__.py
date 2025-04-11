@@ -4,7 +4,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 from ipfs_toolkit_generics.peers import SwarmFiltersUpdateError
-from ipfs_toolkit_generics import PubsubListener
+from ipfs_toolkit_generics import BasePubsubListener
 import socket
 from urllib.parse import ParseResult
 from urllib.parse import urlparse
@@ -27,7 +27,8 @@ import ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from remote_client import IpfsRemote
 from remote_client.files import USE_IPFS_CONTENT_CACHE
-client = IpfsRemote()
+from remote_client.pubsub import PubsubListener
+client = IpfsRemote("127.0.0.1:5001")
 
 
 def publish(path: str):
@@ -91,7 +92,7 @@ def get_ipns_record_validity(ipns_key):
 
 
 def my_id():
-    return client.peer_id
+    return client.peer_id()
 
 
 def is_ipfs_running():
@@ -131,11 +132,11 @@ def find_providers(cid):
 
 
 def create_tcp_listening_connection(name: str, port: int):
-    return client.tcp.create_tcp_listening_connection(name, port)
+    return client.tcp.open_listener(name, port)
 
 
 def create_tcp_sending_connection(name: str, port, peerID):
-    client.tcp.create_tcp_sending_connection(name, port, peerID)
+    client.tcp.open_sender(name, port, peerID)
 
 
 def close_all_tcp_connections(listeners_only=False):
@@ -189,7 +190,8 @@ def get_swarm_filters():
 def wait_till_ipfs_is_running(timeout_sec=None):
     return client.wait_till_ipfs_is_running(timeout_sec=timeout_sec)
 
-
+def _ipfs_host_ip():
+    return client._ipfs_host_ip()
 def try_run_ipfs():
     """Tries to use the IPFS CLI to run the local IPFS daemon with PubSub,
     like manually executing `ipfs daemon --enable-pubsub-experiment`

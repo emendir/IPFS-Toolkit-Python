@@ -8,7 +8,6 @@ import tempfile
 class RemoteIpns(BaseIpns):
     def __init__(self, node: BaseClient):
         self._node = node
-        self._repo_path = self._node._repo_path
         self._self._http_client = self._node._http_client
 
     def create_ipns_record(self, name: str, type: str = "rsa", size: int = 2048):

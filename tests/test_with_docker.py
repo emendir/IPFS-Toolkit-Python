@@ -107,6 +107,7 @@ conv = None
 
 
 def test_find_peer():
+    print("Running test_find_peer...")
     success = False
     for i in range(5):
         success = ipfs_api.find_peer(docker_peer.ipfs_id)
