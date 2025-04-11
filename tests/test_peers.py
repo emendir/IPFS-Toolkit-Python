@@ -5,7 +5,7 @@ from datetime import datetime, UTC
 import sys
 import os
 from termcolor import colored
-from docker_container import DockerContainer
+from ipfs_toolkit_docker.docker_container import DockerContainer
 if True:
     sys.path.insert(0, os.path.join((os.path.dirname(__file__)),"..","src"))
     import ipfs_api

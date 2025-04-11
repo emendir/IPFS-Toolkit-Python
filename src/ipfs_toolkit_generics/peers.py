@@ -15,7 +15,7 @@ class BasePeers(ABC):
         pass
 
     @abstractmethod
-    def find_peer(self, peer_id: str):
+    def find(self, peer_id: str):
         pass
 
     @abstractmethod

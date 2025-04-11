@@ -47,6 +47,7 @@ def test_pubsub():
     def on_pubsub_received(data):
         nonlocal received_msg
         received_msg = data["data"]
+        # received_msg = data.data
     sub = ipfs_api.pubsub_subscribe("autotest", on_pubsub_received)
     ipfs_api.pubsub_publish("autotest", "Hello there!".encode())
     time.sleep(5)

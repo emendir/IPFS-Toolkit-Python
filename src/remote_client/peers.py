@@ -21,26 +21,8 @@ class RemotePeers(BasePeers):
             for peer in self._http_client.swarm.peers()["Peers"]
         ]
 
-    def get_peer_multiaddrs(self, peer_id):
-        """Returns the multiaddresses (without the IPFS CID) via which we can reach
-        the specified peer.
-        Append /p2p/PEER_ID to these multiaddress parts to turn them into complete
-        multiaddresses.
 
-        Args:
-            peer_id (str): the IPFS ID of the peer to lookup
-
-        Returns:
-            list(str): the multiaddresses (without the IPFS CID) via which we can
-            reach the given peer
-        """
-        try:
-            response = self._http_client.routing.findpeer(peer_id)
-            return response["Responses"][0]["Addrs"]
-        except:
-            return []
-
-    def connect_to_peer(self, multiaddr):
+    def connect(self, multiaddr):
         """Tries to connect to a peer given its multiaddress.
         Returns:
             bool: success
@@ -53,7 +35,7 @@ class RemotePeers(BasePeers):
         except:
             return False
 
-    def find_peer(self, peer_id: str):
+    def find(self, peer_id: str):
         """Try to connect to the specified IPFS node.
         Args:
             peer_id (str): the IPFS peer ID of the node to connect to

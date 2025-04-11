@@ -28,7 +28,7 @@ from random import randrange
 import time
 import sys
 from termcolor import colored
-from docker_container import DockerContainer
+from ipfs_toolkit_docker.docker_container import DockerContainer
 import os
 import threading
 

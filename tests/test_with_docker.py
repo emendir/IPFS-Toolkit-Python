@@ -23,7 +23,7 @@ run the following commands to stop and remove the unterminated container:
 import time
 import sys
 from termcolor import colored
-from docker_container import DockerContainer
+from ipfs_toolkit_docker.docker_container import DockerContainer
 import os
 import threading
 
@@ -66,7 +66,7 @@ def prepare():
             pass
 
     if REBUILD_DOCKER:
-        from build_docker import build_docker
+        from ipfs_toolkit_docker.build_docker import build_docker
         build_docker(verbose=False)
 
     docker_peer = DockerContainer("IPFS-Toolkit-Test")

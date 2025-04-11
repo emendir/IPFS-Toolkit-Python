@@ -26,10 +26,15 @@ import base64
 import ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from remote_client import IpfsRemote
-from remote_client.files import USE_IPFS_CONTENT_CACHE
-from remote_client.pubsub import PubsubListener
-client = IpfsRemote("127.0.0.1:5001")
-
+if False:
+    from remote_client.files import USE_IPFS_CONTENT_CACHE
+    from remote_client.pubsub import PubsubListener
+    client = IpfsRemote("127.0.0.1:5001")
+else:
+    from kubo_python import IpfsNode
+    USE_IPFS_CONTENT_CACHE = False
+    from kubo_python.ipfs_pubsub import IPFSSubscription as PubsubListener
+    client = IpfsNode()
 
 def publish(path: str):
     return client.files.publish(path)
@@ -92,7 +97,7 @@ def get_ipns_record_validity(ipns_key):
 
 
 def my_id():
-    return client.peer_id()
+    return client.peer_id
 
 
 def is_ipfs_running():
@@ -112,15 +117,15 @@ def list_peer_multiaddrs():
 
 
 def get_peer_multiaddrs(peer_id):
-    return client.peers.get_peer_multiaddrs(peer_id)
+    return client.peers.find(peer_id)
 
 
 def connect_to_peer(multiaddr):
-    return client.peers.connect_to_peer(multiaddr)
+    return client.peers.connect(multiaddr)
 
 
 def find_peer(peer_id: str):
-    return client.peers.find_peer(peer_id)
+    return client.peers.find(peer_id)
 
 
 def is_peer_connected(peer_id, ping_count=1):
@@ -168,7 +173,8 @@ def pubsub_publish(topic, data):
 
 
 def pubsub_subscribe(topic, eventhandler):
-    return client.pubsub.subscribe(topic, eventhandler)
+    return client.pubsub.subscribe(topic,eventhandler)
+
 
 
 def pubsub_peers(topic: str):
@@ -188,9 +194,13 @@ def get_swarm_filters():
 
 
 def wait_till_ipfs_is_running(timeout_sec=None):
-    return client.wait_till_ipfs_is_running(timeout_sec=timeout_sec)
+    if isinstance(client, IpfsRemote):
+        return client.wait_till_ipfs_is_running(timeout_sec=timeout_sec)
+    else:
+        return
 
 def _ipfs_host_ip():
+    return "127.0.0.1"
     return client._ipfs_host_ip()
 def try_run_ipfs():
     """Tries to use the IPFS CLI to run the local IPFS daemon with PubSub,
