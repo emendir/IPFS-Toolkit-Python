@@ -101,7 +101,7 @@ class Peer:
         for multiaddr, date in self.__multiaddrs:
             if self.__terminate:
                 return False
-            success = ipfs_api.connect_(
+            success = ipfs_api.connect_to_peer(
                 f"{multiaddr}/p2p/{self.__peer_id}")
             if success and ipfs_api.is_peer_connected(self.__peer_id):
                 self.register_contact_event(successive_register_ignore_dur_sec)

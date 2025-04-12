@@ -24,7 +24,7 @@ peer = None
 
 def prepare():
     if REBUILD_DOCKER:
-        from build_docker import build_docker
+        from ipfs_toolkit_docker.build_docker import build_docker
         build_docker(verbose=False)
     if DELETE_ALL_IPFS_DOCKERS:
         try:
@@ -34,6 +34,15 @@ def prepare():
     global docker_peer
     global peer_id
     docker_peer = DockerContainer("IPFS-Toolkit-Test")
+    python_code="""import ipfs_api
+ipfs_api.client.close()
+ipfs_api.client=ipfs_api.IpfsNode('/tmp/IpfsToolkitTest')
+from time import sleep
+sleep(300)
+""".replace("\n", ";")
+    command=f"docker exec {docker_peer.container_id} python -c \"{python_code}\"&"
+    os.system(command)
+    
     peer_id = docker_peer.ipfs_id
 
 
@@ -118,7 +127,7 @@ def test_load_peer_monitor():
     connection_attempt_interval_sec = 5
     monitor2 = PeerMonitor(monitor2_config_path, forget_after_hrs=forget_after_hrs,
                            connection_attempt_interval_sec=connection_attempt_interval_sec)
-    print(mark(monitor.peers()[0].serialise() ==
+    print(mark(monitor.peers() and monitor.peers()[0].serialise() ==
           monitor2.peers()[0].serialise()), "Load PeerMonitor")
 
 

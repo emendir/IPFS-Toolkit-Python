@@ -11,10 +11,13 @@ import os
 # import multiprocessing
 import base64
 from base64 import urlsafe_b64decode, urlsafe_b64encode
+
+
 class RemotePubSub(BasePubSub):
-    def __init__(self, node:BaseClient):
+    def __init__(self, node: BaseClient):
         self._node = node
         self._http_client = self._node._http_client
+
     def publish(self, topic, data):
         """Publishes te specified data to the specified IPFS-PubSub topic.
         Args:
@@ -38,8 +41,6 @@ class RemotePubSub(BasePubSub):
         else:
             self._http_client.pubsub.publish(topic, data)
 
-
-    
     def subscribe(self, topic, eventhandler):
         """
         Listens to the specified IPFS PubSub topic, calling the eventhandler
@@ -56,13 +57,13 @@ class RemotePubSub(BasePubSub):
         """
         return PubsubListener(self._node, topic, eventhandler)
 
-    
     def list_peers(self, topic: str):
         """Looks up what IPFS nodes we are connected to who are listening on the given topic.
         Returns:
             list: peers we are connected to on the specified pubsub topic
         """
         return self._http_client.pubsub.list_peers(topic=_encode_base64_url(topic.encode()))["Strings"]
+
 
 class PubsubListener(BasePubsubListener):
     """Listener object for PubSub subscriptions."""
@@ -142,16 +143,6 @@ class PubsubListener(BasePubsubListener):
             self.listener_thread.join()
 
 
-
-
-
-
-
-
-
-
-
-
 def _decode_base64_url(data: str):
     """Performs the URL-Safe multibase decoding required by some functions (since IFPS v0.11.0) on strings"""
     if isinstance(data, bytes):
@@ -163,7 +154,7 @@ def _decode_base64_url(data: str):
     return urlsafe_b64decode(_data)
 
 
-def _encode_base64_url(data: bytearray|bytes):
+def _encode_base64_url(data: bytearray | bytes):
     """Performs the URL-Safe multibase encoding required by some functions (since IFPS v0.11.0) on strings"""
     if isinstance(data, str):
         data = data.encode()
@@ -172,5 +163,3 @@ def _encode_base64_url(data: bytearray|bytes):
         data = data[:-1]
     data = b'u' + data
     return data
-
-
