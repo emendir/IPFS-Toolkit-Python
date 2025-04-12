@@ -55,7 +55,7 @@ if True:
     else:
         import ipfs_api
         import ipfs_api
-        ipfs_api.client.close()
+        ipfs_api.client.terminate()
         ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
     import ipfs_datatransmission
 
@@ -115,11 +115,12 @@ conv = None
 def test_find_peer():
     print("Running test_find_peer...")
     success = False
-    for i in range(5):
+    for i in range(10):
         success = ipfs_api.find_peer(docker_peer.ipfs_id)
         if success:
             print(success)
             break
+        sleep(1)
             
     print(mark(success), "ipfs_api.find_peer")
 

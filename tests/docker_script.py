@@ -1,7 +1,7 @@
 import time
 if True:
     import ipfs_api
-    ipfs_api.client.close()
+    ipfs_api.client.terminate()
     ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
     import ipfs_datatransmission
     ipfs_api.wait_till_ipfs_is_running()

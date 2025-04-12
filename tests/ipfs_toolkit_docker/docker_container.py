@@ -43,15 +43,20 @@ class DockerContainer():
         while not self.ipfs_id:
             time.sleep(1)
             result = subprocess.run(
-                f"docker exec -it {self.container_id} python3 -c 'import ipfs_api;ipfs_api.client.close();ipfs_api.client=ipfs_api.IpfsNode(\"/tmp/IpfsToolkitTest\");ipfs_id=ipfs_api.my_id();ipfs_api.client.close();print(ipfs_id)' 2>/dev/null",
+                f"docker exec -it {self.container_id} python3 -c 'import ipfs_api;ipfs_api.client.terminate();ipfs_api.client=ipfs_api.IpfsNode(\"/tmp/IpfsToolkitTest\");ipfs_id=ipfs_api.my_id();ipfs_api.client.terminate();print(\"PeerID:\", ipfs_id)' 2>/dev/null",
                 shell=True,
                 capture_output=True,
                 text=True,
                 check=False
             ).stdout
-            print(result)    
+            # print(result)    
             if result:
-                self.ipfs_id = result.split()[-1].strip()
+                match = [line for line in result.split("\n") if line.startswith("PeerID:")]
+                if match:
+                    # print(match)
+                    parts= match[-1].strip().split(" ")
+                    if len(parts) == 2:
+                        self.ipfs_id = parts[-1]
         print("IPFS-Docker: IPFS is online!")
         
 

@@ -35,7 +35,7 @@ def prepare():
     global peer_id
     docker_peer = DockerContainer("IPFS-Toolkit-Test")
     python_code="""import ipfs_api
-ipfs_api.client.close()
+ipfs_api.client.terminate()
 ipfs_api.client=ipfs_api.IpfsNode('/tmp/IpfsToolkitTest')
 from time import sleep
 sleep(300)
