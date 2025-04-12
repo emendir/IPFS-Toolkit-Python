@@ -4,14 +4,11 @@ from abc import ABC, abstractmethod
 class BasePeers(ABC):
 
     @abstractmethod
-    def list(self, ):
-        pass
-    @abstractmethod        
-    def get_peer_multiaddrs(self, peer_id):
+    def list_peers(self, ):
         pass
 
     @abstractmethod
-    def connect_to_peer(self, multiaddr):
+    def connect(self, multiaddr):
         pass
 
     @abstractmethod

@@ -9,7 +9,7 @@ class BasePubSub(ABC):
         pass
 
     @abstractmethod
-    def peers(self, topic: str):
+    def list_peers(self, topic: str):
         pass
 class BasePubsubListener:
     pass

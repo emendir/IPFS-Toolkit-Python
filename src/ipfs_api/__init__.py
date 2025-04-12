@@ -178,7 +178,7 @@ def pubsub_subscribe(topic, eventhandler):
 
 
 def pubsub_peers(topic: str):
-    return client.pubsub.peers(topic)
+    return client.pubsub.list_peers(topic)
 
 
 def add_swarm_filter(filter_multiaddr):
