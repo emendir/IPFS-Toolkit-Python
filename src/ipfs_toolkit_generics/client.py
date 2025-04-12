@@ -17,5 +17,5 @@ class BaseClient(ABC):
     def peer_id(self)->str:
         pass
     @abstractmethod
-    def get_multiaddrs(self)->set[str]:
+    def get_addrs(self)->set[str]:
         pass

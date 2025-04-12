@@ -51,10 +51,10 @@ class IpfsRemote(BaseClient):
         Returns:
             bool: whether or not the IPFS daemon is currently running
         """
-        return len(self.get_multiaddrs()) > 0
+        return len(self.get_addrs()) > 0
 
 
-    def get_multiaddrs(self):
+    def get_addrs(self):
         """Returns this IPFS node's peer ID.
         Returns:
             str: the peer ID of this node

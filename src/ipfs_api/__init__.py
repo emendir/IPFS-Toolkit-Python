@@ -45,7 +45,7 @@ def predict_cid(path: str):
 
 
 def download(cid, path="."):
-    return client.files.download(cid, path=path)
+    return client.files.download(cid, dest_path=path)
 
 
 def read(cid: str, nocache: bool = not USE_IPFS_CONTENT_CACHE):
@@ -65,7 +65,7 @@ def remove(cid: str):
 
 
 def pins(cids_only: bool = False, cache_age_s: int = None):
-    return client.files.pins(cids_only=cids_only, cache_age_s=cache_age_s)
+    return client.files.list_pins(cids_only=cids_only, cache_age_s=cache_age_s)
 
 
 def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
@@ -105,7 +105,7 @@ def is_ipfs_running():
 
 
 def my_multiaddrs():
-    return client.get_multiaddrs()
+    return client.get_addrs()
 
 
 def list_peers():
@@ -113,7 +113,7 @@ def list_peers():
 
 
 def list_peer_multiaddrs():
-    return client.get_multiaddrs()
+    return client.get_addrs()
 
 
 def get_peer_multiaddrs(peer_id):

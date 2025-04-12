@@ -11,7 +11,7 @@ class BaseFiles(ABC):
         pass
 
     @abstractmethod
-    def download(self, cid, path="."):
+    def download(self, cid, dest_path="."):
         pass
 
     @abstractmethod
@@ -31,5 +31,5 @@ class BaseFiles(ABC):
         pass
 
     @abstractmethod
-    def pins(self, cids_only: bool = False, cache_age_s: int = None):
+    def list_pins(self, cids_only: bool = False, cache_age_s: int = None):
         pass

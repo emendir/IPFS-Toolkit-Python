@@ -71,7 +71,7 @@ class RemoteFiles(BaseFiles):
         else:
             return result["Hash"]
 
-    def download(self, cid, path="."):
+    def download(self, cid, dest_path="."):
         """Get the specified IPFS content, saving it to a file.
         Args:
             cid (str): the IPFS content ID (cid) of the resource to get
