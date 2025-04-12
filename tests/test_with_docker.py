@@ -27,6 +27,8 @@ from ipfs_toolkit_docker.docker_container import DockerContainer
 import os
 import threading
 
+
+
 # time in seconds to wait for file to transmit before calling test a failure
 FILE_SEND_TIMEOUT = 20
 
@@ -52,6 +54,9 @@ if True:
         import ipfs_cli as ipfs_api
     else:
         import ipfs_api
+        import ipfs_api
+        ipfs_api.client.close()
+        ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
     import ipfs_datatransmission
 
 docker_peer = None
@@ -74,6 +79,7 @@ def prepare():
     # run test script on docker container
     command = "python3 /opt/IPFS-Toolkit/docker_script.py"
     os.system(f"docker exec {docker_peer.container_id} {command}&")
+    print(f"docker exec {docker_peer.container_id} {command}&")
     time.sleep(1)
 
 
@@ -99,7 +105,7 @@ def on_message_received(conversation, message):
     """Eventhandler for when the other peer says something in the conversation."""
     # print(f"Received message on {conversation.conv_name}:", message.decode(
     #     "utf-8"))
-    pass
+    print(message)
 
 
 file_progress = 0
@@ -112,8 +118,9 @@ def test_find_peer():
     for i in range(5):
         success = ipfs_api.find_peer(docker_peer.ipfs_id)
         if success:
+            print(success)
             break
-
+            
     print(mark(success), "ipfs_api.find_peer")
 
 
@@ -126,9 +133,8 @@ def progress_handler(progress):
 def test_create_conv():
     global conv
     # print("Setting up conversation...")
-    conv = ipfs_datatransmission.start_conversation(
-        "test-con", docker_peer.ipfs_id, "general_listener", on_message_received)
-
+    conv = ipfs_datatransmission.start_conversation("test-con", docker_peer.ipfs_id, "general_listener", on_message_received)
+    conv.say("Hello there!!".encode())
     success = conv != None
 
     print(mark(success), "ipfs_datatransmission.start_conversation")
@@ -179,11 +185,12 @@ def test_thread_cleanup():
     success = len(threading.enumerate()) == 1
     print(mark(success), "thread cleanup")
 
-
+from time import sleep
 def run_tests():
     print("\nStarting tests for IPFS-DataTransmission...")
     prepare()
     test_find_peer()
+    sleep(2)
     test_create_conv()
     test_send_file()
     test_terminate()

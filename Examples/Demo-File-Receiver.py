@@ -30,6 +30,8 @@ def on_data_received(peer_id, file, metadata):
 
 file_receiver = ipfs_datatransmission.listen_for_file_transmissions(
     "my_apps_filelistener", on_data_received, receiving_file_progress)
+import ipfs_api
+print(ipfs_api.client.tcp.list_tcp_connections())
 
 a = input("Press any key to exit...")
 # when you no longer need to listen for incoming files, clean up resources:

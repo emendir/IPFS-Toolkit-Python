@@ -1,7 +1,7 @@
 from ipfs_toolkit_generics import BaseIpns
 import ipfshttpclient2 as ipfshttpclient
 
-class BaseIpns:
+class BaseIpns(ABC):
 
     def create_ipns_record(self, name: str, type: str = "rsa", size: int = 2048):
         pass

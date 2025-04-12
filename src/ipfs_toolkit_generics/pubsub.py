@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-class BasePubSub:
+class BasePubSub(ABC):
     @abstractmethod
     def publish(self, topic, data):
         pass

@@ -25,6 +25,7 @@ def on_receive(data, peer_id):
 
 # starting to listen for incoming data transmissions
 listener = ipfs_datatransmission.listen_for_transmissions("test application", on_receive)
-
+import ipfs_api
+print(ipfs_api.client.tcp.list_tcp_connections())
 a = input("Press any key to exit...")
 listener.terminate()

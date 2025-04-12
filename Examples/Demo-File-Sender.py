@@ -13,10 +13,10 @@ import ipfs_api
 import os
 
 # insert your peer's IPFS ID here
-peer_id = ""
+peer_id = "QmWUL3pMRFUnEzTjbEfcqtVj82uumm2N3s3cnwEdVZtVwa"
 
 # insert the path of the file to transmit here
-filepath = ""
+filepath = "/mnt/Uverlin/Programming/IPFS-Toolkit/ReadMe.md"
 
 # you can send any metadata your like
 metadata = os.path.basename(filepath).encode()

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-class BaseTcp:
+class BaseTcp(ABC):
 
     @abstractmethod    
     def open_listener(self, name: str, port: int):

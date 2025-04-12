@@ -1,10 +1,11 @@
 import time
 if True:
     import ipfs_api
-    ipfs_api.client.close();
+    ipfs_api.client.close()
     ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
     import ipfs_datatransmission
     ipfs_api.wait_till_ipfs_is_running()
+    print(ipfs_api.my_id())
 """
 This script demonstrates, together with Demo-Conversation-Full-Starter,
 the advanced usage of the ipfs_datatransmission.Conversation class.
@@ -29,13 +30,10 @@ def new_conv_handler(conv_name, peerID):
             "utf-8"))
         if message.decode("utf-8") == "Bye!":
             conversation.terminate()
-
     def on_file_received(conversation, filepath, metadata):
         print("Received file", filepath)
-
     def progress_handler(progress):
         print(str(round(progress*100))+"%")
-
     conv = ipfs_datatransmission.Conversation()
     conv.join(conv_name, peerID, conv_name, on_message_received,
               on_file_received, file_progress_callback=progress_handler, dir="/opt")
@@ -55,6 +53,7 @@ def new_conv_handler(conv_name, peerID):
 conv_lis = ipfs_datatransmission.listen_for_conversations(
     "general_listener", new_conv_handler)
 print("Set up listener")
+print(ipfs_api.client.tcp.list_tcp_connections())
 # input()
 while True:
     # endless loop to stop program from terminating

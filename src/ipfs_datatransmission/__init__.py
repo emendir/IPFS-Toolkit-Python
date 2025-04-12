@@ -41,7 +41,7 @@ TRANSM_REQ_MAX_RETRIES = 3
 TRANSM_SEND_TIMEOUT_SEC = 10
 TRANSM_RECV_TIMEOUT_SEC = 10
 
-BUFFER_SIZE = 4096  # the communication buffer size
+BUFFER_SIZE = 2048  # the communication buffer size
 # the size of the chunks into which files should be split before transmission
 BLOCK_SIZE = 1048576    # 1MiB
 

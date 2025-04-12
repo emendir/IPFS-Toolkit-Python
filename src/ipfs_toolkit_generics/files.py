@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class BaseFiles:
+class BaseFiles(ABC):
     @abstractmethod
     def publish(self, path: str):
         pass

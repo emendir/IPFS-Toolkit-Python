@@ -6,7 +6,7 @@ if True:
 import test_peers
 import test_with_docker
 import test_without_docker
-from build_docker import build_docker
+from ipfs_toolkit_docker.build_docker import build_docker
 
 if __name__ == "__main__":
     build_docker(verbose=False)

@@ -16,7 +16,7 @@ if True:
     import ipfs_api
 
 # insert your peer's IPFS ID here
-peer_id = ""
+peer_id = "Qmdm3Q9DVZeBcPXqzrNBPqd7Bk8RPUg3bSPPzpe9H9UXet"
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
 ipfs_api.find_peer(peer_id)
