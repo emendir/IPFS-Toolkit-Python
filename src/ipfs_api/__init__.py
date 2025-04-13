@@ -141,7 +141,7 @@ def create_tcp_listening_connection(name: str, port: int):
 
 
 def create_tcp_sending_connection(name: str, port, peerID):
-    client.tcp.open_sender(name, port, peerID)
+    return client.tcp.open_sender(name, port, peerID)
 
 
 def close_all_tcp_connections(listeners_only=False):

@@ -37,7 +37,7 @@ class IpfsRemote(BaseClient):
     def _ipfs_host_ip(self) -> str:
         ip_address = socket.gethostbyname(self._ipfs_api_url().hostname)
         return ip_address
-
+    @property
     def peer_id(self):
         """Returns this IPFS node's peer ID.
         Returns:

@@ -9,7 +9,7 @@ class RemotePeers(BasePeers):
         self._node = node
         self._http_client = self._node._http_client
 
-    def list(self, ):
+    def list_peers(self, ):
         """Returns a list of the IPFS multiaddresses of the other nodes
         this node is connected to.
         Returns:

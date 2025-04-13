@@ -8,13 +8,9 @@ after reading the instruct ions in that script,
 and of course make sure IPFS is running on both computers first.
 """
 
-import threading
-import time
-if True:
-    import sys
-    import os
-    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-    import ipfs_datatransmission
+import ipfs_datatransmission
+import ipfs_api
+print("IPFS ID:", ipfs_api.client.peer_id)
 
 
 def on_receive(data, peer_id):
@@ -24,8 +20,7 @@ def on_receive(data, peer_id):
 
 
 # starting to listen for incoming data transmissions
-listener = ipfs_datatransmission.listen_for_transmissions("test application", on_receive)
-import ipfs_api
-print(ipfs_api.client.tcp.list_tcp_connections())
+listener = ipfs_datatransmission.listen_for_transmissions(
+    "test_application", on_receive)
 a = input("Press any key to exit...")
 listener.terminate()

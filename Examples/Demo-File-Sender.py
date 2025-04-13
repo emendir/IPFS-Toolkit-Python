@@ -8,26 +8,33 @@ paste the other's IPFS ID in the peer_id variable below and specify a file to up
 and then run this script.
 """
 
-import ipfs_datatransmission
+import sys
 import ipfs_api
 import os
-
+# ipfs_api.client = ipfs_api.IpfsNode()
+import ipfs_datatransmission
+print(ipfs_api.my_id())
 # insert your peer's IPFS ID here
-peer_id = "QmWUL3pMRFUnEzTjbEfcqtVj82uumm2N3s3cnwEdVZtVwa"
+peer_id = ""
 
 # insert the path of the file to transmit here
-filepath = "/mnt/Uverlin/Programming/IPFS-Toolkit/ReadMe.md"
+filepath = ""
 
 # you can send any metadata your like
 metadata = os.path.basename(filepath).encode()
 
 # making sure our IPFS node finds the receiver computer on the IP layer of the internet
-ipfs_api.find_peer(peer_id)
-
+found_peer = ipfs_api.find_peer(peer_id)
+print("Routing", found_peer)
+if not found_peer:
+    print("Couldn't find peer!")
+    sys.exit(1)
 
 # --OPTIONAL--
+
+
 def progress_update(progress):
-    print(f"sending file ... {round(progress*100)}%")
+    print(f"sending file ... {round(progress * 100)}%")
 # ------------
 
 

@@ -688,6 +688,9 @@ class Conversation:
             info = _split_by_255(data)
             if bytearray(info[0]) == bytearray("I'm listening".encode('utf-8')):
                 self.others_trsm_listener = info[1].decode('utf-8')
+                if PRINT_LOG_CONVERSATIONS:
+                    print(
+                        f"{self.conv_name}: other's proto is {self.others_trsm_listener}")
                 # self.hear_eventhandler = self._hear
                 self._conversation_started = True
                 if PRINT_LOG_CONVERSATIONS:
@@ -959,6 +962,8 @@ class ConversationListener:
         """Stop listening for conversation requests and clean up IPFS
         connection configurations.
         """
+        if PRINT_LOG_CONVERSATIONS:
+            print(f"Conv.terminate: closing liseter for {self._listener_name}")
         self._listener.terminate()
 
     def __del__(self):
@@ -1053,7 +1058,7 @@ def listen_for_file_transmissions(listener_name,
         ft = FileTransmissionReceiver()
         conv = Conversation()
         ft.setup(conv, eventhandler, progress_handler=progress_handler, dir=dir)
-        conv.join(conv_name,
+        conv.join(ipfs_api.client.tcp.generate_name(conv_name),
                   peer_id,
                   conv_name,
                   ft.on_data_received,
