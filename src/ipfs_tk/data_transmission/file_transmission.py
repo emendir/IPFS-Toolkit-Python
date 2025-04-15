@@ -1,0 +1,383 @@
+import shutil
+from threading import Thread
+import traceback
+import os
+# import inspect
+from inspect import signature
+try:
+    import ipfs_api
+except:
+    import IPFS_API_Remote_Client as ipfs_api
+from .config import (
+    PRINT_LOG,
+    PRINT_LOG_FILES,
+    TRANSM_REQ_MAX_RETRIES,
+    TRANSM_SEND_TIMEOUT_SEC,
+    BLOCK_SIZE,
+)
+
+from .conversations import (
+    Conversation,
+    ConversationListener,
+)
+
+from .errors import (
+    InvalidPeer,
+    UnreadableReply,
+)
+def transmit_file(filepath,
+                  peer_id,
+                  others_req_listener,
+                  metadata=bytearray(),
+                  progress_handler=None,
+                  encryption_callbacks=None,
+                  block_size=BLOCK_SIZE,
+                  transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+                  transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
+                  ):
+    """Transmits the provided file to the specified peer.
+    Args:
+        filepath (str): the path of the file to transmit
+        peer_id (str): the IPFS peer ID of the node to communicate with
+        others_req_listener (str): the name of the other peer's FileListener
+        metadata (bytearray): optional metadata to send to the receiver
+        progress_handler (function): eventhandler to send progress (fraction
+                        twix 0-1) every for sending/receiving files
+                        Parameters: (progress:float)
+        encryption_callbacks (tuple): encryption and decryption functions
+                        Tuple Contents: two functions which each take a
+                        a bytearray as a parameter and return a bytearray
+                        (
+                            function(plaintext:bytearray):bytearray,
+                            function(cipher:bytearray):bytearray
+                        )
+        block_size (int): the FileTransmitter sends the file in chunks. This is
+                        the size of those chunks in bytes (default 1MiB).
+                        Increasing this speeds up transmission but reduces the
+                        frequency of progress update messages.
+        transm_send_timeout_sec (int): (low level) data transmission -
+                        connection attempt timeout, multiplied with the maximum
+                        number of retries will result in the total time
+                        required for a failed attempt
+        transm_req_max_retries (int): (low level) data transmission -
+                        how often the transmission should be reattempted when
+                        the timeout is reached
+    Returns:
+        FileTransmitter: object which manages the filetransmission
+    """
+    return FileTransmitter(
+        filepath,
+        peer_id,
+        others_req_listener,
+        metadata=metadata,
+        progress_handler=progress_handler,
+        encryption_callbacks=encryption_callbacks,
+        block_size=block_size,
+        transm_send_timeout_sec=transm_send_timeout_sec,
+        transm_req_max_retries=transm_req_max_retries
+    )
+
+
+def listen_for_file_transmissions(listener_name,
+                                  eventhandler,
+                                  progress_handler=None,
+                                  dir=".",
+                                  encryption_callbacks=None):
+    """Listens to incoming file transmission requests.
+    Whenever a file is received, the specified eventhandler is called.
+    Call `.terminate()` on the returned ConversationListener object when you
+    no longer need it to clean up IPFS connection configurations.
+    Args:
+        listener_name (str): name of this listener object, used by file sender
+                            to adress this listener
+        eventhandler (function): function to be called when a file is received
+                            Parameters: (peer_id:str, path:str, metadata:bytes)
+        progress_handler (function): function to be called whenever a block of
+                            data is received during a file transmission
+                            progress is a value between 0 and 1
+                            Parameters:
+                                (peer_id:str, filesize:int, progress:float)
+        dir (str): the directory in which received files should be written
+        encryption_callbacks (tuple): encryption and decryption functions
+                            Tuple Contents: two functions which each take a
+                            a bytearray as a parameter and return a bytearray
+                            (
+                                function(plaintext:bytearray):bytearray,
+                                function(cipher:bytearray):bytearray
+                            )
+    Returns:
+        ConversationListener: an object which listens for incoming file
+                            requests
+    """
+    def request_handler(conv_name, peer_id):
+        ft = FileTransmissionReceiver()
+        conv = Conversation()
+        ft.setup(conv, eventhandler, progress_handler=progress_handler, dir=dir)
+        conv.join(ipfs_api.client.tcp.generate_name(conv_name),
+                  peer_id,
+                  conv_name,
+                  ft.on_data_received,
+                  encryption_callbacks=encryption_callbacks
+                  )
+
+    return ConversationListener(listener_name, request_handler)
+
+
+class FileTransmitter:
+    """Object for managing file transmission (sending only, not receiving)
+    """
+    status = "not started"  # "transmitting" "finished" "aborted"
+
+    def __init__(self,
+                 filepath,
+                 peer_id,
+                 others_req_listener,
+                 metadata=bytearray(),
+                 progress_handler=None,
+                 encryption_callbacks=None,
+                 block_size=BLOCK_SIZE,
+                 transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+                 transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
+                 ):
+        """
+        Args:
+            filepath (str): the path of the file to transmit
+            peer_id (str): the IPFS peer ID of the node to communicate with
+            others_req_listener (str): the name of the other peer's FileListener
+            metadata (bytearray): optional metadata to send to the receiver
+            progress_handler (function): eventhandler to send progress (fraction
+                            twix 0-1) every for sending/receiving files
+                            Parameters: (progress:float)
+            encryption_callbacks (tuple): encryption and decryption functions
+                            Tuple Contents: two functions which each take a
+                            a bytearray as a parameter and return a bytearray
+                            (
+                                function(plaintext:bytearray):bytearray,
+                                function(cipher:bytearray):bytearray
+                            )
+            block_size (int): the FileTransmitter sends the file in chunks. This is
+                            the size of those chunks in bytes (default 1MiB).
+                            Increasing this speeds up transmission but reduces the
+                            frequency of progress update messages.
+            transm_send_timeout_sec (int): (low level) data transmission -
+                            connection attempt timeout, multiplied with the maximum
+                            number of retries will result in the total time
+                            required for a failed attempt
+            transm_req_max_retries (int): (low level) data transmission -
+                            how often the transmission should be reattempted when
+                            the timeout is reached
+        """
+        if peer_id == ipfs_api.my_id():
+            raise InvalidPeer(
+                message="You cannot use your own IPFS peer ID as the recipient.")
+        self.filename = os.path.basename(filepath)
+        self.filesize = os.path.getsize(filepath)
+        self.filepath = filepath
+        self.peer_id = peer_id
+        self.others_req_listener = others_req_listener
+        self.metadata = metadata
+        self.progress_handler = progress_handler
+        self.encryption_callbacks = encryption_callbacks
+        self.block_size = block_size
+        self._transm_send_timeout_sec = transm_send_timeout_sec
+        self._transm_req_max_retries = transm_req_max_retries
+
+        self.conv_name = self.filename + "_conv"
+        self.conversation = Conversation()
+        self.conversation.start(
+            self.conv_name,
+            self.peer_id,
+            self.others_req_listener,
+            data_received_eventhandler=self._hear,
+            encryption_callbacks=self.encryption_callbacks,
+            transm_send_timeout_sec=self._transm_send_timeout_sec,
+            transm_req_max_retries=self._transm_req_max_retries
+        )
+        self.conversation.say(
+            _to_b255_no_0s(self.filesize) + bytearray([255])
+            + bytearray(self.filename.encode()) + bytearray([255]) + self.metadata)
+        if PRINT_LOG_FILES:
+            print("FileTransmission: " + self.filename
+                  + ": Sent transmission request")
+        self._call_progress_callback(0)
+
+    def _start_transmission(self):
+        if PRINT_LOG_FILES:
+            print("FileTransmission: " + self.filename
+                  + ": starting transmmission")
+        self.status = "transmitting"
+        position = 0
+        with open(self.filepath, "rb") as reader:
+            while position < self.filesize:
+                blocksize = self.filesize - position
+                if blocksize > self.block_size:
+                    blocksize = self.block_size
+                data = reader.read(blocksize)
+                position += len(data)
+                self._call_progress_callback(position / self.filesize,)
+
+                if PRINT_LOG_FILES:
+                    print("FileTransmission: " + self.filename
+                          + ": sending data " + str(position) + "/" + str(self.filesize))
+                self.conversation.say(data)
+        if PRINT_LOG_FILES:
+            print("FileTransmission: " + self.filename
+                  + ": finished file transmission")
+        self.status = "finished"
+        self.conversation.close()
+
+    def _call_progress_callback(self, progress):
+        if self.progress_handler:
+            # run callback on a new thread, specifying only as many parameters as the callback wants
+            Thread(target=call_progress_callback,
+                   args=(self.progress_handler,
+                         self.peer_id,
+                         self.filename,
+                         self.filesize,
+                         progress),
+                   name='Conversation.progress_handler'
+                   ).start()
+
+    def _hear(self, conv, data):
+        if PRINT_LOG_FILES:
+            print("FileTransmission: " + self.filename
+                  + ": received response from receiver")
+        info = _split_by_255(data)
+        if info[0].decode('utf-8') == "ready":
+            self._start_transmission()
+
+    def __del__(self):
+        if self.conversation:
+            self.conversation.close()
+
+
+class FileTransmissionReceiver:
+    """Object for receiving a file transmission (after a file transmission
+    request hast been received and accepted)
+    """
+    transmission_started = False
+    writtenbytes = 0
+    status = "not started"  # "receiving" "finished" "aborted"
+
+    def setup(self, conversation, eventhandler, progress_handler=None, dir="."):
+        """Configure this object to make it work.
+        Args:
+            conversation (Conversation): the Conversation object with which to
+                        communicate with the transmitter
+            eventhandler (function): function to be called when a file is
+                        received
+                        Parameters: (peer_id:str, path:str, metadata:bytes)
+            progress_handler (function): function to be called whenever a block
+                        of data is received during file transmission.
+                        progress is a value between 0 and 1
+                        Parameters: (peer_id:str, filesize:int, progress:float)
+
+        """
+        if PRINT_LOG_FILES:
+            print("FileReception: "
+                  + ": Preparing to receive file")
+
+        self.eventhandler = eventhandler
+        self.progress_handler = progress_handler
+        self.conv = conversation
+        self.dir = dir
+        if PRINT_LOG_FILES:
+            print("FileReception: "
+                  + ": responded to sender, ready to receive")
+
+        self.status = "receiving"
+
+    def on_data_received(self, conv, data):
+        if not self.transmission_started:
+            try:
+                filesize, filename, metadata = _split_by_255(data)
+                self.filesize = _from_b255_no_0s(filesize)
+                self.filename = filename.decode('utf-8')
+                self.metadata = metadata
+                self.writer = open(os.path.join(
+                    self.dir, self.filename + ".PART"), "wb")
+                self.transmission_started = True
+                self.conv.say("ready".encode())
+                self.writtenbytes = 0
+                if PRINT_LOG_FILES:
+                    print("FileReception: " + self.filename
+                          + ": ready to receive file")
+                if self.progress_handler:
+                    # run callback on a new thread, specifying only as many parameters as the callback wants
+                    Thread(target=call_progress_callback,
+                           args=(self.progress_handler,
+                                 self.conv.peer_id,
+                                 self.filename,
+                                 self.filesize,
+                                 0
+                                 ),
+                           name='FileTransmissionReceiver.progress'
+                           ).start()
+
+                if (self.filesize == 0):
+                    self.finish()
+            except:
+                if PRINT_LOG_FILES:
+                    print("Received unreadable data on FileTransmissionListener ")
+                    traceback.print_exc()
+
+        else:
+            self.writer.write(data)
+            self.writtenbytes += len(data)
+
+            if self.progress_handler:
+                # run callback on a new thread, specifying only as many parameters as the callback wants
+                Thread(target=call_progress_callback,
+                       args=(self.progress_handler,
+                             self.conv.peer_id,
+                             self.filename,
+                             self.filesize,
+                             self.writtenbytes / self.filesize
+                             ),
+                       name='FileTransmissionReceiver.progress'
+                       ).start()
+
+            if PRINT_LOG_FILES:
+                print("FileTransmission: " + self.filename
+                      + ": received data " + str(self.writtenbytes) + "/" + str(self.filesize))
+
+            if self.writtenbytes == self.filesize:
+                self.finish()
+            elif self.writtenbytes > self.filesize:
+                self.writer.close()
+                raise UnreadableReply(
+                    "Something weird happened, filesize is larger than expected.")
+
+    def finish(self):
+        self.writer.close()
+        shutil.move(os.path.join(self.dir, self.filename + ".PART"),
+                    os.path.join(self.dir, self.filename))
+        if PRINT_LOG:
+            print("FileReception: " + self.filename
+                  + ": Transmission finished.")
+        self.status = "finished"
+        self.conv.close()
+        if self.eventhandler:
+            filepath = os.path.abspath(os.path.join(
+                self.dir, self.filename))
+            if signature(self.eventhandler).parameters["metadata"]:
+                self.eventhandler(self.conv.peer_id, filepath, self.metadata)
+            else:
+                self.eventhandler(self.conv.peer_id, filepath)
+
+    def terminate(self):
+        self.conv.terminate()
+
+
+def call_progress_callback(callback, peer_id, filename, filesize, progress):
+    """Calls the specified callback function with part of all of the rest of
+    the parameters, depending on how many parameters the callback takes.
+    The callback can take between 1 and 4 parameters"""
+    if len(signature(callback).parameters) == 1:
+        callback(progress)
+    elif len(signature(callback).parameters) == 2:
+        callback(filename, progress)
+    elif len(signature(callback).parameters) == 3:
+        callback(filename, filesize, progress)
+    elif len(signature(callback).parameters) == 4:
+        callback(peer_id, filename, filesize, progress)
