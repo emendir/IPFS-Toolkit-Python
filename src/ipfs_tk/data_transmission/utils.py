@@ -191,7 +191,7 @@ def _create_listening_connection(ipfs_client: BaseClientInterface, protocol, por
     return port
 
 
-def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id: Optional[str]=None, name: Optional[str]=None, port: None=None):
+def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id: str|None=None, name: str|None=None, port: None=None):
     try:
         ipfs_client.tcp.close_sender(
             peer_id=peer_id, name=name, port=port)
@@ -199,7 +199,7 @@ def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id: Optiona
         raise IPFS_Error(str(e))
 
 
-def _close_listening_connection(ipfs_client: BaseClientInterface, name: Optional[str]=None, port: Optional[int]=None):
+def _close_listening_connection(ipfs_client: BaseClientInterface, name: str|None=None, port: int|None=None):
     try:
         ipfs_client.tcp.close_listener(
             name=name, port=port)

@@ -84,7 +84,8 @@ def transmit_data(
                 sock.close()
                 _close_sending_connection(ipfs_client, peer_id, req_lis_name)
                 raise CommunicationTimeout(
-                    "Received no response from peer while sending transmission request.")
+                    "Received no response from peer while sending transmission request."
+                )
 
             # reply = _tcp_recv_all(sock, timeout_sec)
             # _tcp_recv_all

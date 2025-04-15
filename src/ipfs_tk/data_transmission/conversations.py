@@ -29,7 +29,7 @@ from .file_transmission import (
     listen_for_file_transmissions,     transmit_file,
     call_progress_callback
 )
-from typing import Callable, Optional
+from typing import Callable
 
 
 def start_conversation(
@@ -37,13 +37,13 @@ def start_conversation(
         conv_name: str,
         peer_id: str,
         others_req_listener: str,
-        data_received_eventhandler: Optional[Callable]=None,
-        file_eventhandler: None=None,
-        file_progress_callback: None=None,
-        encryption_callbacks: None=None,
-        timeout_sec: int=TRANSM_SEND_TIMEOUT_SEC,
-        max_retries: int=TRANSM_REQ_MAX_RETRIES,
-        dir: str="."):
+        data_received_eventhandler: Callable | None = None,
+        file_eventhandler: None = None,
+        file_progress_callback: None = None,
+        encryption_callbacks: None = None,
+        timeout_sec: int = TRANSM_SEND_TIMEOUT_SEC,
+        max_retries: int = TRANSM_REQ_MAX_RETRIES,
+        dir: str = "."):
     """Starts a conversation object with which 2 peers can repetatively make
     data transmissions to each other asynchronously and bidirectionally.
     Sends a conversation request to the other peer's conversation request
@@ -203,13 +203,13 @@ class Conversation(BaseConversation):
               conv_name: str,
               peer_id: str,
               others_req_listener: str,
-              data_received_eventhandler: Optional[Callable]=None,
-              file_eventhandler: None=None,
-              file_progress_callback: None=None,
-              encryption_callbacks: None=None,
-              transm_send_timeout_sec: int=BaseConversation._transm_send_timeout_sec,
-              transm_req_max_retries: int=BaseConversation._transm_req_max_retries,
-              dir: str="."):
+              data_received_eventhandler: Callable | None = None,
+              file_eventhandler: None = None,
+              file_progress_callback: None = None,
+              encryption_callbacks: None = None,
+              transm_send_timeout_sec: int = BaseConversation._transm_send_timeout_sec,
+              transm_req_max_retries: int = BaseConversation._transm_req_max_retries,
+              dir: str = "."):
         """Initialises this conversation object so that it can be used.
         Code execution blocks until the other peer joins the conversation or
         timeout is reached.

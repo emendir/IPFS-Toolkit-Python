@@ -28,7 +28,7 @@ from .errors import (
     ConvListenTimeout,
 )
 from ipfs_tk_generics.client_interface import BaseClientInterface
-from typing import Callable, Optional
+from typing import Callable
 
 
 class BaseConversation():
@@ -58,11 +58,11 @@ class BaseConversation():
               conv_name: str,
               peer_id: str,
               others_req_listener: str,
-              data_received_eventhandler: Optional[Callable]=None,
-              encryption_callbacks: None=None,
-              transm_send_timeout_sec: int=_transm_send_timeout_sec,
-              transm_req_max_retries: int=_transm_req_max_retries,
-              dir: str="."):
+              data_received_eventhandler: Callable | None = None,
+              encryption_callbacks: None = None,
+              transm_send_timeout_sec: int = _transm_send_timeout_sec,
+              transm_req_max_retries: int = _transm_req_max_retries,
+              dir: str = "."):
         """Initialises this conversation object so that it can be used.
         Code execution blocks until the other peer joins the conversation or
         timeout is reached.
@@ -191,16 +191,16 @@ class BaseConversation():
         self._transm_req_max_retries = transm_req_max_retries
         self._listener = listen_for_transmissions(
             self.ipfs_client,
-                                                  conv_name,
-                                                  self._hear,
-                                                  )
+            conv_name,
+            self._hear,
+        )
 
         self.others_trsm_listener = others_trsm_listener
         self.peer_id = peer_id
         data = bytearray("I'm listening".encode(
             'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
         self._conversation_started = True
-        transmit_data(self.ipfs_client,data, peer_id, others_trsm_listener)
+        transmit_data(self.ipfs_client, data, peer_id, others_trsm_listener)
         self._last_coms_time = datetime.now(UTC)
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + ": Joined conversation "

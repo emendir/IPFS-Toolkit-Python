@@ -18,16 +18,13 @@ from .config import (
     BLOCK_SIZE,
 )
 
-from .conversation_basics import (
-    ConversationListener,
-)
 from ipfs_tk_generics.client_interface import BaseClientInterface
 from .errors import (
     InvalidPeer,
     UnreadableReply
 )
 from data_transmission.conversation_basics import ConversationListener
-from typing import Callable, Optional
+from typing import Callable
 
 
 def transmit_file(
@@ -89,9 +86,9 @@ def transmit_file(
 def listen_for_file_transmissions(ipfs_client: BaseClientInterface,
                                   listener_name: str,
                                   eventhandler: Callable,
-                                  progress_handler: Optional[Callable]=None,
-                                  dir: str=".",
-                                  encryption_callbacks: None=None) -> ConversationListener:
+                                  progress_handler: Callable | None = None,
+                                  dir: str = ".",
+                                  encryption_callbacks: None = None) -> ConversationListener:
     """Listens to incoming file transmission requests.
     Whenever a file is received, the specified eventhandler is called.
     Call `.terminate()` on the returned ConversationListener object when you
@@ -121,7 +118,8 @@ def listen_for_file_transmissions(ipfs_client: BaseClientInterface,
     def request_handler(conv_name, peer_id):
         ft = FileTransmissionReceiver()
         conv = BaseConversation(ipfs_client)
-        ft.setup(ipfs_client,conv, eventhandler, progress_handler=progress_handler, dir=dir)
+        ft.setup(ipfs_client, conv, eventhandler,
+                 progress_handler=progress_handler, dir=dir)
         conv.join(ipfs_client.tcp.generate_name(conv_name),
                   peer_id,
                   conv_name,
@@ -144,12 +142,12 @@ class FileTransmitter:
                  filepath: str,
                  peer_id: str,
                  others_req_listener: str,
-                 metadata: bytes=bytearray(),
-                 progress_handler: Optional[Callable]=None,
-                 encryption_callbacks: None=None,
-                 block_size: int=BLOCK_SIZE,
-                 transm_send_timeout_sec: int=TRANSM_SEND_TIMEOUT_SEC,
-                 transm_req_max_retries: int=TRANSM_REQ_MAX_RETRIES
+                 metadata: bytes = bytearray(),
+                 progress_handler: Callable | None = None,
+                 encryption_callbacks: None = None,
+                 block_size: int = BLOCK_SIZE,
+                 transm_send_timeout_sec: int = TRANSM_SEND_TIMEOUT_SEC,
+                 transm_req_max_retries: int = TRANSM_REQ_MAX_RETRIES
                  ):
         """
         Args:
@@ -207,8 +205,11 @@ class FileTransmitter:
             transm_req_max_retries=self._transm_req_max_retries
         )
         self.conversation.say(
-            _to_b255_no_0s(self.filesize) + bytearray([255])
-            + bytearray(self.filename.encode()) + bytearray([255]) + self.metadata)
+            _to_b255_no_0s(self.filesize)
+            + bytearray([255])
+            + bytearray(self.filename.encode())
+            + bytearray([255]) + self.metadata
+        )
         if PRINT_LOG_FILES:
             print("FileTransmission: " + self.filename
                   + ": Sent transmission request")
