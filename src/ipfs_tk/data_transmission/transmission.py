@@ -31,6 +31,7 @@ from .utils import (
     _close_sending_connection,
     _close_listening_connection,
 )
+from typing import Callable
 
 
 def transmit_data(
@@ -134,7 +135,7 @@ def transmit_data(
     # _close_sending_connection(peer_id, their_trsm_port)
 
 
-def listen_for_transmissions(ipfs_client: BaseClientInterface, listener_name, eventhandler):
+def listen_for_transmissions(ipfs_client: BaseClientInterface, listener_name: str, eventhandler: Callable) -> "TransmissionListener":
     """
     Listens for incoming transmission requests (senders requesting to transmit
     data to us) and sets up the machinery needed to receive those transmissions.
@@ -165,7 +166,7 @@ class TransmissionListener:
     # This function itself is called to process the transmission request buffer sent by the transmission sender.
     _terminate = False
 
-    def __init__(self, ipfs_client: BaseClientInterface, listener_name, eventhandler):
+    def __init__(self, ipfs_client: BaseClientInterface, listener_name: str, eventhandler: Callable):
         """
         Args:
             listener_name (str): the name of this TransmissionListener (chosen by

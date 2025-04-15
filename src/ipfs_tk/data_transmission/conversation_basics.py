@@ -28,6 +28,7 @@ from .errors import (
     ConvListenTimeout,
 )
 from ipfs_tk_generics.client_interface import BaseClientInterface
+from typing import Callable, Optional
 
 
 class BaseConversation():
@@ -54,14 +55,14 @@ class BaseConversation():
         self.message_queue: Queue[bytes] = Queue()
 
     def start(self,
-              conv_name,
-              peer_id,
-              others_req_listener,
-              data_received_eventhandler=None,
-              encryption_callbacks=None,
-              transm_send_timeout_sec=_transm_send_timeout_sec,
-              transm_req_max_retries=_transm_req_max_retries,
-              dir="."):
+              conv_name: str,
+              peer_id: str,
+              others_req_listener: str,
+              data_received_eventhandler: Optional[Callable]=None,
+              encryption_callbacks: None=None,
+              transm_send_timeout_sec: int=_transm_send_timeout_sec,
+              transm_req_max_retries: int=_transm_req_max_retries,
+              dir: str="."):
         """Initialises this conversation object so that it can be used.
         Code execution blocks until the other peer joins the conversation or
         timeout is reached.
@@ -342,7 +343,7 @@ class ConversationListener:
 
     """
 
-    def __init__(self, ipfs_client: BaseClientInterface, listener_name, eventhandler):
+    def __init__(self, ipfs_client: BaseClientInterface, listener_name: str, eventhandler: Callable):
         self.ipfs_client = ipfs_client
         self._listener_name = listener_name
         if (PRINT_LOG_CONVERSATIONS):

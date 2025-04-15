@@ -10,9 +10,10 @@ from .config import (
 from .errors import (
     IPFS_Error,
 )
+from typing import Optional, Union
 
 
-def __add_integritybyte_to_buffer(buffer):
+def __add_integritybyte_to_buffer(buffer: bytes) -> bytearray:
     # Adding an integrity byte that equals the sum of all the bytes in the buffer modulus 256
     # to be able to detect data corruption:
     sum = 0
@@ -25,7 +26,7 @@ def __add_integritybyte_to_buffer(buffer):
 
 
 # turns a base 10 integer into a base 255 integer in  the form of an array of bytes where each byte represents a digit, and where no byte has the value 0
-def _to_b255_no_0s(number):
+def _to_b255_no_0s(number: int) -> bytearray:
     array = bytearray([])
     while (number > 0):
         # modulus + 1 in order to get a range of possible values from 1-256 instead of 0-255
@@ -63,7 +64,7 @@ def _split_by_255(bytes):
     return result
 
 
-def _tcp_send_all(sock, data):
+def _tcp_send_all(sock: socket.socket, data: Union[bytearray, bytes]):
     length = len(data)
     sock.send(_to_b255_no_0s(length) + bytearray([0]))
     sock.send(data)
@@ -116,7 +117,7 @@ def _tcp_recv_all(sock, timeout=5):
     return total_data
 
 
-def _tcp_recv_buffer_timeout(sock, buffer_size=BUFFER_SIZE, timeout=5):
+def _tcp_recv_buffer_timeout(sock: socket.socket, buffer_size: int=BUFFER_SIZE, timeout: int=5) -> bytes:
     # make socket non blocking
     # sock.setblocking(0)
     sock.settimeout(timeout)
@@ -139,7 +140,7 @@ def _tcp_recv_buffer_timeout(sock, buffer_size=BUFFER_SIZE, timeout=5):
 # ----------IPFS Utilities-------------------------------------------
 
 
-def _create_sending_connection(ipfs_client: BaseClientInterface, peer_id: str, protocol: str, port=None):
+def _create_sending_connection(ipfs_client: BaseClientInterface, peer_id: str, protocol: str, port: None=None) -> socket.socket:
     # _close_sending_connection(
     #     peer_id=peer_id, name=protocol)
     if port:
@@ -190,7 +191,7 @@ def _create_listening_connection(ipfs_client: BaseClientInterface, protocol, por
     return port
 
 
-def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id=None, name=None, port=None):
+def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id: Optional[str]=None, name: Optional[str]=None, port: None=None):
     try:
         ipfs_client.tcp.close_sender(
             peer_id=peer_id, name=name, port=port)
@@ -198,7 +199,7 @@ def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id=None, na
         raise IPFS_Error(str(e))
 
 
-def _close_listening_connection(ipfs_client: BaseClientInterface, name=None, port=None):
+def _close_listening_connection(ipfs_client: BaseClientInterface, name: Optional[str]=None, port: Optional[int]=None):
     try:
         ipfs_client.tcp.close_listener(
             name=name, port=port)

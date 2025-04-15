@@ -26,6 +26,8 @@ from .errors import (
     InvalidPeer,
     UnreadableReply
 )
+from data_transmission.conversation_basics import ConversationListener
+from typing import Callable, Optional
 
 
 def transmit_file(
@@ -85,11 +87,11 @@ def transmit_file(
 
 
 def listen_for_file_transmissions(ipfs_client: BaseClientInterface,
-                                  listener_name,
-                                  eventhandler,
-                                  progress_handler=None,
-                                  dir=".",
-                                  encryption_callbacks=None):
+                                  listener_name: str,
+                                  eventhandler: Callable,
+                                  progress_handler: Optional[Callable]=None,
+                                  dir: str=".",
+                                  encryption_callbacks: None=None) -> ConversationListener:
     """Listens to incoming file transmission requests.
     Whenever a file is received, the specified eventhandler is called.
     Call `.terminate()` on the returned ConversationListener object when you
@@ -139,15 +141,15 @@ class FileTransmitter:
     def __init__(self,
                  ipfs_client: BaseClientInterface,
 
-                 filepath,
-                 peer_id,
-                 others_req_listener,
-                 metadata=bytearray(),
-                 progress_handler=None,
-                 encryption_callbacks=None,
-                 block_size=BLOCK_SIZE,
-                 transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-                 transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
+                 filepath: str,
+                 peer_id: str,
+                 others_req_listener: str,
+                 metadata: bytes=bytearray(),
+                 progress_handler: Optional[Callable]=None,
+                 encryption_callbacks: None=None,
+                 block_size: int=BLOCK_SIZE,
+                 transm_send_timeout_sec: int=TRANSM_SEND_TIMEOUT_SEC,
+                 transm_req_max_retries: int=TRANSM_REQ_MAX_RETRIES
                  ):
         """
         Args:
