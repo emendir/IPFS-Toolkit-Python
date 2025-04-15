@@ -14,6 +14,12 @@ from .conversations import (
     Conversation,
     ConversationListener,
 )
+from .file_transmission import(
+    transmit_file,
+    listen_for_file_transmissions,
+    FileTransmitter,
+    FileTransmissionReceiver,
+)
 
 from .errors import (
     DataTransmissionError,

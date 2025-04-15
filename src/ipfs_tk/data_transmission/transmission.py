@@ -1,16 +1,10 @@
-from ipfs_api import _ipfs_host_ip
 import socket
 import threading
 from threading import Thread
 from datetime import datetime, UTC
 import time
 import traceback
-# import inspect
-try:
-    import ipfs_api
-except:
-    import IPFS_API_Remote_Client as ipfs_api
-
+from ipfs_tk_generics.client_interface import BaseClientInterface
 
 from .errors import (
     InvalidPeer,
@@ -39,8 +33,8 @@ from .utils import (
 )
 
 
-
 def transmit_data(
+        ipfs_client: BaseClientInterface,
         data: bytes,
         peer_id: str,
         req_lis_name: str,
@@ -57,7 +51,7 @@ def transmit_data(
     Returns:
         bool: whether or not the transmission succeeded
     """
-    if peer_id == ipfs_api.my_id():
+    if peer_id == ipfs_client.peer_id:
         raise InvalidPeer(
             message="You cannot use your own IPFS peer ID as the recipient.")
 
@@ -65,14 +59,16 @@ def transmit_data(
         """
         Sends transmission request to the recipient.
         """
-        request_data = __add_integritybyte_to_buffer(ipfs_api.my_id().encode())
+        request_data = __add_integritybyte_to_buffer(
+            ipfs_client.peer_id.encode())
         tries = 0
 
         # repeatedly try to send transmission request to recipient until a reply is received
         while max_retries == -1 or tries < max_retries:
             if PRINT_LOG_TRANSMISSIONS:
                 print("Sending transmission request to " + str(req_lis_name))
-            sock = _create_sending_connection(peer_id, req_lis_name)
+            sock = _create_sending_connection(
+                ipfs_client, peer_id, req_lis_name)
             # sock.sendall(request_data)
             sock.settimeout(timeout_sec)
             _tcp_send_all(sock, request_data)
@@ -85,7 +81,7 @@ def transmit_data(
                                                  timeout=timeout_sec)
             except socket.timeout:
                 sock.close()
-                _close_sending_connection(peer_id, req_lis_name)
+                _close_sending_connection(ipfs_client, peer_id, req_lis_name)
                 raise CommunicationTimeout(
                     "Received no response from peer while sending transmission request.")
 
@@ -93,7 +89,7 @@ def transmit_data(
             # _tcp_recv_all
             sock.close()
             del sock
-            _close_sending_connection(peer_id, req_lis_name)
+            _close_sending_connection(ipfs_client, peer_id, req_lis_name)
             if reply:
                 try:
                     their_trsm_port = reply[30:].decode()  # signal success
@@ -111,12 +107,12 @@ def transmit_data(
                     print("Transmission request send " +
                           str(req_lis_name) + "timeout_sec reached.")
             tries += 1
-        _close_sending_connection(peer_id, req_lis_name)
+        _close_sending_connection(ipfs_client, peer_id, req_lis_name)
         raise CommunicationTimeout(
             "Received no response from peer while sending transmission request.")
 
     their_trsm_port = SendTransmissionRequest()
-    sock = _create_sending_connection(peer_id, their_trsm_port)
+    sock = _create_sending_connection(ipfs_client, peer_id, their_trsm_port)
     sock.settimeout(timeout_sec)
     # sock.sendall(data)  # transmit Data
     _tcp_send_all(sock, data)
@@ -126,7 +122,7 @@ def transmit_data(
     if response and response == b"Finished!":
         # conn.close()
         sock.close()
-        _close_sending_connection(peer_id, their_trsm_port)
+        _close_sending_connection(ipfs_client, peer_id, their_trsm_port)
         if PRINT_LOG_TRANSMISSIONS:
             print(": Finished transmission.")
         return True  # signal success
@@ -138,7 +134,7 @@ def transmit_data(
     # _close_sending_connection(peer_id, their_trsm_port)
 
 
-def listen_for_transmissions(listener_name, eventhandler):
+def listen_for_transmissions(ipfs_client: BaseClientInterface, listener_name, eventhandler):
     """
     Listens for incoming transmission requests (senders requesting to transmit
     data to us) and sets up the machinery needed to receive those transmissions.
@@ -156,7 +152,7 @@ def listen_for_transmissions(listener_name, eventhandler):
         TramissionListener: listener object which can be terminated with
             `.terminate()` or whose `.eventhandler` attribute can be changed.
     """
-    return TransmissionListener(listener_name, eventhandler)
+    return TransmissionListener(ipfs_client, listener_name, eventhandler)
 
 
 class TransmissionListener:
@@ -169,7 +165,7 @@ class TransmissionListener:
     # This function itself is called to process the transmission request buffer sent by the transmission sender.
     _terminate = False
 
-    def __init__(self, listener_name, eventhandler):
+    def __init__(self, ipfs_client: BaseClientInterface, listener_name, eventhandler):
         """
         Args:
             listener_name (str): the name of this TransmissionListener (chosen by
@@ -179,6 +175,7 @@ class TransmissionListener:
                 data is received.
                 Parameters: data (bytearray), peer_id (str)
         """
+        self.ipfs_client = ipfs_client
         self._listener_name = listener_name
         self.eventhandler = eventhandler
         self.port = 0  # not yet set
@@ -212,9 +209,10 @@ class TransmissionListener:
                 print(
                     self._listener_name + ": Received transmission request.")
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.bind((_ipfs_host_ip(), 0))
+            sock.bind((self.ipfs_client._ipfs_host_ip(), 0))
             our_port = sock.getsockname()[1]
-            _create_listening_connection(str(our_port), our_port)
+            _create_listening_connection(
+                self.ipfs_client, str(our_port), our_port)
             sock.listen()
 
             listener = Thread(target=self._receive_transmission, args=(
@@ -252,16 +250,17 @@ class TransmissionListener:
         # conn.close()
         Thread(target=eventhandler, args=(data, peer_id),
                name="TransmissionListener.ReceivedTransmission").start()
-        _close_listening_connection(str(our_port), our_port)
+        _close_listening_connection(self.ipfs_client, str(our_port), our_port)
         sock.close()
 
     def _listen(self):
         if PRINT_LOG_TRANSMISSIONS:
             print("Creating Listener")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((_ipfs_host_ip(), 0))
+        self.socket.bind((self.ipfs_client._ipfs_host_ip(), 0))
         self.port = self.socket.getsockname()[1]
-        _create_listening_connection(self._listener_name, self.port)
+        _create_listening_connection(
+            self.ipfs_client, self._listener_name, self.port)
 
         if PRINT_LOG_TRANSMISSIONS:
             print(self._listener_name
@@ -293,10 +292,11 @@ class TransmissionListener:
         if not self.port:
             return
 
-        _close_listening_connection(self._listener_name, self.port)
+        _close_listening_connection(
+            self.ipfs_client, self._listener_name, self.port)
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((_ipfs_host_ip(), self.port))
+            sock.connect((self.ipfs_client._ipfs_host_ip(), self.port))
             # sock.sendall("close".encode())
             _tcp_send_all(sock, "close".encode())
 
@@ -310,69 +310,85 @@ class TransmissionListener:
         self.terminate()
 
 
-
 class BufferSender():
 
-    def __init__(self, peer_id, proto):
+    def __init__(self, ipfs_client: BaseClientInterface, peer_id, proto):
+        self.ipfs_client = ipfs_client
         self.peer_id = peer_id
         self.proto = proto
-        self.sock = _create_sending_connection(peer_id, proto)
+        self.sock = _create_sending_connection(
+            self.ipfs_client, peer_id, proto)
 
     def send_buffer(self, data):
         try:
             self.sock.send(data)
         except:
-            self.sock = _create_sending_connection(self.peer_id, self.proto)
+            self.sock = _create_sending_connection(
+                self.ipfs_client, self.peer_id, self.proto)
             self.sock.send(data)
 
     def terminate(self):
-        _close_sending_connection(self.peer_id, self.proto)
+        _close_sending_connection(self.ipfs_client, self.peer_id, self.proto)
 
     def __del__(self):
         self.terminate()
 
 
 class BufferReceiver():
-    def __init__(self,
-                 eventhandler,
-                 proto,
-                 buffer_size=BUFFER_SIZE,
-                 monitoring_interval=2,
-                 status_eventhandler=None,
-                 eventhandlers_on_new_threads=True):
+    def __init__(
+        self,
+        ipfs_client: BaseClientInterface,
+        eventhandler,
+        proto,
+        address: tuple[str, int],
+        buffer_size=BUFFER_SIZE,
+        monitoring_interval=2,
+        status_eventhandler=None,
+        eventhandlers_on_new_threads=True
+    ):
+        self.ipfs_client = ipfs_client
         self.proto = proto
         self._listener = _ListenerTCP(
             eventhandler,
-            0,
+            address,
             buffer_size=buffer_size,
             monitoring_interval=monitoring_interval,
             status_eventhandler=status_eventhandler,
             eventhandlers_on_new_threads=eventhandlers_on_new_threads
         )
-        _create_listening_connection(proto, self._listener.port)
+        _create_listening_connection(
+            self.ipfs_client, proto, self._listener.port
+        )
 
     def terminate(self):
-        _close_listening_connection(self.proto, self._listener.port)
+        _close_listening_connection(
+            self.ipfs_client, self.proto, self._listener.port)
         self._listener.terminate()
 
     def __del__(self):
         self.terminate()
 
 
-def listen_to_buffers(eventhandler,
-                      proto,
-                      buffer_size=BUFFER_SIZE,
-                      monitoring_interval=2,
-                      status_eventhandler=None,
-                      eventhandlers_on_new_threads=True):
-    return BufferReceiver(
+def listen_to_buffers(
+        ipfs_client: BaseClientInterface,
         eventhandler,
         proto,
+        ip_addr="127.0.0.1",
+        buffer_size=BUFFER_SIZE,
+        monitoring_interval=2,
+        status_eventhandler=None,
+        eventhandlers_on_new_threads=True):
+    return BufferReceiver(
+        ipfs_client,
+        eventhandler,
+        proto,
+        (ip_addr, 0),
         buffer_size=buffer_size,
         monitoring_interval=monitoring_interval,
         status_eventhandler=status_eventhandler,
         eventhandlers_on_new_threads=eventhandlers_on_new_threads
     )
+
 
 class _ListenerTCP(threading.Thread):
     """
@@ -391,25 +407,25 @@ class _ListenerTCP(threading.Thread):
 
     def __init__(self,
                  eventhandler,
-                 port=0,
+                 address=tuple[int, str],
                  buffer_size=BUFFER_SIZE,
                  monitoring_interval=2,
                  status_eventhandler=None,
                  eventhandlers_on_new_threads=True):
         threading.Thread.__init__(self)
-        self.port = port
-        self.name = f"TCPListener-{port}"
+        self.address = address
+        self.name = f"TCPListener-{self.address}"
         self.eventhandler = eventhandler
         self.buffer_size = buffer_size
         self.eventhandlers_on_new_threads = eventhandlers_on_new_threads
         self.sock = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
 
-        self.sock.bind((_ipfs_host_ip(), self.port))
+        self.sock.bind(self.address)
         # in case it had been 0 (requesting automatic port assiggnent)
         self.port = self.sock.getsockname()[1]
 
-        if status_eventhandler != None:
+        if status_eventhandler is not None:
             self.status_eventhandler = status_eventhandler
             self.monitoring_interval = monitoring_interval
             self.last_time_recv = datetime.now(UTC)
@@ -476,14 +492,21 @@ class _ListenerTCP(threading.Thread):
         self.terminate()
 
 
-def listen_to_buffers_on_port(eventhandler,
-                              port=0,
-                              buffer_size=BUFFER_SIZE,
-                              monitoring_interval=2,
-                              status_eventhandler=None):
+def listen_to_buffers_on_port(
+    ipfs_client: BaseClientInterface,
+
+    eventhandler,
+    proto,
+    address: tuple[str, int],
+    buffer_size=BUFFER_SIZE,
+    monitoring_interval=2,
+    status_eventhandler=None
+):
     return BufferReceiver(
+        ipfs_client,
         eventhandler,
-        port,
+        proto,
+        address,
         buffer_size,
         monitoring_interval,
         status_eventhandler

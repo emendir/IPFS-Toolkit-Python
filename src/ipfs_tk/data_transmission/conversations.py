@@ -1,13 +1,12 @@
+"""
+"""
+
 from queue import Queue, Empty as QueueEmpty
-from threading import Thread, Event
+
+from threading import Thread
 from datetime import datetime, UTC
 import time
 # import inspect
-from inspect import signature
-try:
-    import ipfs_api
-except:
-    import IPFS_API_Remote_Client as ipfs_api
 
 
 from .config import (
@@ -15,28 +14,35 @@ from .config import (
     PRINT_LOG_CONVERSATIONS,
     TRANSM_REQ_MAX_RETRIES,
     TRANSM_SEND_TIMEOUT_SEC,
-    BLOCK_SIZE,
-)
-from .transmission import (
-    transmit_data,
-    listen_for_transmissions,
+    BLOCK_SIZE
 )
 
 from .errors import (
-    InvalidPeer,
     CommunicationTimeout,
     ConvListenTimeout,
 )
-def start_conversation(conv_name,
-                       peer_id,
-                       others_req_listener,
-                       data_received_eventhandler=None,
-                       file_eventhandler=None,
-                       file_progress_callback=None,
-                       encryption_callbacks=None,
-                       timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-                       max_retries=TRANSM_REQ_MAX_RETRIES,
-                       dir="."):
+from ipfs_tk_generics.client_interface import BaseClientInterface
+from .conversation_basics import (
+    BaseConversation, ConversationListener,
+)
+from .file_transmission import (
+    listen_for_file_transmissions,     transmit_file,
+    call_progress_callback
+)
+
+
+def start_conversation(
+        ipfs_client: BaseClientInterface,
+        conv_name,
+        peer_id,
+        others_req_listener,
+        data_received_eventhandler=None,
+        file_eventhandler=None,
+        file_progress_callback=None,
+        encryption_callbacks=None,
+        timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+        max_retries=TRANSM_REQ_MAX_RETRIES,
+        dir="."):
     """Starts a conversation object with which 2 peers can repetatively make
     data transmissions to each other asynchronously and bidirectionally.
     Sends a conversation request to the other peer's conversation request
@@ -77,7 +83,7 @@ def start_conversation(conv_name,
     Returns:
         Conversation: an object through which messages and files can be sent
     """
-    conv = Conversation()
+    conv = Conversation(ipfs_client)
     conv.start(conv_name,
                peer_id,
                others_req_listener,
@@ -92,16 +98,19 @@ def start_conversation(conv_name,
     return conv
 
 
-def join_conversation(conv_name,
-                      peer_id,
-                      others_req_listener,
-                      data_received_eventhandler=None,
-                      file_eventhandler=None,
-                      file_progress_callback=None,
-                      encryption_callbacks=None,
-                      timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-                      max_retries=TRANSM_REQ_MAX_RETRIES,
-                      dir="."):
+def join_conversation(
+    ipfs_client: BaseClientInterface,
+    conv_name,
+    peer_id,
+    others_req_listener,
+    data_received_eventhandler=None,
+    file_eventhandler=None,
+    file_progress_callback=None,
+    encryption_callbacks=None,
+    timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+    max_retries=TRANSM_REQ_MAX_RETRIES,
+    dir="."
+):
     """Join a conversation object started by another peer.
     Call `.terminate()` on the returned Conversation object when you
     no longer need it to clean up IPFS connection configurations.
@@ -138,7 +147,7 @@ def join_conversation(conv_name,
     Returns:
         Conversation: an object through which messages and files can be sent
     """
-    conv = Conversation()
+    conv = Conversation(ipfs_client)
     conv.join(conv_name,
               peer_id,
               others_req_listener,
@@ -153,7 +162,9 @@ def join_conversation(conv_name,
     return conv
 
 
-def listen_for_conversations(listener_name: str, eventhandler):
+def listen_for_conversations(
+    ipfs_client: BaseClientInterface, listener_name: str, eventhandler
+):
     """
     Listen for incoming conversation requests.
     Whenever a new conversation request is received, the specified eventhandler
@@ -171,36 +182,21 @@ def listen_for_conversations(listener_name: str, eventhandler):
         ConversationListener: an object which listens for incoming conversation
                                 requests
     """
-    return ConversationListener(listener_name, eventhandler)
+    return ConversationListener(ipfs_client, listener_name, eventhandler)
 
 
-class Conversation:
+class Conversation(BaseConversation):
     """Communication object which allows 2 peers to repetatively make
     data transmissions to each other asynchronously and bidirectionally.
     """
-    conv_name = ""
-    peer_id = ""
-    data_received_eventhandler = None
-    file_eventhandler = None
     file_progress_callback = None
-    _transm_send_timeout_sec = TRANSM_SEND_TIMEOUT_SEC
-    _transm_req_max_retries = TRANSM_REQ_MAX_RETRIES
-    _listener = None
-    __encryption_callback = None
-    __decryption_callback = None
-    _terminate = False
 
-    _last_coms_time = None
-
-    def __init__(self):
-        self.started = Event()
-        self._conversation_started = False
-        self.data_received_eventhandler = None
+    def __init__(self, ipfs_client: BaseClientInterface):
+        BaseConversation.__init__(self, ipfs_client)
         self.file_listener = None
         self.file_eventhandler = None
         self.file_progress_callback = None
-        self.message_queue = Queue()
-        self._file_queue = Queue()
+        self._file_queue: Queue[dict] = Queue()
 
     def start(self,
               conv_name,
@@ -210,8 +206,8 @@ class Conversation:
               file_eventhandler=None,
               file_progress_callback=None,
               encryption_callbacks=None,
-              transm_send_timeout_sec=_transm_send_timeout_sec,
-              transm_req_max_retries=_transm_req_max_retries,
+              transm_send_timeout_sec=BaseConversation._transm_send_timeout_sec,
+              transm_req_max_retries=BaseConversation._transm_req_max_retries,
               dir="."):
         """Initialises this conversation object so that it can be used.
         Code execution blocks until the other peer joins the conversation or
@@ -247,54 +243,28 @@ class Conversation:
                             reattempted when the timeout is reached
             dir (str): the path where received files should be downloaded to
         """
-        if peer_id == ipfs_api.my_id():
-            raise InvalidPeer(
-                message="You cannot use your own IPFS peer ID as your conversation partner.")
-        if (PRINT_LOG_CONVERSATIONS):
-            print(conv_name + ": Starting conversation")
-        self.conv_name = conv_name
-        self.data_received_eventhandler = data_received_eventhandler
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
-        if encryption_callbacks:
-            self.__encryption_callback = encryption_callbacks[0]
-            self.__decryption_callback = encryption_callbacks[1]
-        self._transm_send_timeout_sec = transm_send_timeout_sec
-        self._transm_req_max_retries = transm_req_max_retries
-        self.peer_id = peer_id
-        if PRINT_LOG_CONVERSATIONS:
-            print(conv_name + ": sending conversation request")
-        self._listener = listen_for_transmissions(conv_name,
-                                                  self._hear
-                                                  )
         self.file_listener = listen_for_file_transmissions(
+            self.ipfs_client,
+
             f"{conv_name}:files",
             self._file_received,
             progress_handler=self._on_file_progress_received,
             dir=dir,
             encryption_callbacks=encryption_callbacks
         )
-        # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
-        data = bytearray("I want to start a conversation".encode(
-            'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
-        try:
-            transmit_data(data,
-                          peer_id,
-                          others_req_listener,
-                          self._transm_send_timeout_sec,
-                          self._transm_req_max_retries
-                          )
-        except Exception as e:
-            self.terminate()
-            raise e
-        self._last_coms_time = datetime.now(UTC)
-        if PRINT_LOG_CONVERSATIONS:
-            print(conv_name + ": sent conversation request")
-        success = self.started.wait(transm_send_timeout_sec)
-        if not success:
-            raise CommunicationTimeout(
-                f"Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.")
-        return True     # signal success
+        return BaseConversation.start(
+            self,
+            conv_name=conv_name,
+            peer_id=peer_id,
+            others_req_listener=others_req_listener,
+            data_received_eventhandler=data_received_eventhandler,
+            encryption_callbacks=encryption_callbacks,
+            transm_send_timeout_sec=transm_send_timeout_sec,
+            transm_req_max_retries=transm_req_max_retries,
+            dir=dir,
+        )
 
     def join(self,
              conv_name,
@@ -304,8 +274,8 @@ class Conversation:
              file_eventhandler=None,
              file_progress_callback=None,
              encryption_callbacks=None,
-             transm_send_timeout_sec=_transm_send_timeout_sec,
-             transm_req_max_retries=_transm_req_max_retries,
+             transm_send_timeout_sec=BaseConversation._transm_send_timeout_sec,
+             transm_req_max_retries=BaseConversation._transm_req_max_retries,
              dir="."):
         """Joins a conversation which another peer started, given their peer ID
         and conversation's transmission-listener's name.
@@ -342,117 +312,27 @@ class Conversation:
                             reattempted when the timeout is reached
             dir (str): the path where received files should be downloaded to
         """
-        self.conv_name = conv_name
-        if PRINT_LOG_CONVERSATIONS:
-            print(conv_name + ": Joining conversation "
-                  + others_trsm_listener)
-        self.data_received_eventhandler = data_received_eventhandler
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
-        if encryption_callbacks:
-            self.__encryption_callback = encryption_callbacks[0]
-            self.__decryption_callback = encryption_callbacks[1]
-        self._transm_send_timeout_sec = transm_send_timeout_sec
-        self._transm_req_max_retries = transm_req_max_retries
-        self._listener = listen_for_transmissions(conv_name,
-                                                  self._hear,
-                                                  )
         self.file_listener = listen_for_file_transmissions(
+            self.ipfs_client,
             f"{conv_name}:files", self._file_received,
             progress_handler=self._on_file_progress_received,
             dir=dir,
             encryption_callbacks=encryption_callbacks
         )
 
-        self.others_trsm_listener = others_trsm_listener
-        self.peer_id = peer_id
-        data = bytearray("I'm listening".encode(
-            'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
-        self._conversation_started = True
-        transmit_data(data, peer_id, others_trsm_listener)
-        self._last_coms_time = datetime.now(UTC)
-        if PRINT_LOG_CONVERSATIONS:
-            print(conv_name + ": Joined conversation "
-                  + others_trsm_listener)
-        return True  # signal success
-
-    def _hear(self, data, peer_id, arg3=""):
-        """
-        Receives this conversation's data transmissions.
-        Forwards it to the user's data_received_eventhandler if the
-        conversation has already started,
-        otherwise processes the conversation initiation codes.
-        """
-        if self._terminate:
-            return
-        # print("HEAR", data)
-        if not data:
-            print("CONV.HEAR: RECEIVED NONE")
-            return
-        self._last_coms_time = datetime.now(UTC)
-
-        if not self._conversation_started:
-            info = _split_by_255(data)
-            if bytearray(info[0]) == bytearray("I'm listening".encode('utf-8')):
-                self.others_trsm_listener = info[1].decode('utf-8')
-                if PRINT_LOG_CONVERSATIONS:
-                    print(
-                        f"{self.conv_name}: other's proto is {self.others_trsm_listener}")
-                # self.hear_eventhandler = self._hear
-                self._conversation_started = True
-                if PRINT_LOG_CONVERSATIONS:
-                    print(self.conv_name +
-                          ": peer joined, conversation started")
-                self.started.set()
-
-            elif PRINT_LOG_CONVERSATIONS:
-                print(self.conv_name +
-                      ": received unrecognisable buffer, expected join confirmation")
-                print(info[0])
-            return
-        else:   # conversation has already started
-            if self.__decryption_callback:
-                if PRINT_LOG_CONVERSATIONS:
-                    print("Conv._hear: decrypting message")
-                data = self.__decryption_callback(data)
-            self.message_queue.put(data)
-
-            if self.data_received_eventhandler:
-                # if the data_received_eventhandler has 2 parameters
-                if len(signature(self.data_received_eventhandler).parameters) == 2:
-                    Thread(target=self.data_received_eventhandler,
-                           args=(self, data), name="Converstion.data_received_eventhandler").start()
-                else:
-                    Thread(target=self.data_received_eventhandler, args=(
-                        self, data, arg3), name="Converstion.data_received_eventhandler").start()
-
-    def listen(self, timeout=None):
-        """Waits until the conversation peer sends a message, then returns that
-        message. Can be used as an alternative to specifying an
-        data_received_eventhandler to process received messages,
-        or both can be used in parallel.
-        Args:
-            timeout (int): how many seconds to wait until giving up and
-                            raising an exception
-        Returns:
-            bytearray: received data
-        """
-        if self._terminate:
-            return
-        if not timeout:
-            data = self.message_queue.get()
-        else:
-            try:
-                data = self.message_queue.get(timeout=timeout)
-            except:  # timeout reached
-                raise ConvListenTimeout("Didn't receive any data.") from None
-
-        if data:
-            return data
-        else:
-            if PRINT_LOG_CONVERSATIONS:
-                print("Conv.listen: received nothing restarting Event Wait")
-            self.listen()
+        return BaseConversation.join(
+            self,
+            conv_name=conv_name,
+            peer_id=peer_id,
+            others_trsm_listener=others_trsm_listener,
+            data_received_eventhandler=data_received_eventhandler,
+            encryption_callbacks=encryption_callbacks,
+            transm_send_timeout_sec=transm_send_timeout_sec,
+            transm_req_max_retries=transm_req_max_retries,
+            dir=dir,
+        )
 
     def _file_received(self, peer, filepath, metadata):
         """Receives this conversation's file transmissions."""
@@ -537,44 +417,13 @@ class Conversation:
             #     self.file_progress_callback(
             #         filename, filesize, progress)
 
-    def say(self,
-            data,
-            timeout_sec=_transm_send_timeout_sec,
-            max_retries=_transm_req_max_retries
-            ):
-        """
-        Transmits the provided data (a bytearray of any length) to this
-        conversation's peer.
-        Args:
-            bytearray data: the data to be transmitted to the receiver
-            timeout_sec: connection attempt timeout, multiplied with the
-                        maximum number of retries will result in the
-                        total time required for a failed attempt
-            max_retries: how often the transmission should be reattempted
-                        when the timeout is reached
-        Returns:
-            bool success: whether or not the transmission succeeded
-        """
-        while not self._conversation_started:
-            if PRINT_LOG:
-                print("Wanted to say something but conversation was not yet started")
-            time.sleep(0.01)
-        if self.__encryption_callback:
-            if PRINT_LOG_CONVERSATIONS:
-                print("Conv.say: encrypting message")
-            data = self.__encryption_callback(data)
-        transmit_data(data, self.peer_id, self.others_trsm_listener,
-                      timeout_sec, max_retries)
-        self._last_coms_time = datetime.now(UTC)
-        return True
-
     def transmit_file(self,
                       filepath,
                       metadata=bytearray(),
                       progress_handler=file_progress_callback,
                       block_size=BLOCK_SIZE,
-                      transm_send_timeout_sec=_transm_send_timeout_sec,
-                      transm_req_max_retries=_transm_req_max_retries
+                      transm_send_timeout_sec=BaseConversation._transm_send_timeout_sec,
+                      transm_req_max_retries=BaseConversation._transm_req_max_retries
                       ):
         """
         Transmits the provided file to the other computer in this conversation.
@@ -601,6 +450,7 @@ class Conversation:
                        name='Conversation.progress_handler'
                        ).start()
         return transmit_file(
+            self.ipfs_client,
             filepath,
             self.peer_id,
             f"{self.others_trsm_listener}:files",
@@ -615,11 +465,7 @@ class Conversation:
     def terminate(self):
         """Stop the conversation and clean up IPFS connection configurations.
         """
-        if self._terminate:
-            return
-        self._terminate = True
-        if self._listener:
-            self._listener.terminate()
+        BaseConversation.terminate(self)
         if self.file_listener:
             self.file_listener.terminate()
 
@@ -627,51 +473,6 @@ class Conversation:
         """Stop the conversation and clean up IPFS connection configurations.
         """
         self.terminate()
-
-    def __del__(self):
-        self.terminate()
-
-
-class ConversationListener:
-    """
-    Object which listens to incoming conversation requests.
-    Whenever a new conversation request is received, the specified eventhandler
-    is called which must then decide whether or not to join the conversation,
-    and then act upon that decision.
-
-    """
-
-    def __init__(self, listener_name, eventhandler):
-        self._listener_name = listener_name
-        if (PRINT_LOG_CONVERSATIONS):
-            print("Listening for conversations as " + listener_name)
-        self.eventhandler = eventhandler
-        self._listener = listen_for_transmissions(
-            listener_name, self._on_request_received)
-
-    def _on_request_received(self, data, peer_id):
-        if PRINT_LOG_CONVERSATIONS:
-            print(
-                f"ConvLisReceived {self._listener_name}: Received Conversation Request")
-        info = _split_by_255(data)
-        if info[0] == bytearray("I want to start a conversation".encode('utf-8')):
-            if PRINT_LOG_CONVERSATIONS:
-                print(
-                    f"ConvLisReceived {self._listener_name}: Starting conversation...")
-            conv_name = info[1].decode('utf-8')
-            self.eventhandler(conv_name, peer_id)
-        elif PRINT_LOG_CONVERSATIONS:
-            print(
-                f"ConvLisReceived {self._listener_name}: Received unreadable request")
-            print(info[0])
-
-    def terminate(self):
-        """Stop listening for conversation requests and clean up IPFS
-        connection configurations.
-        """
-        if PRINT_LOG_CONVERSATIONS:
-            print(f"Conv.terminate: closing liseter for {self._listener_name}")
-        self._listener.terminate()
 
     def __del__(self):
         self.terminate()

@@ -1,11 +1,6 @@
-from ipfs_api import _ipfs_host_ip
 import socket
 import time
-# import inspect
-try:
-    import ipfs_api
-except:
-    import IPFS_API_Remote_Client as ipfs_api
+from ipfs_tk_generics.client_interface import BaseClientInterface
 from .config import (
     PRINT_LOG_CONNECTIONS,
     BUFFER_SIZE,
@@ -15,6 +10,7 @@ from .config import (
 from .errors import (
     IPFS_Error,
 )
+
 
 def __add_integritybyte_to_buffer(buffer):
     # Adding an integrity byte that equals the sum of all the bytes in the buffer modulus 256
@@ -141,21 +137,19 @@ def _tcp_recv_buffer_timeout(sock, buffer_size=BUFFER_SIZE, timeout=5):
 
 
 # ----------IPFS Utilities-------------------------------------------
-connections_send = list()
-connections_listen = list()
 
 
-def _create_sending_connection(peer_id: str, protocol: str, port=None):
+def _create_sending_connection(ipfs_client: BaseClientInterface, peer_id: str, protocol: str, port=None):
     # _close_sending_connection(
     #     peer_id=peer_id, name=protocol)
     if port:
-        _close_sending_connection(port=port)
+        _close_sending_connection(ipfs_client, port=port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if port == None:
         for prt in sending_ports:   # trying ports until we find a free one
             try:
-                ipfs_api.create_tcp_sending_connection(protocol, prt, peer_id)
-                sock.connect((_ipfs_host_ip(), prt))
+                ipfs_client.tcp.open_sender(protocol, prt, peer_id)
+                sock.connect((ipfs_client._ipfs_host_ip(), prt))
                 return sock
             except Exception as e:   # ignore errors caused by port already in use
                 if "bind: address already in use" not in str(e):
@@ -163,51 +157,50 @@ def _create_sending_connection(peer_id: str, protocol: str, port=None):
         raise IPFS_Error("Failed to find free port for sending connection")
     else:
         try:
-            ipfs_api.create_tcp_sending_connection(protocol, port, peer_id)
-            sock.connect((_ipfs_host_ip(), prt))
+            ipfs_client.tcp.open_sender(protocol, port, peer_id)
+            sock.connect((ipfs_client._ipfs_host_ip(), prt))
             return sock
         except Exception as e:
             raise IPFS_Error(str(e))
 
 
-def _create_listening_connection(protocol, port, force=True):
+def _create_listening_connection(ipfs_client: BaseClientInterface, protocol, port, force=True):
     """
     Args:
         bool force: whether or not already existing conflicting connections should be closed.
     """
     try:
-        ipfs_api.create_tcp_listening_connection(protocol, port)
+        ipfs_client.tcp.open_listener(protocol, port)
         if PRINT_LOG_CONNECTIONS:
             print(f"listening fas \"{protocol}\" on {port}")
     except:
         if force:
-            _close_listening_connection(name=protocol)
+            _close_listening_connection(ipfs_client, name=protocol)
         try:
             time.sleep(0.1)
-            ipfs_api.create_tcp_listening_connection(protocol, port)
+            ipfs_client.tcp.open_listener(protocol, port)
             if PRINT_LOG_CONNECTIONS:
                 print(f"listening as \"{protocol}\" on {port}")
         except:
             raise IPFS_Error(
                 "Error registering listening connection to IPFS: "
-                f"/x/{protocol}/ip4/{_ipfs_host_ip()}/udp/{port}"
+                f"/x/{protocol}/ip4/{ipfs_client._ipfs_host_ip()}/udp/{port}"
             )
 
-    connections_listen.append((protocol, port))
     return port
 
 
-def _close_sending_connection(peer_id=None, name=None, port=None):
+def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id=None, name=None, port=None):
     try:
-        ipfs_api.close_tcp_sending_connection(
+        ipfs_client.tcp.close_sender(
             peer_id=peer_id, name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))
 
 
-def _close_listening_connection(name=None, port=None):
+def _close_listening_connection(ipfs_client: BaseClientInterface, name=None, port=None):
     try:
-        ipfs_api.close_tcp_listening_connection(
+        ipfs_client.tcp.close_listener(
             name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))

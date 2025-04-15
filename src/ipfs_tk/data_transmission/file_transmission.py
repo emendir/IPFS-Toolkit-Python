@@ -1,13 +1,15 @@
+from .conversation_basics import BaseConversation
+from .utils import (
+    _to_b255_no_0s,
+    _from_b255_no_0s,
+    _split_by_255,
+)
 import shutil
 from threading import Thread
 import traceback
 import os
 # import inspect
 from inspect import signature
-try:
-    import ipfs_api
-except:
-    import IPFS_API_Remote_Client as ipfs_api
 from .config import (
     PRINT_LOG,
     PRINT_LOG_FILES,
@@ -16,25 +18,28 @@ from .config import (
     BLOCK_SIZE,
 )
 
-from .conversations import (
-    Conversation,
+from .conversation_basics import (
     ConversationListener,
 )
-
+from ipfs_tk_generics.client_interface import BaseClientInterface
 from .errors import (
     InvalidPeer,
-    UnreadableReply,
+    UnreadableReply
 )
-def transmit_file(filepath,
-                  peer_id,
-                  others_req_listener,
-                  metadata=bytearray(),
-                  progress_handler=None,
-                  encryption_callbacks=None,
-                  block_size=BLOCK_SIZE,
-                  transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-                  transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
-                  ):
+
+
+def transmit_file(
+    ipfs_client: BaseClientInterface,
+    filepath,
+    peer_id,
+    others_req_listener,
+    metadata=bytearray(),
+    progress_handler=None,
+    encryption_callbacks=None,
+    block_size=BLOCK_SIZE,
+    transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+    transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
+):
     """Transmits the provided file to the specified peer.
     Args:
         filepath (str): the path of the file to transmit
@@ -66,6 +71,7 @@ def transmit_file(filepath,
         FileTransmitter: object which manages the filetransmission
     """
     return FileTransmitter(
+        ipfs_client,
         filepath,
         peer_id,
         others_req_listener,
@@ -78,7 +84,8 @@ def transmit_file(filepath,
     )
 
 
-def listen_for_file_transmissions(listener_name,
+def listen_for_file_transmissions(ipfs_client: BaseClientInterface,
+                                  listener_name,
                                   eventhandler,
                                   progress_handler=None,
                                   dir=".",
@@ -111,16 +118,17 @@ def listen_for_file_transmissions(listener_name,
     """
     def request_handler(conv_name, peer_id):
         ft = FileTransmissionReceiver()
-        conv = Conversation()
-        ft.setup(conv, eventhandler, progress_handler=progress_handler, dir=dir)
-        conv.join(ipfs_api.client.tcp.generate_name(conv_name),
+        conv = BaseConversation(ipfs_client)
+        ft.setup(ipfs_client,conv, eventhandler, progress_handler=progress_handler, dir=dir)
+        conv.join(ipfs_client.tcp.generate_name(conv_name),
                   peer_id,
                   conv_name,
                   ft.on_data_received,
                   encryption_callbacks=encryption_callbacks
                   )
 
-    return ConversationListener(listener_name, request_handler)
+    return ConversationListener(ipfs_client,
+                                listener_name, request_handler)
 
 
 class FileTransmitter:
@@ -129,6 +137,8 @@ class FileTransmitter:
     status = "not started"  # "transmitting" "finished" "aborted"
 
     def __init__(self,
+                 ipfs_client: BaseClientInterface,
+
                  filepath,
                  peer_id,
                  others_req_listener,
@@ -167,9 +177,10 @@ class FileTransmitter:
                             how often the transmission should be reattempted when
                             the timeout is reached
         """
-        if peer_id == ipfs_api.my_id():
+        if peer_id == ipfs_client.peer_id:
             raise InvalidPeer(
                 message="You cannot use your own IPFS peer ID as the recipient.")
+        self.ipfs_client = ipfs_client
         self.filename = os.path.basename(filepath)
         self.filesize = os.path.getsize(filepath)
         self.filepath = filepath
@@ -183,7 +194,7 @@ class FileTransmitter:
         self._transm_req_max_retries = transm_req_max_retries
 
         self.conv_name = self.filename + "_conv"
-        self.conversation = Conversation()
+        self.conversation = BaseConversation(self.ipfs_client)
         self.conversation.start(
             self.conv_name,
             self.peer_id,
@@ -235,7 +246,7 @@ class FileTransmitter:
                          self.filename,
                          self.filesize,
                          progress),
-                   name='Conversation.progress_handler'
+                   name='BaseConversation.progress_handler'
                    ).start()
 
     def _hear(self, conv, data):
@@ -259,10 +270,11 @@ class FileTransmissionReceiver:
     writtenbytes = 0
     status = "not started"  # "receiving" "finished" "aborted"
 
-    def setup(self, conversation, eventhandler, progress_handler=None, dir="."):
+    def setup(self,    ipfs_client: BaseClientInterface,
+              conversation, eventhandler, progress_handler=None, dir="."):
         """Configure this object to make it work.
         Args:
-            conversation (Conversation): the Conversation object with which to
+            conversation (BaseConversation): the BaseConversation object with which to
                         communicate with the transmitter
             eventhandler (function): function to be called when a file is
                         received
@@ -276,7 +288,7 @@ class FileTransmissionReceiver:
         if PRINT_LOG_FILES:
             print("FileReception: "
                   + ": Preparing to receive file")
-
+        self.ipfs_client = ipfs_client
         self.eventhandler = eventhandler
         self.progress_handler = progress_handler
         self.conv = conversation

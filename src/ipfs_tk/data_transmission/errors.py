@@ -1,32 +1,8 @@
-from ipfs_api import _ipfs_host_ip
-import shutil
-from queue import Queue, Empty as QueueEmpty
-import socket
-import threading
-from threading import Thread, Event
-from datetime import datetime, UTC
-import time
-import traceback
-import os
 # import inspect
-from inspect import signature
 try:
-    import ipfs_api
+    pass
 except:
-    import IPFS_API_Remote_Client as ipfs_api
-from .config import (
-    PRINT_LOG,
-    PRINT_LOG_CONNECTIONS,
-    PRINT_LOG_TRANSMISSIONS,
-    PRINT_LOG_CONVERSATIONS,
-    PRINT_LOG_FILES,
-    TRANSM_REQ_MAX_RETRIES,
-    TRANSM_SEND_TIMEOUT_SEC,
-    TRANSM_RECV_TIMEOUT_SEC,
-    BUFFER_SIZE,
-    BLOCK_SIZE,
-    sending_ports,
-)
+    pass
 
 
 class DataTransmissionError(Exception):
