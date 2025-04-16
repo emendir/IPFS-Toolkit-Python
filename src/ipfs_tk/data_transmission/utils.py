@@ -155,6 +155,7 @@ def _create_sending_connection(ipfs_client: BaseClientInterface, peer_id: str, p
             except Exception as e:   # ignore errors caused by port already in use
                 if "bind: address already in use" not in str(e):
                     raise IPFS_Error(str(e))
+                pass
         raise IPFS_Error("Failed to find free port for sending connection")
     else:
         try:

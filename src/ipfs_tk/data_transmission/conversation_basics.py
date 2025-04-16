@@ -109,9 +109,13 @@ class BaseConversation():
             self.__decryption_callback = encryption_callbacks[1]
         self._transm_send_timeout_sec = transm_send_timeout_sec
         self._transm_req_max_retries = transm_req_max_retries
+
         self.peer_id = peer_id
         if PRINT_LOG_CONVERSATIONS:
             print(conv_name + ": sending conversation request")
+        self._listener = listen_for_transmissions(
+            self.ipfs_client, conv_name,self._hear
+        )
         # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
         data = bytearray("I want to start a conversation".encode(
             'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
@@ -128,11 +132,17 @@ class BaseConversation():
             raise e
         self._last_coms_time = datetime.now(UTC)
         if PRINT_LOG_CONVERSATIONS:
-            print(conv_name + ": sent conversation request")
+            print(
+                f"{conv_name}: sent conversation request to "
+                f"{others_req_listener}"
+            )
         success = self.started.wait(transm_send_timeout_sec)
         if not success:
+            print(f"{conv_name}: IPFS tunnels: {
+                  self.ipfs_client.tcp.get_tunnels().listeners}")
             raise CommunicationTimeout(
                 f"Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.")
+
         return True     # signal success
 
     def join(self,
@@ -200,6 +210,9 @@ class BaseConversation():
         data = bytearray("I'm listening".encode(
             'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
         self._conversation_started = True
+        if PRINT_LOG_CONVERSATIONS:
+            print(f"{conv_name}: Sending join response to {
+                  others_trsm_listener}")
         transmit_data(self.ipfs_client, data, peer_id, others_trsm_listener)
         self._last_coms_time = datetime.now(UTC)
         if PRINT_LOG_CONVERSATIONS:
@@ -311,7 +324,7 @@ class BaseConversation():
             if PRINT_LOG_CONVERSATIONS:
                 print("Conv.say: encrypting message")
             data = self.__encryption_callback(data)
-        transmit_data(data, self.peer_id, self.others_trsm_listener,
+        transmit_data(self.ipfs_client,data, self.peer_id, self.others_trsm_listener,
                       timeout_sec, max_retries)
         self._last_coms_time = datetime.now(UTC)
         return True
