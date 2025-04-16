@@ -8,8 +8,8 @@ import time
 from threading import Thread, Lock
 import os
 import json
-import ipfs_api
 from datetime import datetime, UTC, timedelta
+from ipfs_tk_generics import BaseClient
 
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
@@ -28,7 +28,8 @@ class Peer:
     __multi_addrs_lock = Lock()
     __terminate = False
 
-    def __init__(self, peer_id="", serial=None):
+    def __init__(self, ipfs_client: BaseClient, peer_id="", serial=None):
+        self.ipfs_client = ipfs_client
         if peer_id and not serial:
             self.__peer_id = peer_id
         elif serial:
@@ -57,8 +58,8 @@ class Peer:
         if self.last_seen() and (datetime.now(UTC) - self.last_seen()).total_seconds() < successive_register_ignore_dur_sec:
             return False
         with self.__multi_addrs_lock:
-            multiaddrs = ipfs_api.get_peer_multiaddrs(self.__peer_id)
-            if not ipfs_api.is_peer_connected(self.__peer_id):
+            multiaddrs = self.ipfs_client.peers.find(self.__peer_id)
+            if not self.ipfs_client.peers.is_connected(self.__peer_id):
                 return False
             now = datetime.now(UTC)
             if multiaddrs:
@@ -101,16 +102,16 @@ class Peer:
         for multiaddr, date in self.__multiaddrs:
             if self.__terminate:
                 return False
-            success = ipfs_api.connect_to_peer(
+            success = self.ipfs_client.peers.connect(
                 f"{multiaddr}/p2p/{self.__peer_id}")
-            if success and ipfs_api.is_peer_connected(self.__peer_id):
+            if success and self.ipfs_client.peers.is_connected(self.__peer_id):
                 self.register_contact_event(successive_register_ignore_dur_sec)
 
                 return True
             if self.__terminate:
                 return False
         # if none of the known multiaddresses worked, try a general findpeer
-        if ipfs_api.find_peer(self.__peer_id) and ipfs_api.is_peer_connected(self.__peer_id):
+        if self.ipfs_client.peers.find(self.__peer_id) and self.ipfs_client.peers.is_connected(self.__peer_id):
             self.register_contact_event(successive_register_ignore_dur_sec)
             return True
         return False
@@ -161,10 +162,12 @@ class PeerMonitor:
     __peers_lock = Lock()   # for adding & removing peers
 
     def __init__(self,
+        ipfs_client:BaseClient,
                  filepath,
                  forget_after_hrs=FORGET_AFTER_HOURS,
                  connection_attempt_interval_sec=CONNECTION_ATTEMPT_INTERVAL_SEC,
                  successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC):
+        self.ipfs_client = ipfs_client
         self.__filepath = filepath
         self.forget_after_hrs = forget_after_hrs
         self.connection_attempt_interval_sec = connection_attempt_interval_sec
@@ -182,7 +185,7 @@ class PeerMonitor:
                         # Function to merge peers?
                         # Ever necessary?
                         continue
-                    self.__peers.append(Peer(serial=peer_data))
+                    self.__peers.append(Peer(self.ipfs_client,serial=peer_data))
         self.__peer_finder_thread = Thread(target=self.__connect_to_peers, args=(),
                                            name="PeerMonitor.__connect_to_peers")
         self.__peer_finder_thread.start()
@@ -195,7 +198,7 @@ class PeerMonitor:
         with self.__peers_lock:
             peer = self.get_peer_by_id(peer_id, already_locked=True)
             if not peer:
-                peer = Peer(peer_id)
+                peer = Peer(self.ipfs_client,peer_id)
                 self.__peers.append(peer)
 
         # try register, and if data is recorded, save to file

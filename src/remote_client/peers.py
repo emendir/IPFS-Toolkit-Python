@@ -49,7 +49,7 @@ class RemotePeers(BasePeers):
         except:
             return None
 
-    def is_peer_connected(self, peer_id, ping_count=1):
+    def is_connected(self, peer_id, ping_count=1):
         """Tests the connection to the given IPFS peer.
         Args:
             peer_id (str): the IPFS ID of the peer to test

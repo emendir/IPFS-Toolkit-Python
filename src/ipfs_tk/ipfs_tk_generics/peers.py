@@ -16,7 +16,7 @@ class BasePeers(ABC):
         pass
 
     @abstractmethod
-    def is_peer_connected(self, peer_id, ping_count=1):
+    def is_connected(self, peer_id, ping_count=1):
         pass
 
 
