@@ -23,7 +23,7 @@ from .errors import (
     InvalidPeer,
     UnreadableReply
 )
-from data_transmission.conversation_basics import ConversationListener
+from ipfs_tk_transmission.conversation_basics import ConversationListener
 from typing import Callable
 
 

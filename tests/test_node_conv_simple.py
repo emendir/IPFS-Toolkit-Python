@@ -7,11 +7,11 @@ import _testing_utils
 import pytest
 from _testing_utils import mark
 
-import data_transmission
+import ipfs_tk_transmission
 import ipfs_tk_generics
 
 _testing_utils.assert_is_loaded_from_source(
-    source_dir=os.path.dirname(os.path.dirname(__file__)), module=data_transmission
+    source_dir=os.path.dirname(os.path.dirname(__file__)), module=ipfs_tk_transmission
 )
 _testing_utils.assert_is_loaded_from_source(
     source_dir=os.path.dirname(os.path.dirname(__file__)), module=ipfs_tk_generics

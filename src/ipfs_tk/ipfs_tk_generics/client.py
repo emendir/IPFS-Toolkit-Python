@@ -1,5 +1,5 @@
 from .base_client import BaseClient
-from data_transmission import (
+from ipfs_tk_transmission import (
     transmit_data,
     TransmissionListener,
     listen_for_file_transmissions,
@@ -9,7 +9,7 @@ from data_transmission import (
     listen_for_conversations
 
 )
-from data_transmission.config import (
+from ipfs_tk_transmission.config import (
     TRANSM_SEND_TIMEOUT_SEC,
     TRANSM_REQ_MAX_RETRIES,
     BLOCK_SIZE
