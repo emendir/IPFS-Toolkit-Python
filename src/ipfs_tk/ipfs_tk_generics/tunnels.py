@@ -14,7 +14,7 @@ class ListenerTunnel:
 class TunnelsList:
     senders:list[SenderTunnel]
     listeners:list[ListenerTunnel]
-class BaseTcp(ABC):
+class BaseTunnels(ABC):
     def __init__(self):
         self._generated_protos:list[str] = []
         self._proto_generator_lock = Lock()

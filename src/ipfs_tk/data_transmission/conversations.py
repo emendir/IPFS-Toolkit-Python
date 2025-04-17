@@ -21,7 +21,7 @@ from .errors import (
     CommunicationTimeout,
     ConvListenTimeout,
 )
-from ipfs_tk_generics.client_interface import BaseClientInterface
+from ipfs_tk_generics.base_client import BaseClient
 from .conversation_basics import (
     BaseConversation, ConversationListener,
 )
@@ -33,7 +33,7 @@ from typing import Callable
 
 
 def start_conversation(
-        ipfs_client: BaseClientInterface,
+        ipfs_client: BaseClient,
         conv_name: str,
         peer_id: str,
         others_req_listener: str,
@@ -100,7 +100,7 @@ def start_conversation(
 
 
 def join_conversation(
-    ipfs_client: BaseClientInterface,
+    ipfs_client: BaseClient,
     conv_name,
     peer_id,
     others_req_listener,
@@ -164,7 +164,7 @@ def join_conversation(
 
 
 def listen_for_conversations(
-    ipfs_client: BaseClientInterface, listener_name: str, eventhandler
+    ipfs_client: BaseClient, listener_name: str, eventhandler
 ):
     """
     Listen for incoming conversation requests.
@@ -192,7 +192,7 @@ class Conversation(BaseConversation):
     """
     file_progress_callback = None
 
-    def __init__(self, ipfs_client: BaseClientInterface):
+    def __init__(self, ipfs_client: BaseClient):
         BaseConversation.__init__(self, ipfs_client)
         self.file_listener = None
         self.file_eventhandler = None

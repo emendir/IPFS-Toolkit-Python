@@ -1,11 +1,11 @@
-from ipfs_toolkit_generics import BaseClient, BaseTcp
-from ipfs_toolkit_generics.tcp import SenderTunnel, ListenerTunnel, TunnelsList
+from ipfs_tk_generics import IpfsClient, BaseTunnels
+from ipfs_tk_generics.tunnels import SenderTunnel, ListenerTunnel, TunnelsList
 
-class RemoteTcp(BaseTcp):
-    def __init__(self, node:BaseClient):
+class RemoteTunnels(BaseTunnels):
+    def __init__(self, node:IpfsClient):
         self._node = node
         self._http_client = self._node._http_client
-        BaseTcp.__init__(self)
+        BaseTunnels.__init__(self)
         
     def open_listener(self,name: str, port: int):
         """Open a listener TCP connection for IPFS' libp2p stream-mounting (port-forwarding).

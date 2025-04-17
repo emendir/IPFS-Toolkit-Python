@@ -1,10 +1,10 @@
 from abc import ABC, abstractproperty, abstractmethod
 from .pubsub import BasePubSub
-from .tcp import BaseTcp
+from .tunnels import BaseTunnels
 from .files import BaseFiles
 
 
-class BaseClientInterface(ABC):
+class BaseClient(ABC):
     @abstractproperty
     def files(self) -> BaseFiles:
         pass
@@ -14,7 +14,7 @@ class BaseClientInterface(ABC):
         pass
 
     @abstractproperty
-    def tcp(self) -> BaseTcp:
+    def tunnels(self) -> BaseTunnels:
         pass
 
     @abstractproperty

@@ -53,7 +53,7 @@ def new_conv_handler(conv_name, peerID):
 conv_lis = ipfs_datatransmission.listen_for_conversations(
     "general_listener", new_conv_handler)
 print("Set up listener")
-print(ipfs_api.client.tcp.get_tunnels())
+print(ipfs_api.client.tunnels.get_tunnels())
 # input()
 while True:
     # endless loop to stop program from terminating

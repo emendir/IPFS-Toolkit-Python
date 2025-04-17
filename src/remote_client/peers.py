@@ -1,11 +1,11 @@
-from ipfs_toolkit_generics.peers import SwarmFiltersUpdateError
-from ipfs_toolkit_generics import BaseClient, BasePeers
+from ipfs_tk_generics.peers import SwarmFiltersUpdateError
+from ipfs_tk_generics import IpfsClient, BasePeers
 
 import ipfshttpclient2 as ipfshttpclient
 
 
 class RemotePeers(BasePeers):
-    def __init__(self, node: BaseClient):
+    def __init__(self, node: IpfsClient):
         self._node = node
         self._http_client = self._node._http_client
 

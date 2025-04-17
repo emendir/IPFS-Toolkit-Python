@@ -1,5 +1,5 @@
 import os
-from ipfs_toolkit_generics import BaseClient, BasePubSub, BasePubsubListener
+from ipfs_tk_generics import IpfsClient, BasePubSub, BasePubsubListener
 
 from io import BytesIO
 from threading import Thread
@@ -14,7 +14,7 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 
 class RemotePubSub(BasePubSub):
-    def __init__(self, node: BaseClient):
+    def __init__(self, node: IpfsClient):
         self._node = node
         self._http_client = self._node._http_client
 

@@ -3,8 +3,8 @@
 # To use it you must have IPFS running on your computer.
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
-from ipfs_toolkit_generics.peers import SwarmFiltersUpdateError
-from ipfs_toolkit_generics import BasePubsubListener
+from ipfs_tk_generics.peers import SwarmFiltersUpdateError
+from ipfs_tk_generics import BasePubsubListener
 import socket
 from urllib.parse import ParseResult
 from urllib.parse import urlparse
@@ -137,23 +137,23 @@ def find_providers(cid):
 
 
 def create_tcp_listening_connection(name: str, port: int):
-    return client.tcp.open_listener(name, port)
+    return client.tunnels.open_listener(name, port)
 
 
 def create_tcp_sending_connection(name: str, port, peerID):
-    return client.tcp.open_sender(name, port, peerID)
+    return client.tunnels.open_sender(name, port, peerID)
 
 
 def close_all_tcp_connections(listeners_only=False):
-    return client.tcp.close_all(listeners_only=False)
+    return client.tunnels.close_all(listeners_only=False)
 
 
 def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: str = None):
-    return client.tcp.close_sender(name=name, port=port, peer_id=peer_id)
+    return client.tunnels.close_sender(name=name, port=port, peer_id=peer_id)
 
 
 def close_tcp_listening_connection(name: str = None, port: str = None):
-    return client.tcp.close_listener(name=name, port=port)
+    return client.tunnels.close_listener(name=name, port=port)
 
 
 def check_peer_connection(id, name=""):

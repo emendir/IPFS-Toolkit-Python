@@ -1058,7 +1058,7 @@ def listen_for_file_transmissions(listener_name,
         ft = FileTransmissionReceiver()
         conv = Conversation()
         ft.setup(conv, eventhandler, progress_handler=progress_handler, dir=dir)
-        conv.join(ipfs_api.client.tcp.generate_name(conv_name),
+        conv.join(ipfs_api.client.tunnels.generate_name(conv_name),
                   peer_id,
                   conv_name,
                   ft.on_data_received,

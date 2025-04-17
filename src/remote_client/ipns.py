@@ -1,4 +1,4 @@
-from ipfs_toolkit_generics import BaseClient, BaseIpns
+from ipfs_tk_generics import IpfsClient, BaseIpns
 import ipfshttpclient2 as ipfshttpclient
 from datetime import datetime
 import os
@@ -6,7 +6,7 @@ import shutil
 import tempfile
 
 class RemoteIpns(BaseIpns):
-    def __init__(self, node: BaseClient):
+    def __init__(self, node: IpfsClient):
         self._node = node
         self._self._http_client = self._node._http_client
 

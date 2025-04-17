@@ -1,25 +1,25 @@
 from time import sleep
-from ipfs_toolkit_generics import BaseClient
+from ipfs_tk_generics import IpfsClient
 from .files import RemoteFiles
 from .pubsub import RemotePubSub
-from .tcp import RemoteTcp
+from .tunnels import RemoteTunnels
 from .peers import RemotePeers
 import ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 import socket
 from urllib.parse import ParseResult
 from urllib.parse import urlparse
-class IpfsRemote(BaseClient):
+class IpfsRemote(IpfsClient):
     def __init__(self, address:str|None):
         self._http_client = ipfshttpclient.client.Client()
         
         self._pubsub = RemotePubSub(self)
-        self._tcp = RemoteTcp(self)
+        self._tunnels = RemoteTunnels(self)
         self._files = RemoteFiles(self)
         self._peers = RemotePeers(self)
     @property
-    def tcp(self)->RemoteTcp:
-        return self._tcp
+    def tunnels(self)->RemoteTunnels:
+        return self._tunnels
     @property
     def pubsub(self)->RemotePubSub:
         return self._pubsub

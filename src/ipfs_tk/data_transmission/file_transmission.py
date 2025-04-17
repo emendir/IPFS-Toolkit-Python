@@ -18,7 +18,7 @@ from .config import (
     BLOCK_SIZE,
 )
 
-from ipfs_tk_generics.client_interface import BaseClientInterface
+from ipfs_tk_generics.base_client import BaseClient
 from .errors import (
     InvalidPeer,
     UnreadableReply
@@ -28,7 +28,7 @@ from typing import Callable
 
 
 def transmit_file(
-    ipfs_client: BaseClientInterface,
+    ipfs_client: BaseClient,
     filepath,
     peer_id,
     others_req_listener,
@@ -83,7 +83,7 @@ def transmit_file(
     )
 
 
-def listen_for_file_transmissions(ipfs_client: BaseClientInterface,
+def listen_for_file_transmissions(ipfs_client: BaseClient,
                                   listener_name: str,
                                   eventhandler: Callable,
                                   progress_handler: Callable | None = None,
@@ -120,7 +120,7 @@ def listen_for_file_transmissions(ipfs_client: BaseClientInterface,
         conv = BaseConversation(ipfs_client)
         ft.setup(ipfs_client, conv, eventhandler,
                  progress_handler=progress_handler, dir=dir)
-        conv.join(ipfs_client.tcp.generate_name(conv_name),
+        conv.join(ipfs_client.tunnels.generate_name(conv_name),
                   peer_id,
                   conv_name,
                   ft.on_data_received,
@@ -137,7 +137,7 @@ class FileTransmitter:
     status = "not started"  # "transmitting" "finished" "aborted"
 
     def __init__(self,
-                 ipfs_client: BaseClientInterface,
+                 ipfs_client: BaseClient,
 
                  filepath: str,
                  peer_id: str,
@@ -273,7 +273,7 @@ class FileTransmissionReceiver:
     writtenbytes = 0
     status = "not started"  # "receiving" "finished" "aborted"
 
-    def setup(self,    ipfs_client: BaseClientInterface,
+    def setup(self,    ipfs_client: BaseClient,
               conversation, eventhandler, progress_handler=None, dir="."):
         """Configure this object to make it work.
         Args:

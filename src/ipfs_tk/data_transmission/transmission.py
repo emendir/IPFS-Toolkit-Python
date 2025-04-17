@@ -4,7 +4,7 @@ from threading import Thread
 from datetime import datetime, UTC
 import time
 import traceback
-from ipfs_tk_generics.client_interface import BaseClientInterface
+from ipfs_tk_generics.base_client import BaseClient
 
 from .errors import (
     InvalidPeer,
@@ -35,7 +35,7 @@ from typing import Callable
 
 
 def transmit_data(
-        ipfs_client: BaseClientInterface,
+        ipfs_client: BaseClient,
         data: bytes,
         peer_id: str,
         req_lis_name: str,
@@ -136,7 +136,7 @@ def transmit_data(
     # _close_sending_connection(peer_id, their_trsm_port)
 
 
-def listen_for_transmissions(ipfs_client: BaseClientInterface, listener_name: str, eventhandler: Callable) -> "TransmissionListener":
+def listen_for_transmissions(ipfs_client: BaseClient, listener_name: str, eventhandler: Callable) -> "TransmissionListener":
     """
     Listens for incoming transmission requests (senders requesting to transmit
     data to us) and sets up the machinery needed to receive those transmissions.
@@ -167,7 +167,7 @@ class TransmissionListener:
     # This function itself is called to process the transmission request buffer sent by the transmission sender.
     _terminate = False
 
-    def __init__(self, ipfs_client: BaseClientInterface, listener_name: str, eventhandler: Callable):
+    def __init__(self, ipfs_client: BaseClient, listener_name: str, eventhandler: Callable):
         """
         Args:
             listener_name (str): the name of this TransmissionListener (chosen by
@@ -314,7 +314,7 @@ class TransmissionListener:
 
 class BufferSender():
 
-    def __init__(self, ipfs_client: BaseClientInterface, peer_id, proto):
+    def __init__(self, ipfs_client: BaseClient, peer_id, proto):
         self.ipfs_client = ipfs_client
         self.peer_id = peer_id
         self.proto = proto
@@ -339,7 +339,7 @@ class BufferSender():
 class BufferReceiver():
     def __init__(
         self,
-        ipfs_client: BaseClientInterface,
+        ipfs_client: BaseClient,
         eventhandler,
         proto,
         address: tuple[str, int],
@@ -372,7 +372,7 @@ class BufferReceiver():
 
 
 def listen_to_buffers(
-        ipfs_client: BaseClientInterface,
+        ipfs_client: BaseClient,
         eventhandler,
         proto,
         ip_addr="127.0.0.1",
@@ -495,7 +495,7 @@ class _ListenerTCP(threading.Thread):
 
 
 def listen_to_buffers_on_port(
-    ipfs_client: BaseClientInterface,
+    ipfs_client: BaseClient,
 
     eventhandler,
     proto,

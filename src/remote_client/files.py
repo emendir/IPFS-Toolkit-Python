@@ -5,7 +5,7 @@ import os
 import tempfile
 import shutil
 from datetime import datetime, UTC
-from ipfs_toolkit_generics import BaseClient, BaseFiles
+from ipfs_tk_generics import IpfsClient, BaseFiles
 
 
 from cachetools import LRUCache
@@ -23,7 +23,7 @@ def _getsizeof_cache_entry(value):
 
 class RemoteFiles(BaseFiles):
 
-    def __init__(self, node:BaseClient):
+    def __init__(self, node:IpfsClient):
         self._node = node
         self._http_client = self._node._http_client
         # LRUCache with a custom size-based eviction policy

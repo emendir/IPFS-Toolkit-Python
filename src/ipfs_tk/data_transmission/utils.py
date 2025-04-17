@@ -1,6 +1,6 @@
 import socket
 import time
-from ipfs_tk_generics.client_interface import BaseClientInterface
+from ipfs_tk_generics.base_client import BaseClient
 from .config import (
     PRINT_LOG_CONNECTIONS,
     BUFFER_SIZE,
@@ -140,7 +140,7 @@ def _tcp_recv_buffer_timeout(sock: socket.socket, buffer_size: int=BUFFER_SIZE, 
 # ----------IPFS Utilities-------------------------------------------
 
 
-def _create_sending_connection(ipfs_client: BaseClientInterface, peer_id: str, protocol: str, port: None=None) -> socket.socket:
+def _create_sending_connection(ipfs_client: BaseClient, peer_id: str, protocol: str, port: None=None) -> socket.socket:
     # _close_sending_connection(
     #     peer_id=peer_id, name=protocol)
     if port:
@@ -149,7 +149,7 @@ def _create_sending_connection(ipfs_client: BaseClientInterface, peer_id: str, p
     if port == None:
         for prt in sending_ports:   # trying ports until we find a free one
             try:
-                ipfs_client.tcp.open_sender(protocol, prt, peer_id)
+                ipfs_client.tunnels.open_sender(protocol, prt, peer_id)
                 sock.connect((ipfs_client._ipfs_host_ip(), prt))
                 return sock
             except Exception as e:   # ignore errors caused by port already in use
@@ -159,20 +159,20 @@ def _create_sending_connection(ipfs_client: BaseClientInterface, peer_id: str, p
         raise IPFS_Error("Failed to find free port for sending connection")
     else:
         try:
-            ipfs_client.tcp.open_sender(protocol, port, peer_id)
+            ipfs_client.tunnels.open_sender(protocol, port, peer_id)
             sock.connect((ipfs_client._ipfs_host_ip(), prt))
             return sock
         except Exception as e:
             raise IPFS_Error(str(e))
 
 
-def _create_listening_connection(ipfs_client: BaseClientInterface, protocol, port, force=True):
+def _create_listening_connection(ipfs_client: BaseClient, protocol, port, force=True):
     """
     Args:
         bool force: whether or not already existing conflicting connections should be closed.
     """
     try:
-        ipfs_client.tcp.open_listener(protocol, port)
+        ipfs_client.tunnels.open_listener(protocol, port)
         if PRINT_LOG_CONNECTIONS:
             print(f"listening fas \"{protocol}\" on {port}")
     except:
@@ -180,7 +180,7 @@ def _create_listening_connection(ipfs_client: BaseClientInterface, protocol, por
             _close_listening_connection(ipfs_client, name=protocol)
         try:
             time.sleep(0.1)
-            ipfs_client.tcp.open_listener(protocol, port)
+            ipfs_client.tunnels.open_listener(protocol, port)
             if PRINT_LOG_CONNECTIONS:
                 print(f"listening as \"{protocol}\" on {port}")
         except:
@@ -192,17 +192,17 @@ def _create_listening_connection(ipfs_client: BaseClientInterface, protocol, por
     return port
 
 
-def _close_sending_connection(ipfs_client: BaseClientInterface, peer_id: str|None=None, name: str|None=None, port: None=None):
+def _close_sending_connection(ipfs_client: BaseClient, peer_id: str|None=None, name: str|None=None, port: None=None):
     try:
-        ipfs_client.tcp.close_sender(
+        ipfs_client.tunnels.close_sender(
             peer_id=peer_id, name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))
 
 
-def _close_listening_connection(ipfs_client: BaseClientInterface, name: str|None=None, port: int|None=None):
+def _close_listening_connection(ipfs_client: BaseClient, name: str|None=None, port: int|None=None):
     try:
-        ipfs_client.tcp.close_listener(
+        ipfs_client.tunnels.close_listener(
             name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))

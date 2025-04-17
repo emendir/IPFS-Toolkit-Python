@@ -27,7 +27,7 @@ from .errors import (
     CommunicationTimeout,
     ConvListenTimeout,
 )
-from ipfs_tk_generics.client_interface import BaseClientInterface
+from ipfs_tk_generics.base_client import BaseClient
 from typing import Callable
 
 
@@ -47,7 +47,7 @@ class BaseConversation():
 
     _last_coms_time: datetime | None = None
 
-    def __init__(self, ipfs_client: BaseClientInterface):
+    def __init__(self, ipfs_client: BaseClient):
         self.ipfs_client = ipfs_client
         self.started = Event()
         self._conversation_started = False
@@ -139,7 +139,7 @@ class BaseConversation():
         success = self.started.wait(transm_send_timeout_sec)
         if not success:
             print(f"{conv_name}: IPFS tunnels: {
-                  self.ipfs_client.tcp.get_tunnels().listeners}")
+                  self.ipfs_client.tunnels.get_tunnels().listeners}")
             raise CommunicationTimeout(
                 f"Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.")
 
@@ -356,7 +356,7 @@ class ConversationListener:
 
     """
 
-    def __init__(self, ipfs_client: BaseClientInterface, listener_name: str, eventhandler: Callable):
+    def __init__(self, ipfs_client: BaseClient, listener_name: str, eventhandler: Callable):
         self.ipfs_client = ipfs_client
         self._listener_name = listener_name
         if (PRINT_LOG_CONVERSATIONS):

@@ -9,7 +9,7 @@ from threading import Thread, Lock
 import os
 import json
 from datetime import datetime, UTC, timedelta
-from ipfs_tk_generics import BaseClient
+from ipfs_tk_generics import IpfsClient
 
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
@@ -28,7 +28,7 @@ class Peer:
     __multi_addrs_lock = Lock()
     __terminate = False
 
-    def __init__(self, ipfs_client: BaseClient, peer_id="", serial=None):
+    def __init__(self, ipfs_client: IpfsClient, peer_id="", serial=None):
         self.ipfs_client = ipfs_client
         if peer_id and not serial:
             self.__peer_id = peer_id
@@ -162,7 +162,7 @@ class PeerMonitor:
     __peers_lock = Lock()   # for adding & removing peers
 
     def __init__(self,
-        ipfs_client:BaseClient,
+        ipfs_client:IpfsClient,
                  filepath,
                  forget_after_hrs=FORGET_AFTER_HOURS,
                  connection_attempt_interval_sec=CONNECTION_ATTEMPT_INTERVAL_SEC,

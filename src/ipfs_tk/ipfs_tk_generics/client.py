@@ -1,4 +1,4 @@
-from .client_interface import BaseClientInterface
+from .base_client import BaseClient
 from data_transmission import (
     transmit_data,
     TransmissionListener,
@@ -16,7 +16,7 @@ from data_transmission.config import (
 )
 
 
-class BaseClient(BaseClientInterface):
+class IpfsClient(BaseClient):
 
     def transmit_data(
             self,
