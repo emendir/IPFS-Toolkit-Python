@@ -78,3 +78,5 @@ class IpfsRemote(IpfsClient):
             count += 1
             if timeout_sec and count == timeout_sec:
                 raise TimeoutError()
+    def terminate(self):
+        pass

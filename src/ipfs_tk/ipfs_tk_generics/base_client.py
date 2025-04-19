@@ -24,3 +24,6 @@ class BaseClient(ABC):
     @abstractmethod
     def get_addrs(self) -> set[str]:
         pass
+    @abstractmethod
+    def terminate(self):
+        pass
