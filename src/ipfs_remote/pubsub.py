@@ -63,7 +63,7 @@ class RemotePubSub(BasePubSub):
         Returns:
             list: peers we are connected to on the specified pubsub topic
         """
-        return self._http_client.pubsub.list_peers(topic=_encode_base64_url(topic.encode()))["Strings"]
+        return self._http_client.pubsub.peers(topic=_encode_base64_url(topic.encode()))["Strings"]
 
 
 class PubsubListener(BasePubsubListener):
