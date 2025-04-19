@@ -457,8 +457,8 @@ class Conversation(BaseConversation):
             f"{self.others_trsm_listener}:files",
             metadata,
             _progress_handler,
-            encryption_callbacks=(self.__encryption_callback,
-                                  self.__decryption_callback),
+            encryption_callbacks=(self._encryption_callback,
+                                  self._decryption_callback),
             block_size=block_size,
             transm_send_timeout_sec=transm_send_timeout_sec,
             transm_req_max_retries=transm_req_max_retries)

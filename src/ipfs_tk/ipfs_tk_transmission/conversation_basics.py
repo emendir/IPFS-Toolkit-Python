@@ -41,9 +41,7 @@ class BaseConversation():
     _transm_send_timeout_sec = TRANSM_SEND_TIMEOUT_SEC
     _transm_req_max_retries = TRANSM_REQ_MAX_RETRIES
     _listener = None
-    __encryption_callback = None
-    __decryption_callback = None
-    _terminate = False
+
 
     _last_coms_time: datetime | None = None
 
@@ -53,6 +51,10 @@ class BaseConversation():
         self._conversation_started = False
         self.data_received_eventhandler = None
         self.message_queue: Queue[bytes] = Queue()
+        
+        self._encryption_callback = None
+        self._decryption_callback = None
+        self._terminate = False
 
     def start(self,
               conv_name: str,
@@ -105,8 +107,8 @@ class BaseConversation():
         self.conv_name = conv_name
         self.data_received_eventhandler = data_received_eventhandler
         if encryption_callbacks:
-            self.__encryption_callback = encryption_callbacks[0]
-            self.__decryption_callback = encryption_callbacks[1]
+            self._encryption_callback = encryption_callbacks[0]
+            self._decryption_callback = encryption_callbacks[1]
         self._transm_send_timeout_sec = transm_send_timeout_sec
         self._transm_req_max_retries = transm_req_max_retries
 
@@ -195,8 +197,8 @@ class BaseConversation():
                   + others_trsm_listener)
         self.data_received_eventhandler = data_received_eventhandler
         if encryption_callbacks:
-            self.__encryption_callback = encryption_callbacks[0]
-            self.__decryption_callback = encryption_callbacks[1]
+            self._encryption_callback = encryption_callbacks[0]
+            self._decryption_callback = encryption_callbacks[1]
         self._transm_send_timeout_sec = transm_send_timeout_sec
         self._transm_req_max_retries = transm_req_max_retries
         self._listener = listen_for_transmissions(
@@ -255,10 +257,10 @@ class BaseConversation():
                 print(info[0])
             return
         else:   # conversation has already started
-            if self.__decryption_callback:
+            if self._decryption_callback:
                 if PRINT_LOG_CONVERSATIONS:
                     print("Conv._hear: decrypting message")
-                data = self.__decryption_callback(data)
+                data = self._decryption_callback(data)
             self.message_queue.put(data)
 
             if self.data_received_eventhandler:
@@ -320,10 +322,10 @@ class BaseConversation():
             if PRINT_LOG:
                 print("Wanted to say something but conversation was not yet started")
             time.sleep(0.01)
-        if self.__encryption_callback:
+        if self._encryption_callback:
             if PRINT_LOG_CONVERSATIONS:
                 print("Conv.say: encrypting message")
-            data = self.__encryption_callback(data)
+            data = self._encryption_callback(data)
         transmit_data(self.ipfs_client,data, self.peer_id, self.others_trsm_listener,
                       timeout_sec, max_retries)
         self._last_coms_time = datetime.now(UTC)
