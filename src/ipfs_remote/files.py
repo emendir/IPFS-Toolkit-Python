@@ -86,7 +86,7 @@ class RemoteFiles(BaseFiles):
         self._http_client.get(cid=cid, target=tempdir)
 
         # move file/folder from temporary directory to desired path
-        shutil.move(os.path.join(tempdir, cid), path)
+        shutil.move(os.path.join(tempdir, cid), dest_path)
 
         # cleanup temporary directory
         shutil.rmtree(tempdir)
