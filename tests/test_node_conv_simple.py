@@ -1,3 +1,4 @@
+from time import sleep
 from ipfs_node import IpfsNode
 import os
 import shutil
@@ -22,13 +23,12 @@ TRANSMISSION_NAME = "ipfs_tk_test_node_transm_simple"
 
 received_data: list[bytes] = []
 
-MESSAGE_1="Hello there!".encode('utf-8')
-REPLY_1="Hi!".encode()
-MESSAGE_2="It's working, it's working!".encode('utf-8')
-REPLY_2="Seeya soon!".encode("utf-8")
-MESSAGE_3="Bye!".encode('utf-8')
+MESSAGE_1 = "Hello there!".encode('utf-8')
+REPLY_1 = "Hi!".encode()
+MESSAGE_2 = "It's working, it's working!".encode('utf-8')
+REPLY_2 = "Seeya soon!".encode("utf-8")
+MESSAGE_3 = "Bye!".encode('utf-8')
 
-import tempfile
 dir_rec = tempfile.mkdtemp()
 dir_sen = tempfile.mkdtemp()
 # print("Receiver kubo logs:", os.path.join(dir_rec, "kubo.log"))
@@ -36,8 +36,9 @@ dir_sen = tempfile.mkdtemp()
 
 ipfs_receiver = IpfsNode(dir_rec)
 
+node_listener_received_messages: list[bytes] = []
 
-node_listener_received_messages:list[bytes] = []
+
 def new_conv_handler(conv_name, peer_id):
     """Eventhandler for when we join a new conversation."""
     print("Joining a new conversation:", conv_name)
@@ -55,12 +56,10 @@ def new_conv_handler(conv_name, peer_id):
             conversation.close()
         else:
             print(f"Received unexpected message: {message}")
-                
 
     conv = ipfs_receiver.join_conversation(
         conv_name, peer_id, conv_name, on_message_received)
     print("Joined")
-
 
 
 conv_lis = ipfs_receiver.listen_for_conversations(
@@ -68,21 +67,14 @@ conv_lis = ipfs_receiver.listen_for_conversations(
 print("Set up listener")
 
 
-
-
-
-
-
-
-
-
 ipfs_sender = IpfsNode(dir_sen)
 
-from time import sleep
+multi_addr = f"{ipfs_receiver.get_addrs()[0]}/p2p/{ipfs_receiver.peer_id}"
+ipfs_sender.peers.connect(multi_addr)
 found_peer = ipfs_sender.peers.find(ipfs_receiver.peer_id)
 mark(found_peer, "Found peer")
 if found_peer:
-    node_sender_received_messages:list[bytes] = []
+    node_sender_received_messages: list[bytes] = []
 
     def sender_on_message_received(conversation, message):
         """Eventhandler for when the other peer says something in the conversation."""
@@ -96,7 +88,6 @@ if found_peer:
             conversation.say(MESSAGE_3)
             conversation.close()
 
-
     # Starting a conversation with name "test-con",
     # where the peer is listening for conversations on a ConversationListener called "general_listener",
     # waiting for the peer to join the conversation until executing the next line of code
@@ -109,14 +100,13 @@ if found_peer:
 
     sleep(30)
     conv.terminate()
-    
+
     mark(
         MESSAGE_1 in node_listener_received_messages
         and MESSAGE_2 in node_listener_received_messages
         and MESSAGE_3 in node_listener_received_messages
         and REPLY_1 in node_sender_received_messages
-        and REPLY_2 in node_sender_received_messages
-        , "Conversation Messaging")
+        and REPLY_2 in node_sender_received_messages, "Conversation Messaging")
 
 # when you no longer need to listen for incoming conversations, clean up resources:
 conv_lis.terminate()
