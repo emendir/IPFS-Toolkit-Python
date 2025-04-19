@@ -83,5 +83,12 @@ class RemoteTunnels(BaseTunnels):
 
 
     def get_tunnels(self)->TunnelsList:
-        #TODO
-        pass
+        listeners:list[ListenerTunnel]=[]
+        senders:list[SenderTunnel]=[]
+        my_id=f"/p2p/{self._node.peer_id}"
+        for i in self._http_client.p2p.ls()[0]["Listeners"]:
+            if i["ListenAddress"] == my_id:
+                listeners.append(ListenerTunnel(i["Protocol"], i["TargetAddress"]))
+            else:
+                senders.append(SenderTunnel(i["Protocol"], i["ListenAddress"], i["TargetAddress"]))
+        return TunnelsList(senders, listeners)

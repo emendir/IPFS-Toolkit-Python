@@ -4,7 +4,7 @@
 # This wrapper uses a custom updated version of the ipfshttpclient.
 
 from ipfs_tk_generics.peers import SwarmFiltersUpdateError
-from ipfs_tk_generics import BasePubsubListener
+from ipfs_tk_generics.pubsub import BasePubsubListener
 import socket
 from urllib.parse import ParseResult
 from urllib.parse import urlparse
@@ -23,10 +23,10 @@ from termcolor import colored
 from datetime import timedelta
 from datetime import datetime, UTC
 import base64
-from . import ipfshttpclient2 as ipfshttpclient
+import ipfs_remote.ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
-from remote_client import IpfsRemote
-if False:
+from ipfs_remote import IpfsRemote
+if True:
     from ipfs_remote.files import USE_IPFS_CONTENT_CACHE
     from ipfs_remote.pubsub import PubsubListener
     client = IpfsRemote("127.0.0.1:5001")
@@ -34,7 +34,7 @@ else:
     from ipfs_node import IpfsNode
     USE_IPFS_CONTENT_CACHE = False
     from ipfs_node.ipfs_pubsub import IPFSSubscription as PubsubListener
-    client = IpfsNode()
+    client = IpfsNode("/tmp/IpfsToolkitTest")
 
 def publish(path: str):
     return client.files.publish(path)

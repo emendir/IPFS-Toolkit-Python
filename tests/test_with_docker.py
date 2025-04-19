@@ -54,9 +54,6 @@ if True:
         import ipfs_cli as ipfs_api
     else:
         import ipfs_api
-        import ipfs_api
-        ipfs_api.client.terminate()
-        ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
     import ipfs_datatransmission
 
 docker_peer = None
@@ -78,7 +75,7 @@ def prepare():
 
     # run test script on docker container
     command = "python3 /opt/IPFS-Toolkit/docker_script.py"
-    os.system(f"docker exec {docker_peer.container_id} {command}&")
+    # os.system(f"docker exec {docker_peer.container_id} {command}&")
     print(f"docker exec {docker_peer.container_id} {command}&")
     time.sleep(1)
 
@@ -114,6 +111,7 @@ conv = None
 
 def test_find_peer():
     print("Running test_find_peer...")
+    ipfs_api.connect_to_peer(docker_peer.mutltiaddr)
     success = False
     for i in range(10):
         success = ipfs_api.find_peer(docker_peer.ipfs_id)

@@ -7,3 +7,5 @@ httpx
 requests
 termcolor
 cachetools
+ipfs_tk
+ipfs_node

@@ -1,8 +1,8 @@
 import time
 if True:
     import ipfs_api
-    ipfs_api.client.terminate()
-    ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
+    # ipfs_api.client.terminate()
+    # ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
     import ipfs_datatransmission
     ipfs_api.wait_till_ipfs_is_running()
     print(ipfs_api.my_id())
@@ -34,8 +34,7 @@ def new_conv_handler(conv_name, peerID):
         print("Received file", filepath)
     def progress_handler(progress):
         print(str(round(progress*100))+"%")
-    conv = ipfs_datatransmission.Conversation()
-    conv.join(conv_name, peerID, conv_name, on_message_received,
+    conv = ipfs_datatransmission.join_conversation(conv_name, peerID, conv_name, on_message_received,
               on_file_received, file_progress_callback=progress_handler, dir="/opt")
     print("Waiting for file...")
     data = conv.listen_for_file(200)

@@ -20,6 +20,8 @@ def get_option(option):
 class DockerContainer():
     def __init__(self, container_name, auto_run=True):
         self.container_name = container_name
+        self.ipfs_id = ""
+        self.mutltiaddr=""
         if auto_run:
             self.run()
 
@@ -38,12 +40,17 @@ class DockerContainer():
         self.container_id = result.stdout.strip("\n")
 
         self.ipfs_id = ""
+        self.mutltiaddr=""
         # wait till IPFS is running and till we can reach it
         print("IPFS-Docker: Waiting for container's IPFS to come online...")
         while not self.ipfs_id:
             time.sleep(1)
-            command=f"docker exec -it {self.container_id} python3 -c 'import ipfs_api;ipfs_api.client.terminate();ipfs_api.client=ipfs_api.IpfsNode(\"/tmp/IpfsToolkitTest\");ipfs_id=ipfs_api.my_id();ipfs_api.client.terminate();print(\"PeerID:\", ipfs_id)' 2>/dev/null"
-            # print(command)
+            # command=f"docker exec -it {self.container_id} python3 -c 'import ipfs_api;ipfs_api.client.terminate();ipfs_api.client=ipfs_api.IpfsNode(\"/tmp/IpfsToolkitTest\");ipfs_id=ipfs_api.my_id();ipfs_api.client.terminate();print(\"PeerID:\", ipfs_id)' 2>/dev/null"
+            command=(
+                f"docker exec -it {self.container_id} python3 -c "
+            "'import ipfs_api;ipfs_id=ipfs_api.my_id();addrs=ipfs_api.my_multiaddrs();print(\"MutliAddr:\", f\"{addrs[0]}/p2p/{ipfs_id}\");print(\"PeerID:\", ipfs_id)' 2>/dev/null"
+            )
+            print(command)
             result = subprocess.run(
                 command,
                 shell=True,
@@ -51,7 +58,7 @@ class DockerContainer():
                 text=True,
                 check=False
             ).stdout
-            # print(result)    
+            print(result)    
             if result:
                 match = [line for line in result.split("\n") if line.startswith("PeerID:")]
                 if match:
@@ -59,6 +66,10 @@ class DockerContainer():
                     parts= match[-1].strip().split(" ")
                     if len(parts) == 2:
                         self.ipfs_id = parts[-1]
+                    match = [line for line in result.split("\n") if line.startswith("MutliAddr:")]
+                    parts= match[-1].strip().split(" ")
+                    self.mutltiaddr= parts[-1]
+                    
         print("IPFS-Docker: IPFS is online!")
         
 

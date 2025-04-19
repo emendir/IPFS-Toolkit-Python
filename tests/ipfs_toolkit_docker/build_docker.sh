@@ -8,7 +8,7 @@ docker rm $(docker ps --filter "ancestor=emendir/ipfs-toolkit" -aq)  >/dev/null 
 # 
 # rsync -XAva --exclude-from=.gitignore  --delete ../KuboPythonLib tests/ipfs_toolkit_docker/python_packages/
 # rsync -XAva  ../KuboPythonLib/src/ --delete tests/ipfs_toolkit_docker/python_packages/KuboPythonLib/src/
-rsync -XAva  ../KuboPythonLib/dist/*.whl tests/ipfs_toolkit_docker/python_packages/
+# rsync -XAva  ../KuboPythonLib/dist/*.whl tests/ipfs_toolkit_docker/python_packages/
 
 docker build -t emendir/ipfs-toolkit -f tests/ipfs_toolkit_docker/Dockerfile .
 

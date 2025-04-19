@@ -213,8 +213,10 @@ class BaseConversation():
             'utf-8')) + bytearray([255]) + bytearray(conv_name.encode('utf-8'))
         self._conversation_started = True
         if PRINT_LOG_CONVERSATIONS:
-            print(f"{conv_name}: Sending join response to {
-                  others_trsm_listener}")
+            print(f"{conv_name}: Sending join-response to "
+                f"{others_trsm_listener}")
+            print("Tunnels:", self.ipfs_client.tunnels.get_tunnels())
+        import time;time.sleep(0.5)#TODO: FIX THIS DELAY WITH TRNAMISSION RETRIES
         transmit_data(self.ipfs_client, data, peer_id, others_trsm_listener)
         self._last_coms_time = datetime.now(UTC)
         if PRINT_LOG_CONVERSATIONS:

@@ -26,6 +26,9 @@
 - terminate properly on error (test it in conv properly, see if more needs to be done for FileTransission)
 - include encryption parameters in transmit_data?
 
+## Conversation
+- replace delays with transmission retries (see "#TODO" comment)
+
 
 ## ipfs_http_client
 - write tests for all routing functionality
