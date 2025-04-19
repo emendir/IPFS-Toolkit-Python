@@ -1,5 +1,5 @@
-from ipfs_tk_generics import IpfsClient, BaseTunnels
-from ipfs_tk_generics.tunnels import SenderTunnel, ListenerTunnel, TunnelsList
+from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.tunnels import BaseTunnels, SenderTunnel, ListenerTunnel, TunnelsList
 
 class RemoteTunnels(BaseTunnels):
     def __init__(self, node:IpfsClient):

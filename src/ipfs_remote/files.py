@@ -1,11 +1,12 @@
-import ipfshttpclient2 as ipfshttpclient
+from . import ipfshttpclient2 as ipfshttpclient
 
 import os.path
 import os
 import tempfile
 import shutil
 from datetime import datetime, UTC
-from ipfs_tk_generics import IpfsClient, BaseFiles
+from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.files import BaseFiles
 
 
 from cachetools import LRUCache

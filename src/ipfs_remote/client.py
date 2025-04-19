@@ -4,7 +4,7 @@ from .files import RemoteFiles
 from .pubsub import RemotePubSub
 from .tunnels import RemoteTunnels
 from .peers import RemotePeers
-import ipfshttpclient2 as ipfshttpclient
+from . import ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 import socket
 from urllib.parse import ParseResult

@@ -1,1 +1,1 @@
-from .ipfs_remote import IpfsRemote
+from .client import IpfsRemote

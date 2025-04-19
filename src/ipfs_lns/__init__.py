@@ -2,7 +2,7 @@ import appdirs
 import os
 import os.path
 import json
-# import ipfshttpclient2 as ipfshttpclient
+# from . import ipfshttpclient2 as ipfshttpclient
 from subprocess import Popen, PIPE
 from threading import Thread
 import ipfs_api

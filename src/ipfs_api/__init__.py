@@ -23,7 +23,7 @@ from termcolor import colored
 from datetime import timedelta
 from datetime import datetime, UTC
 import base64
-import ipfshttpclient2 as ipfshttpclient
+from . import ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from remote_client import IpfsRemote
 if False:

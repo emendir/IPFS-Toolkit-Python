@@ -1,5 +1,6 @@
-from ipfs_tk_generics import IpfsClient, BaseIpns
-import ipfshttpclient2 as ipfshttpclient
+from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.ipns import BaseIpns
+from . import ipfshttpclient2 as ipfshttpclient
 from datetime import datetime
 import os
 import shutil

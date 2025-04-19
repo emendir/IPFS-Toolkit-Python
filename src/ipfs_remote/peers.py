@@ -1,7 +1,7 @@
-from ipfs_tk_generics.peers import SwarmFiltersUpdateError
-from ipfs_tk_generics import IpfsClient, BasePeers
+from ipfs_tk_generics.peers import SwarmFiltersUpdateError, BasePeers
+from ipfs_tk_generics import IpfsClient
 
-import ipfshttpclient2 as ipfshttpclient
+from . import ipfshttpclient2 as ipfshttpclient
 
 
 class RemotePeers(BasePeers):
