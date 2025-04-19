@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ipfs_tk"
-version = "0.5.33"
+version = "0.1.0"
 description = "A set of tools for working with IPFS in Python, agnostic of Python-IPFS interfaces."
 readme = {file = "ReadMe.md", content-type = "text/markdown"}
 requires-python = ">=3.6"

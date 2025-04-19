@@ -27,13 +27,13 @@ import ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from remote_client import IpfsRemote
 if False:
-    from remote_client.files import USE_IPFS_CONTENT_CACHE
-    from remote_client.pubsub import PubsubListener
+    from ipfs_remote.files import USE_IPFS_CONTENT_CACHE
+    from ipfs_remote.pubsub import PubsubListener
     client = IpfsRemote("127.0.0.1:5001")
 else:
-    from kubo_python import IpfsNode
+    from ipfs_node import IpfsNode
     USE_IPFS_CONTENT_CACHE = False
-    from kubo_python.ipfs_pubsub import IPFSSubscription as PubsubListener
+    from ipfs_node.ipfs_pubsub import IPFSSubscription as PubsubListener
     client = IpfsNode()
 
 def publish(path: str):

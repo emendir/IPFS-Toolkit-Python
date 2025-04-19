@@ -1,4 +1,4 @@
-from kubo_python import IpfsNode
+from ipfs_node import IpfsNode
 import os
 import shutil
 import tempfile

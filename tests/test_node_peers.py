@@ -8,7 +8,7 @@ import _testing_utils
 import peer_monitor
 import pytest
 from _testing_utils import mark
-from kubo_python import IpfsNode
+from ipfs_node import IpfsNode
 from peer_monitor import Peer, PeerMonitor
 
 _testing_utils.assert_is_loaded_from_source(
