@@ -44,8 +44,8 @@ class RemotePeers(BasePeers):
         """
         try:
             response = self._http_client.routing.findpeer(peer_id)
-            if (len(response["Responses"][0]["Addrs"]) > 0):
-                return response
+            if (response and len(response["Responses"]) > 0 and len(response["Responses"][0]["Addrs"]) > 0):
+                return response["Responses"][0]["Addrs"]
         except:
             return None
 
