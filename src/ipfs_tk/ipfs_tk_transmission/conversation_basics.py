@@ -140,10 +140,11 @@ class BaseConversation():
             )
         success = self.started.wait(transm_send_timeout_sec)
         if not success:
-            print(f"{conv_name}: IPFS tunnels: {
-                  self.ipfs_client.tunnels.get_tunnels().listeners}")
+            print(f"{conv_name}: IPFS tunnels: "
+                f"{self.ipfs_client.tunnels.get_tunnels().listeners}")
             raise CommunicationTimeout(
-                f"Successfully transmitted conversation request but received no reply within timeout of {transm_send_timeout_sec}s.")
+                "Successfully transmitted conversation request but received no"
+                f" reply within timeout of {transm_send_timeout_sec}s.")
 
         return True     # signal success
 
@@ -245,7 +246,9 @@ class BaseConversation():
                 self.others_trsm_listener = info[1].decode('utf-8')
                 if PRINT_LOG_CONVERSATIONS:
                     print(
-                        f"{self.conv_name}: other's proto is {self.others_trsm_listener}")
+                        f"{self.conv_name}: other's proto is "
+                        f"{self.others_trsm_listener}"
+                    )
                 # self.hear_eventhandler = self._hear
                 self._conversation_started = True
                 if PRINT_LOG_CONVERSATIONS:
@@ -374,17 +377,23 @@ class ConversationListener:
     def _on_request_received(self, data, peer_id):
         if PRINT_LOG_CONVERSATIONS:
             print(
-                f"ConvLisReceived {self._listener_name}: Received Conversation Request")
+                f"ConvLisReceived {self._listener_name}: "
+                "Received Conversation Request"
+            )
         info = _split_by_255(data)
         if info[0] == bytearray("I want to start a conversation".encode('utf-8')):
             if PRINT_LOG_CONVERSATIONS:
                 print(
-                    f"ConvLisReceived {self._listener_name}: Starting conversation...")
+                    f"ConvLisReceived {self._listener_name}: "
+                    "Starting conversation..."
+                )
             conv_name = info[1].decode('utf-8')
             self.eventhandler(conv_name, peer_id)
         elif PRINT_LOG_CONVERSATIONS:
             print(
-                f"ConvLisReceived {self._listener_name}: Received unreadable request")
+                f"ConvLisReceived {self._listener_name}: "
+                "Received unreadable request"
+            )
             print(info[0])
 
     def terminate(self):
