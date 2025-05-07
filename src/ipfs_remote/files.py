@@ -12,7 +12,13 @@ from ipfs_tk_generics.files import BaseFiles
 from cachetools import LRUCache
 import sys
 
-USE_IPFS_CONTENT_CACHE = True
+def _is_pypy()->bool:
+    return hasattr(sys, 'pypy_version_info')
+
+
+
+# we sometime get an error when using pypy instead of cpython
+USE_IPFS_CONTENT_CACHE = not _is_pypy()
 MAX_CACHE_SIZE = 400 * 1024 * 1024  # 50 MB limit
 
 # Define a custom function to measure the size of cache entries

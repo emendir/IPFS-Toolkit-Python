@@ -63,7 +63,7 @@ class RemotePeers(BasePeers):
     def add_swarm_filter(self, filter_multiaddr):
         try:
             self._http_client.swarm.filters.add(filter_multiaddr)
-        except self._ipfshttpclient.exceptions.ErrorResponse:
+        except ipfshttpclient.exceptions.ErrorResponse:
             # this error always gets thrown, isn't a problem
             pass
         if filter_multiaddr not in self.get_swarm_filters():

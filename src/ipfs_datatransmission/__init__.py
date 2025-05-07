@@ -5,7 +5,15 @@ from ipfs_tk_transmission.config import (
     TRANSM_REQ_MAX_RETRIES,
     BLOCK_SIZE
 )
-
+from ipfs_tk_transmission.errors import (
+    DataTransmissionError,
+    PeerNotFound,
+    InvalidPeer,
+    CommunicationTimeout,
+    ConvListenTimeout,
+    UnreadableReply,
+    IPFS_Error,
+)
 
 def transmit_data(
         data: bytes,
