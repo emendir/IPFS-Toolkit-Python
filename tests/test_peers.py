@@ -1,11 +1,12 @@
 import shutil
 import time
 import threading
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import sys
 import os
 from termcolor import colored
 from ipfs_toolkit_docker.docker_container import DockerContainer
+UTC=timezone.utc
 if True:
     sys.path.insert(0, os.path.join((os.path.dirname(__file__)),"..","src"))
     import ipfs_api

@@ -4,13 +4,14 @@ import os.path
 import os
 import tempfile
 import shutil
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from ipfs_tk_generics import IpfsClient
 from ipfs_tk_generics.files import BaseFiles
 
 
 from cachetools import LRUCache
 import sys
+UTC=timezone.utc
 
 def _is_pypy()->bool:
     return hasattr(sys, 'pypy_version_info')

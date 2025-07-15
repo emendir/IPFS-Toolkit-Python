@@ -1,5 +1,9 @@
 
 FROM emendir/systemd-ipfs:24.04
+
+
+RUN apt update && apt install -y python3-pip python-is-python3
+
 COPY *.py /opt/IPFS-Toolkit/
 COPY src /opt/IPFS-Toolkit/src
 COPY ReadMe.md /opt/IPFS-Toolkit/

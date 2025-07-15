@@ -5,7 +5,7 @@ from .utils import (
 )
 from queue import Queue
 from threading import Thread, Event
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import time
 # import inspect
 from inspect import signature
@@ -30,6 +30,7 @@ from .errors import (
 from ipfs_tk_generics.base_client import BaseClient
 from typing import Callable
 
+UTC=timezone.utc
 
 class BaseConversation():
     """Communication object which allows 2 peers to repetatively make

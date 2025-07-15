@@ -24,6 +24,7 @@ import time
 import sys
 from termcolor import colored
 from ipfs_toolkit_docker.docker_container import DockerContainer
+from brenthy_docker import BrenthyDocker
 import os
 import threading
 
@@ -71,8 +72,8 @@ def prepare():
         from ipfs_toolkit_docker.build_docker import build_docker
         build_docker(verbose=False)
 
-    docker_peer = DockerContainer("IPFS-Toolkit-Test")
-
+    # docker_peer = DockerContainer("IPFS-Toolkit-Test")
+    docker_peer = BrenthyDocker(container_name="IPFS-Toolkit-Test", image="emendir/ipfs-toolkit",await_brenthy=False, await_ipfs=True)
     # run test script on docker container
     command = "python3 /opt/IPFS-Toolkit/docker_script.py"
     # os.system(f"docker exec {docker_peer.container_id} {command}&")
@@ -111,7 +112,7 @@ conv = None
 
 def test_find_peer():
     print("Running test_find_peer...")
-    ipfs_api.connect_to_peer(docker_peer.mutltiaddr)
+    # ipfs_api.connect_to_peer(docker_peer.mutltiaddr)
     success = False
     for i in range(10):
         success = ipfs_api.find_peer(docker_peer.ipfs_id)

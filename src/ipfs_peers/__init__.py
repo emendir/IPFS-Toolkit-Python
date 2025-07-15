@@ -9,7 +9,9 @@ from threading import Thread, Lock
 import os
 import json
 import ipfs_api
-from datetime import datetime, UTC, timedelta
+from datetime import datetime, timezone, timedelta
+
+UTC = timezone.utc
 
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
@@ -268,7 +270,8 @@ class PeerMonitor:
                     time.sleep(1)
 
             # make peers forget old multiaddresses
-            threshhold_time = datetime.now(UTC) - timedelta(hours=self.forget_after_hrs)
+            threshhold_time = datetime.now(
+                UTC) - timedelta(hours=self.forget_after_hrs)
             for peer in self.__peers:
                 peer.forget_old_entries(threshhold_time)
             # forget old peers
@@ -284,7 +287,8 @@ class PeerMonitor:
         Blocks until all connection attempts have been finished."""
         threads = []
         for peer in self.__peers:
-            thread = Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,))
+            thread = Thread(target=peer.connect, args=(
+                self.successive_register_ignore_dur_sec,))
             threads.append(thread)
             thread.start()
         # wait for all threads to finish

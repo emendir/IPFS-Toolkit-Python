@@ -8,9 +8,10 @@ import time
 from threading import Thread, Lock
 import os
 import json
-from datetime import datetime, UTC, timedelta
+from datetime import datetime, timezone, timedelta
 from ipfs_tk_generics import IpfsClient
 
+UTC=timezone.utc
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
 SUCCESSIVE_REGISTER_IGNORE_DUR_SEC = 60

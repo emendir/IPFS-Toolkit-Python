@@ -1,7 +1,7 @@
 import socket
 import threading
 from threading import Thread
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import time
 import traceback
 from ipfs_tk_generics.base_client import BaseClient
@@ -34,6 +34,7 @@ from .utils import (
 from typing import Callable
 
 
+UTC=timezone.utc
 def transmit_data(
         ipfs_client: BaseClient,
         data: bytes,

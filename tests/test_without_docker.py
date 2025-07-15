@@ -3,7 +3,8 @@ import os
 import threading
 import sys
 from termcolor import colored
-from datetime import datetime, UTC
+from datetime import datetime, timezone
+UTC=timezone.utc
 if True:
     sys.path.insert(0, os.path.join((os.path.dirname(__file__)),"..","src"))
     import ipfs_api

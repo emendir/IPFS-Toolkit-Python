@@ -4,7 +4,7 @@
 from queue import Queue, Empty as QueueEmpty
 
 from threading import Thread
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import time
 # import inspect
 
@@ -31,6 +31,7 @@ from .file_transmission import (
 )
 from typing import Callable
 
+UTC=timezone.utc
 
 def start_conversation(
         ipfs_client: BaseClient,

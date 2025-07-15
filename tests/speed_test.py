@@ -22,7 +22,7 @@ run the following commands to stop and remove the unterminated container:
 
 # import ipfs_datatransmission
 from threading import Thread
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from matplotlib import pyplot
 from random import randrange
 import time
@@ -32,6 +32,7 @@ from ipfs_toolkit_docker.docker_container import DockerContainer
 import os
 import threading
 
+UTC=timezone.utc
 # replace with the path of a file you would like to send
 file_path = "/mnt/Uverlin/Music/Davy Jones  - Pirates of the Caribbean.mp3"
 # time in seconds to wait for file to transmit before calling test a failure
