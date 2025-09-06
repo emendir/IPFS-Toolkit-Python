@@ -1,0 +1,36 @@
+ipfs\_remote.ipfshttpclient2 package
+====================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ipfs_remote.ipfshttpclient2.client
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ipfs_remote.ipfshttpclient2.encoding
+   ipfs_remote.ipfshttpclient2.exceptions
+   ipfs_remote.ipfshttpclient2.filescanner
+   ipfs_remote.ipfshttpclient2.http
+   ipfs_remote.ipfshttpclient2.http_common
+   ipfs_remote.ipfshttpclient2.http_httpx
+   ipfs_remote.ipfshttpclient2.http_requests
+   ipfs_remote.ipfshttpclient2.multipart
+   ipfs_remote.ipfshttpclient2.requests_wrapper
+   ipfs_remote.ipfshttpclient2.utils
+   ipfs_remote.ipfshttpclient2.version
+
+Module contents
+---------------
+
+.. automodule:: ipfs_remote.ipfshttpclient2
+   :members:
+   :show-inheritance:
+   :undoc-members:

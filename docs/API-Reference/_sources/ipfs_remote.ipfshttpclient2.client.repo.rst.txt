@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.client.repo module
+===============================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client.repo
+   :members:
+   :show-inheritance:
+   :undoc-members:

@@ -1,0 +1,7 @@
+ipfs\_remote.ipns module
+========================
+
+.. automodule:: ipfs_remote.ipns
+   :members:
+   :show-inheritance:
+   :undoc-members:

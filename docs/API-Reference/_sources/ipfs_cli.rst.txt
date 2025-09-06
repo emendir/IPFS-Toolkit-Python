@@ -1,0 +1,10 @@
+ipfs\_cli package
+=================
+
+Module contents
+---------------
+
+.. automodule:: ipfs_cli
+   :members:
+   :show-inheritance:
+   :undoc-members:

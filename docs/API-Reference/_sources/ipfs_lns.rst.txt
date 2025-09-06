@@ -1,0 +1,10 @@
+ipfs\_lns package
+=================
+
+Module contents
+---------------
+
+.. automodule:: ipfs_lns
+   :members:
+   :show-inheritance:
+   :undoc-members:

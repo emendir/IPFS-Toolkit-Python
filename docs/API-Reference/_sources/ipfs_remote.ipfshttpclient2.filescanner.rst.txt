@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.filescanner module
+===============================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.filescanner
+   :members:
+   :show-inheritance:
+   :undoc-members:

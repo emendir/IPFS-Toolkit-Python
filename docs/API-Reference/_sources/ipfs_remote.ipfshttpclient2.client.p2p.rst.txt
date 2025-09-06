@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.client.p2p module
+==============================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client.p2p
+   :members:
+   :show-inheritance:
+   :undoc-members:

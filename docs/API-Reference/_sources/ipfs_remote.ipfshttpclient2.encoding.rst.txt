@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.encoding module
+============================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.encoding
+   :members:
+   :show-inheritance:
+   :undoc-members:

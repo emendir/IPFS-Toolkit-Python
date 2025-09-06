@@ -1,0 +1,983 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="ipfs_remote.ipfshttpclient2.client.base module" href="ipfs_remote.ipfshttpclient2.client.base.html" /><link rel="prev" title="ipfs_remote.ipfshttpclient2 package" href="ipfs_remote.ipfshttpclient2.html" />
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+        <title>ipfs_remote.ipfshttpclient2.client package - ipfs_toolkit 0.6.0rc3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="README.html"><div class="brand">ipfs_toolkit 0.6.0rc3 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="README.html">
+  
+  <span class="sidebar-brand-text">ipfs_toolkit 0.6.0rc3 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ipfs_api.html">ipfs_api package</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="ipfs_remote.html">ipfs_remote package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ipfs_remote package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.html">ipfs_remote.ipfshttpclient2 package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ipfs_remote.ipfshttpclient2 package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">ipfs_remote.ipfshttpclient2.client package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of ipfs_remote.ipfshttpclient2.client package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html">ipfs_remote.ipfshttpclient2.client.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bitswap.html">ipfs_remote.ipfshttpclient2.client.bitswap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html">ipfs_remote.ipfshttpclient2.client.block module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html">ipfs_remote.ipfshttpclient2.client.bootstrap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html">ipfs_remote.ipfshttpclient2.client.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html">ipfs_remote.ipfshttpclient2.client.dag module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html">ipfs_remote.ipfshttpclient2.client.dht module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html">ipfs_remote.ipfshttpclient2.client.files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html">ipfs_remote.ipfshttpclient2.client.key module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html">ipfs_remote.ipfshttpclient2.client.miscellaneous module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html">ipfs_remote.ipfshttpclient2.client.name module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html">ipfs_remote.ipfshttpclient2.client.p2p module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html">ipfs_remote.ipfshttpclient2.client.pin module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html">ipfs_remote.ipfshttpclient2.client.pubsub module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.repo.html">ipfs_remote.ipfshttpclient2.client.repo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html">ipfs_remote.ipfshttpclient2.client.routing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html">ipfs_remote.ipfshttpclient2.client.swarm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html">ipfs_remote.ipfshttpclient2.client.unstable module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.encoding.html">ipfs_remote.ipfshttpclient2.encoding module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.exceptions.html">ipfs_remote.ipfshttpclient2.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.filescanner.html">ipfs_remote.ipfshttpclient2.filescanner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http.html">ipfs_remote.ipfshttpclient2.http module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http_common.html">ipfs_remote.ipfshttpclient2.http_common module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http_httpx.html">ipfs_remote.ipfshttpclient2.http_httpx module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http_requests.html">ipfs_remote.ipfshttpclient2.http_requests module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.multipart.html">ipfs_remote.ipfshttpclient2.multipart module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.requests_wrapper.html">ipfs_remote.ipfshttpclient2.requests_wrapper module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.utils.html">ipfs_remote.ipfshttpclient2.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.version.html">ipfs_remote.ipfshttpclient2.version module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.client.html">ipfs_remote.client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.files.html">ipfs_remote.files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipns.html">ipfs_remote.ipns module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.peers.html">ipfs_remote.peers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.pubsub.html">ipfs_remote.pubsub module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.tunnels.html">ipfs_remote.tunnels module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_datatransmission.html">ipfs_datatransmission package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_peers.html">ipfs_peers package</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/ipfs_remote.ipfshttpclient2.client.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="ipfs-remote-ipfshttpclient2-client-package">
+<h1>ipfs_remote.ipfshttpclient2.client package<a class="headerlink" href="#ipfs-remote-ipfshttpclient2-client-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html">ipfs_remote.ipfshttpclient2.client.base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ClientBase"><code class="docutils literal notranslate"><span class="pre">ClientBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs"><code class="docutils literal notranslate"><span class="pre">CommonArgs</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.auth"><code class="docutils literal notranslate"><span class="pre">CommonArgs.auth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.cookies"><code class="docutils literal notranslate"><span class="pre">CommonArgs.cookies</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.data"><code class="docutils literal notranslate"><span class="pre">CommonArgs.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.headers"><code class="docutils literal notranslate"><span class="pre">CommonArgs.headers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.offline"><code class="docutils literal notranslate"><span class="pre">CommonArgs.offline</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.timeout"><code class="docutils literal notranslate"><span class="pre">CommonArgs.timeout</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseBase"><code class="docutils literal notranslate"><span class="pre">ResponseBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseBase.as_json"><code class="docutils literal notranslate"><span class="pre">ResponseBase.as_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseWrapIterator"><code class="docutils literal notranslate"><span class="pre">ResponseWrapIterator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseWrapIterator.close"><code class="docutils literal notranslate"><span class="pre">ResponseWrapIterator.close()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.SectionBase"><code class="docutils literal notranslate"><span class="pre">SectionBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.SectionBase.chunk_size"><code class="docutils literal notranslate"><span class="pre">SectionBase.chunk_size</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.SectionProperty"><code class="docutils literal notranslate"><span class="pre">SectionProperty</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ident"><code class="docutils literal notranslate"><span class="pre">ident()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.returns_multiple_items"><code class="docutils literal notranslate"><span class="pre">returns_multiple_items()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.returns_no_item"><code class="docutils literal notranslate"><span class="pre">returns_no_item()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.returns_single_item"><code class="docutils literal notranslate"><span class="pre">returns_single_item()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bitswap.html">ipfs_remote.ipfshttpclient2.client.bitswap module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bitswap.html#ipfs_remote.ipfshttpclient2.client.bitswap.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bitswap.html#ipfs_remote.ipfshttpclient2.client.bitswap.Section.stat"><code class="docutils literal notranslate"><span class="pre">Section.stat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bitswap.html#ipfs_remote.ipfshttpclient2.client.bitswap.Section.wantlist"><code class="docutils literal notranslate"><span class="pre">Section.wantlist()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html">ipfs_remote.ipfshttpclient2.client.block module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section.get"><code class="docutils literal notranslate"><span class="pre">Section.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section.put"><code class="docutils literal notranslate"><span class="pre">Section.put()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section.stat"><code class="docutils literal notranslate"><span class="pre">Section.stat()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html">ipfs_remote.ipfshttpclient2.client.bootstrap module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section.add"><code class="docutils literal notranslate"><span class="pre">Section.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section.list"><code class="docutils literal notranslate"><span class="pre">Section.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section.rm"><code class="docutils literal notranslate"><span class="pre">Section.rm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html">ipfs_remote.ipfshttpclient2.client.config module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section.get"><code class="docutils literal notranslate"><span class="pre">Section.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section.replace"><code class="docutils literal notranslate"><span class="pre">Section.replace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section.set"><code class="docutils literal notranslate"><span class="pre">Section.set()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html">ipfs_remote.ipfshttpclient2.client.dag module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.export"><code class="docutils literal notranslate"><span class="pre">Section.export()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.get"><code class="docutils literal notranslate"><span class="pre">Section.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.imprt"><code class="docutils literal notranslate"><span class="pre">Section.imprt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.put"><code class="docutils literal notranslate"><span class="pre">Section.put()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.resolve"><code class="docutils literal notranslate"><span class="pre">Section.resolve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html">ipfs_remote.ipfshttpclient2.client.dht module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.findpeer"><code class="docutils literal notranslate"><span class="pre">Section.findpeer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.findprovs"><code class="docutils literal notranslate"><span class="pre">Section.findprovs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.get"><code class="docutils literal notranslate"><span class="pre">Section.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.put"><code class="docutils literal notranslate"><span class="pre">Section.put()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.query"><code class="docutils literal notranslate"><span class="pre">Section.query()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html">ipfs_remote.ipfshttpclient2.client.files module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.add"><code class="docutils literal notranslate"><span class="pre">Base.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.cat"><code class="docutils literal notranslate"><span class="pre">Base.cat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.files"><code class="docutils literal notranslate"><span class="pre">Base.files</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.get"><code class="docutils literal notranslate"><span class="pre">Base.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.ls"><code class="docutils literal notranslate"><span class="pre">Base.ls()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.cp"><code class="docutils literal notranslate"><span class="pre">Section.cp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.ls"><code class="docutils literal notranslate"><span class="pre">Section.ls()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.mkdir"><code class="docutils literal notranslate"><span class="pre">Section.mkdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.mv"><code class="docutils literal notranslate"><span class="pre">Section.mv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.read"><code class="docutils literal notranslate"><span class="pre">Section.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.rm"><code class="docutils literal notranslate"><span class="pre">Section.rm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.stat"><code class="docutils literal notranslate"><span class="pre">Section.stat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.write"><code class="docutils literal notranslate"><span class="pre">Section.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html">ipfs_remote.ipfshttpclient2.client.key module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.gen"><code class="docutils literal notranslate"><span class="pre">Section.gen()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.list"><code class="docutils literal notranslate"><span class="pre">Section.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.rename"><code class="docutils literal notranslate"><span class="pre">Section.rename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.rm"><code class="docutils literal notranslate"><span class="pre">Section.rm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html">ipfs_remote.ipfshttpclient2.client.miscellaneous module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.dns"><code class="docutils literal notranslate"><span class="pre">Base.dns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.id"><code class="docutils literal notranslate"><span class="pre">Base.id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.ping"><code class="docutils literal notranslate"><span class="pre">Base.ping()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.resolve"><code class="docutils literal notranslate"><span class="pre">Base.resolve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.stop"><code class="docutils literal notranslate"><span class="pre">Base.stop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.version"><code class="docutils literal notranslate"><span class="pre">Base.version()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html">ipfs_remote.ipfshttpclient2.client.name module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section.inspect"><code class="docutils literal notranslate"><span class="pre">Section.inspect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section.publish"><code class="docutils literal notranslate"><span class="pre">Section.publish()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section.resolve"><code class="docutils literal notranslate"><span class="pre">Section.resolve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html">ipfs_remote.ipfshttpclient2.client.p2p module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.close"><code class="docutils literal notranslate"><span class="pre">Section.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.forward"><code class="docutils literal notranslate"><span class="pre">Section.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.listen"><code class="docutils literal notranslate"><span class="pre">Section.listen()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.ls"><code class="docutils literal notranslate"><span class="pre">Section.ls()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html">ipfs_remote.ipfshttpclient2.client.pin module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.add"><code class="docutils literal notranslate"><span class="pre">Section.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.ls"><code class="docutils literal notranslate"><span class="pre">Section.ls()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.rm"><code class="docutils literal notranslate"><span class="pre">Section.rm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.update"><code class="docutils literal notranslate"><span class="pre">Section.update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.verify"><code class="docutils literal notranslate"><span class="pre">Section.verify()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html">ipfs_remote.ipfshttpclient2.client.pubsub module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.EncodeBase64Url"><code class="docutils literal notranslate"><span class="pre">EncodeBase64Url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.ls"><code class="docutils literal notranslate"><span class="pre">Section.ls()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.peers"><code class="docutils literal notranslate"><span class="pre">Section.peers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.publish"><code class="docutils literal notranslate"><span class="pre">Section.publish()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.publish_old"><code class="docutils literal notranslate"><span class="pre">Section.publish_old()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.subscribe"><code class="docutils literal notranslate"><span class="pre">Section.subscribe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.subscribe_old"><code class="docutils literal notranslate"><span class="pre">Section.subscribe_old()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel"><code class="docutils literal notranslate"><span class="pre">SubChannel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel.close"><code class="docutils literal notranslate"><span class="pre">SubChannel.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel.read_message"><code class="docutils literal notranslate"><span class="pre">SubChannel.read_message()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.repo.html">ipfs_remote.ipfshttpclient2.client.repo module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.repo.html#ipfs_remote.ipfshttpclient2.client.repo.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.repo.html#ipfs_remote.ipfshttpclient2.client.repo.Section.gc"><code class="docutils literal notranslate"><span class="pre">Section.gc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.repo.html#ipfs_remote.ipfshttpclient2.client.repo.Section.stat"><code class="docutils literal notranslate"><span class="pre">Section.stat()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html">ipfs_remote.ipfshttpclient2.client.routing module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.findpeer"><code class="docutils literal notranslate"><span class="pre">Section.findpeer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.findprovs"><code class="docutils literal notranslate"><span class="pre">Section.findprovs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.get"><code class="docutils literal notranslate"><span class="pre">Section.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.put"><code class="docutils literal notranslate"><span class="pre">Section.put()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html">ipfs_remote.ipfshttpclient2.client.swarm module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection"><code class="docutils literal notranslate"><span class="pre">FiltersSection</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection.add"><code class="docutils literal notranslate"><span class="pre">FiltersSection.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection.list"><code class="docutils literal notranslate"><span class="pre">FiltersSection.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection.rm"><code class="docutils literal notranslate"><span class="pre">FiltersSection.rm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.addrs"><code class="docutils literal notranslate"><span class="pre">Section.addrs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.connect"><code class="docutils literal notranslate"><span class="pre">Section.connect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.disconnect"><code class="docutils literal notranslate"><span class="pre">Section.disconnect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.filters"><code class="docutils literal notranslate"><span class="pre">Section.filters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.peers"><code class="docutils literal notranslate"><span class="pre">Section.peers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html">ipfs_remote.ipfshttpclient2.client.unstable module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection"><code class="docutils literal notranslate"><span class="pre">LogSection</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection.level"><code class="docutils literal notranslate"><span class="pre">LogSection.level()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection.ls"><code class="docutils literal notranslate"><span class="pre">LogSection.ls()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection.tail"><code class="docutils literal notranslate"><span class="pre">LogSection.tail()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.RefsSection"><code class="docutils literal notranslate"><span class="pre">RefsSection</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.RefsSection.local"><code class="docutils literal notranslate"><span class="pre">RefsSection.local()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.Section.log"><code class="docutils literal notranslate"><span class="pre">Section.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.Section.refs"><code class="docutils literal notranslate"><span class="pre">Section.refs</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-ipfs_remote.ipfshttpclient2.client">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ipfs_remote.ipfshttpclient2.client" title="Link to this heading">¶</a></h2>
+<p>IPFS API Bindings for Python.</p>
+<p>Classes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Client – a TCP client for interacting with an IPFS daemon</p></li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipfs_remote.ipfshttpclient2.client.</span></span><span class="sig-name descname"><span class="pre">Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr:</span> <span class="pre">~multiaddr.multiaddr.Multiaddr</span> <span class="pre">|</span> <span class="pre">bytes</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&lt;Multiaddr</span> <span class="pre">/dns/localhost/tcp/5001/http&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'api/v0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offline:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth:</span> <span class="pre">~typing.Tuple[str</span> <span class="pre">|</span> <span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">bytes]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cookies:</span> <span class="pre">http.cookiejar.CookieJar</span> <span class="pre">|</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">|</span> <span class="pre">~typing.Dict[bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bytes]</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[~typing.Tuple[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]]</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[~typing.Tuple[bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bytes]]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">~typing.Tuple[float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">float]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#Client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base" title="ipfs_remote.ipfshttpclient2.client.files.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a>, <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base" title="ipfs_remote.ipfshttpclient2.client.miscellaneous.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>The main IPFS HTTP client class</p>
+<p>Allows access to an IPFS daemon instance using its HTTP API by exposing an
+<a class="reference external" href="https://github.com/ipfs/interface-ipfs-core/tree/master/SPEC">IPFS Interface Core</a>
+compatible set of methods.</p>
+<p>It is possible to instantiate this class directly, using the same parameters
+as <a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.connect" title="ipfs_remote.ipfshttpclient2.client.connect"><code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code></a>, to prevent the client from checking for an active and
+compatible version of the daemon. In general however, calling
+<a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.connect" title="ipfs_remote.ipfshttpclient2.client.connect"><code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code></a> should be preferred.</p>
+<p>In order to reduce latency between individual API calls, this class may keep
+a pool of TCP connections between this client and the API daemon open
+between requests. The only caveat of this is that the client object should
+be closed when it is not used anymore to prevent resource leaks.</p>
+<p>The easiest way of using this “session management” facility is using a
+context manager:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ipfshttpclient</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">version</span><span class="p">())</span>  <span class="c1"># These calls…</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">version</span><span class="p">())</span>  <span class="c1"># …will reuse their TCP connection</span>
+</pre></div>
+</div>
+<p>A client object may be re-opened several times:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">client</span> <span class="o">=</span> <span class="n">ipfshttpclient</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">version</span><span class="p">())</span>  <span class="c1"># Perform API call on separate TCP connection</span>
+<span class="k">with</span> <span class="n">client</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">version</span><span class="p">())</span>  <span class="c1"># These calls…</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">version</span><span class="p">())</span>  <span class="c1"># …will share a TCP connection</span>
+<span class="k">with</span> <span class="n">client</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">version</span><span class="p">())</span>  <span class="c1"># These calls…</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">version</span><span class="p">())</span>  <span class="c1"># …will share a different TCP connection</span>
+</pre></div>
+</div>
+<p>When storing a long-running <a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client" title="ipfs_remote.ipfshttpclient2.client.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> object use it like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    class Consumer:
+            def __init__(self):
+                    self._client = ipfshttpclient.connect(session=True)
+
+            # … other code …
+
+            def close(self):  # Call this when you&#39;re done
+                    self._client.close()
+
+
+
+Arguments
+---------
+addr
+        The `Multiaddr &lt;dweb:/ipns/multiformats.io/multiaddr/&gt;`_ describing the
+        API daemon location, as used in the *API* key of `go-ipfs Addresses
+        section
+        &lt;https://github.com/ipfs/go-ipfs/blob/master/docs/config.md#addresses&gt;`_
+
+        Supported addressing patterns are currently:
+
+         * ``/{dns,dns4,dns6,ip4,ip6}/&lt;host&gt;/tcp/&lt;port&gt;`` (HTTP)
+         * ``/{dns,dns4,dns6,ip4,ip6}/&lt;host&gt;/tcp/&lt;port&gt;/http`` (HTTP)
+         * ``/{dns,dns4,dns6,ip4,ip6}/&lt;host&gt;/tcp/&lt;port&gt;/https`` (HTTPS)
+
+        Additional forms (proxying) may be supported in the future.
+base
+        The HTTP URL path prefix (or “base”) at which the API is exposed on the
+        API daemon
+chunk_size
+        The size of data chunks passed to the operating system when uploading
+        files or text/binary content
+offline
+        Ask daemon to operate in “offline mode” – that is, it should not consult
+        the network when unable to find resources locally, but fail instead
+session
+        Create this :class:`~ipfshttpclient.Client` instance with a session
+        already open? (Useful for long-running client objects.)
+auth
+        HTTP basic authentication `(username, password)` tuple to send along with
+        each request to the API daemon
+cookies
+        HTTP cookies to send along with each request to the API daemon
+headers
+        Custom HTTP headers to send along with each request to the API daemon
+timeout
+        Connection timeout (in seconds) when connecting to the API daemon
+
+        If a tuple is passed its contents will be interpreted as the values for
+        the connecting and receiving phases respectively, otherwise the value will
+        apply to both phases.
+
+        The default value is implementation-defined. A value of `math.inf`
+        disables the respective timeout.
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.add_bytes">
+<span class="sig-name descname"><span class="pre">add_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#Client.add_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.add_bytes" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a set of bytes as a file to IPFS.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">add_bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Mary had a little lamb&quot;</span><span class="p">)</span>
+<span class="go">&#39;QmZfF6C9j4VtoCsTp4KSrhYH47QMd3DNXVZBKaxJdhaPab&#39;</span>
+</pre></div>
+</div>
+<p>Also accepts and will stream generator objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> – Content to be added as a file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hash of the added IPFS object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.add_json">
+<span class="sig-name descname"><span class="pre">add_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#Client.add_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.add_json" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a json-serializable Python dict as a json file to IPFS.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">add_json</span><span class="p">({</span><span class="s1">&#39;one&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+<span class="go">&#39;QmVz9g7m5u3oHiNKHj2CJX1dbG1gtismRS3g9NaPBBLbob&#39;</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_obj</strong> (<em>dict</em>) – A json-serializable Python dictionary</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hash of the added IPFS object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.add_str">
+<span class="sig-name descname"><span class="pre">add_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#Client.add_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.add_str" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a Python string as a file to IPFS.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">add_str</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;Mary had a little lamb&quot;</span><span class="p">)</span>
+<span class="go">&#39;QmZfF6C9j4VtoCsTp4KSrhYH47QMd3DNXVZBKaxJdhaPab&#39;</span>
+</pre></div>
+</div>
+<p>Also accepts and will stream generator objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – Content to be added as a file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hash of the added IPFS object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.apply_workarounds">
+<span class="sig-name descname"><span class="pre">apply_workarounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#Client.apply_workarounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.apply_workarounds" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Query version information of the referenced daemon and enable any</dt><dd><p>workarounds known for the corresponding version</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The version information returned by the daemon</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.bitswap">
+<span class="sig-name descname"><span class="pre">bitswap</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.bitswap" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bitswap.html#ipfs_remote.ipfshttpclient2.client.bitswap.Section" title="ipfs_remote.ipfshttpclient2.client.bitswap.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.block">
+<span class="sig-name descname"><span class="pre">block</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.block" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section" title="ipfs_remote.ipfshttpclient2.client.block.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.bootstrap">
+<span class="sig-name descname"><span class="pre">bootstrap</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.bootstrap" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section" title="ipfs_remote.ipfshttpclient2.client.bootstrap.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#Client.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.close" title="Link to this definition">¶</a></dt>
+<dd><p>close any currently open client session and free any associated
+resources.</p>
+<p>If there was no session currently open this method does nothing. An open
+session is not a requirement for using a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code>
+object and as such all method defined on it will continue to work, but
+a new TCP connection will be established for each and every API call
+invoked. Such a usage should therefor be avoided and may cause a warning
+in the future. See the class’s description for details.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.config" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section" title="ipfs_remote.ipfshttpclient2.client.config.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.dag">
+<span class="sig-name descname"><span class="pre">dag</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.dag" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section" title="ipfs_remote.ipfshttpclient2.client.dag.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.dht">
+<span class="sig-name descname"><span class="pre">dht</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.dht" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section" title="ipfs_remote.ipfshttpclient2.client.dht.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.get_json">
+<span class="sig-name descname"><span class="pre">get_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cid</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#Client.get_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.get_json" title="Link to this definition">¶</a></dt>
+<dd><p>Loads a json object from IPFS.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">get_json</span><span class="p">(</span><span class="s1">&#39;QmVz9g7m5u3oHiNKHj2CJX1dbG1gtismRS3g9NaPBBLbob&#39;</span><span class="p">)</span>
+<span class="go">{&#39;one&#39;: 1, &#39;two&#39;: 2, &#39;three&#39;: 3}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cid</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>cid.CIDv0</em><em>, </em><em>cid.CIDv1</em><em>]</em>) – CID of the IPFS object to load</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Deserialized IPFS JSON object value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.key">
+<span class="sig-name descname"><span class="pre">key</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.key" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section" title="ipfs_remote.ipfshttpclient2.client.key.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.name" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section" title="ipfs_remote.ipfshttpclient2.client.name.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.p2p">
+<span class="sig-name descname"><span class="pre">p2p</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.p2p" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section" title="ipfs_remote.ipfshttpclient2.client.p2p.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.pin">
+<span class="sig-name descname"><span class="pre">pin</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.pin" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section" title="ipfs_remote.ipfshttpclient2.client.pin.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.pubsub">
+<span class="sig-name descname"><span class="pre">pubsub</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.pubsub" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section" title="ipfs_remote.ipfshttpclient2.client.pubsub.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.repo">
+<span class="sig-name descname"><span class="pre">repo</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.repo" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.repo.html#ipfs_remote.ipfshttpclient2.client.repo.Section" title="ipfs_remote.ipfshttpclient2.client.repo.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.routing">
+<span class="sig-name descname"><span class="pre">routing</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.routing" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section" title="ipfs_remote.ipfshttpclient2.client.routing.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.swarm">
+<span class="sig-name descname"><span class="pre">swarm</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.swarm" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section" title="ipfs_remote.ipfshttpclient2.client.swarm.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.Client.unstable">
+<span class="sig-name descname"><span class="pre">unstable</span></span><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.Client.unstable" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.Section" title="ipfs_remote.ipfshttpclient2.client.unstable.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.assert_version">
+<span class="sig-prename descclassname"><span class="pre">ipfs_remote.ipfshttpclient2.client.</span></span><span class="sig-name descname"><span class="pre">assert_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.5.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.9.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blacklist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#assert_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.assert_version" title="Link to this definition">¶</a></dt>
+<dd><p>Make sure that the given daemon version is supported by this client
+version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>VersionMismatch</strong> – </p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>version</strong> – The actual version of an IPFS daemon</p></li>
+<li><p><strong>minimum</strong> – The minimal IPFS daemon version allowed (inclusive)</p></li>
+<li><p><strong>maximum</strong> – The maximum IPFS daemon version allowed (exclusive)</p></li>
+<li><p><strong>blacklist</strong> – Versions explicitly disallowed even if in range <em>minimum</em> – <em>maximum</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipfs_remote.ipfshttpclient2.client.connect">
+<span class="sig-prename descclassname"><span class="pre">ipfs_remote.ipfshttpclient2.client.</span></span><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr:</span> <span class="pre">~multiaddr.multiaddr.Multiaddr</span> <span class="pre">|</span> <span class="pre">bytes</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&lt;Multiaddr</span> <span class="pre">/dns/localhost/tcp/5001/http&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'api/v0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offline:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth:</span> <span class="pre">~typing.Tuple[str</span> <span class="pre">|</span> <span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">bytes]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cookies:</span> <span class="pre">http.cookiejar.CookieJar</span> <span class="pre">|</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">|</span> <span class="pre">~typing.Dict[bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bytes]</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[~typing.Tuple[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]]</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[~typing.Tuple[bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bytes]]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">~typing.Tuple[float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">float]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipfs_remote/ipfshttpclient2/client.html#connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipfs_remote.ipfshttpclient2.client.connect" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code> instance and connect to the
+daemon to validate that its version is supported as well as applying any
+known workarounds for the given daemon version</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ErrorResponse</strong> – </p></li>
+<li><p><strong>ConnectionError</strong> – </p></li>
+<li><p><strong>ProtocolError</strong> – </p></li>
+<li><p><strong>StatusError</strong> – </p></li>
+<li><p><strong>TimeoutError</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>All parameters are identical to those passed to the constructor of the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code> class.</p>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ipfs_remote.ipfshttpclient2.client.base.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">ipfs_remote.ipfshttpclient2.client.base module</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="ipfs_remote.ipfshttpclient2.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">ipfs_remote.ipfshttpclient2 package</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ipfs_remote.ipfshttpclient2.client package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ipfs_remote.ipfshttpclient2.client">Module contents</a><ul>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client"><code class="docutils literal notranslate"><span class="pre">Client</span></code></a><ul>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.add_bytes"><code class="docutils literal notranslate"><span class="pre">Client.add_bytes()</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.add_json"><code class="docutils literal notranslate"><span class="pre">Client.add_json()</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.add_str"><code class="docutils literal notranslate"><span class="pre">Client.add_str()</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.apply_workarounds"><code class="docutils literal notranslate"><span class="pre">Client.apply_workarounds()</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.bitswap"><code class="docutils literal notranslate"><span class="pre">Client.bitswap</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.block"><code class="docutils literal notranslate"><span class="pre">Client.block</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.bootstrap"><code class="docutils literal notranslate"><span class="pre">Client.bootstrap</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.close"><code class="docutils literal notranslate"><span class="pre">Client.close()</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.config"><code class="docutils literal notranslate"><span class="pre">Client.config</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.dag"><code class="docutils literal notranslate"><span class="pre">Client.dag</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.dht"><code class="docutils literal notranslate"><span class="pre">Client.dht</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.get_json"><code class="docutils literal notranslate"><span class="pre">Client.get_json()</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.key"><code class="docutils literal notranslate"><span class="pre">Client.key</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.name"><code class="docutils literal notranslate"><span class="pre">Client.name</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.p2p"><code class="docutils literal notranslate"><span class="pre">Client.p2p</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.pin"><code class="docutils literal notranslate"><span class="pre">Client.pin</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.pubsub"><code class="docutils literal notranslate"><span class="pre">Client.pubsub</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.repo"><code class="docutils literal notranslate"><span class="pre">Client.repo</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.routing"><code class="docutils literal notranslate"><span class="pre">Client.routing</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.swarm"><code class="docutils literal notranslate"><span class="pre">Client.swarm</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.Client.unstable"><code class="docutils literal notranslate"><span class="pre">Client.unstable</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.assert_version"><code class="docutils literal notranslate"><span class="pre">assert_version()</span></code></a></li>
+<li><a class="reference internal" href="#ipfs_remote.ipfshttpclient2.client.connect"><code class="docutils literal notranslate"><span class="pre">connect()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=6de0164e"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

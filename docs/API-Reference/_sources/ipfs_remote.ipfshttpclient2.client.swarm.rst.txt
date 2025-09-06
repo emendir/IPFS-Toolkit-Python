@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.client.swarm module
+================================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client.swarm
+   :members:
+   :show-inheritance:
+   :undoc-members:

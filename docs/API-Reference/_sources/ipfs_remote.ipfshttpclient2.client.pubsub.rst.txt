@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.client.pubsub module
+=================================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client.pubsub
+   :members:
+   :show-inheritance:
+   :undoc-members:

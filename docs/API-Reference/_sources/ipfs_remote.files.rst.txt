@@ -1,0 +1,7 @@
+ipfs\_remote.files module
+=========================
+
+.. automodule:: ipfs_remote.files
+   :members:
+   :show-inheritance:
+   :undoc-members:

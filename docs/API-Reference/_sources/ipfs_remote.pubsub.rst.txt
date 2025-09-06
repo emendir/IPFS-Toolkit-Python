@@ -1,0 +1,7 @@
+ipfs\_remote.pubsub module
+==========================
+
+.. automodule:: ipfs_remote.pubsub
+   :members:
+   :show-inheritance:
+   :undoc-members:

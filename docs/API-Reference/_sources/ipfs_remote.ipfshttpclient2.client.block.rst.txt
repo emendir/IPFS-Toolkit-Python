@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.client.block module
+================================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client.block
+   :members:
+   :show-inheritance:
+   :undoc-members:

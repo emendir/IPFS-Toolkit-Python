@@ -1,0 +1,10 @@
+ipfs\_peers package
+===================
+
+Module contents
+---------------
+
+.. automodule:: ipfs_peers
+   :members:
+   :show-inheritance:
+   :undoc-members:

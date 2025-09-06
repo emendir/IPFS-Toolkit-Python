@@ -1,0 +1,10 @@
+ipfs\_api package
+=================
+
+Module contents
+---------------
+
+.. automodule:: ipfs_api
+   :members:
+   :show-inheritance:
+   :undoc-members:

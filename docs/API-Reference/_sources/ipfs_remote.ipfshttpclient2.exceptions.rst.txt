@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.exceptions module
+==============================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.exceptions
+   :members:
+   :show-inheritance:
+   :undoc-members:

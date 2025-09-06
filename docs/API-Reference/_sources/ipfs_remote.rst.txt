@@ -1,0 +1,31 @@
+ipfs\_remote package
+====================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ipfs_remote.ipfshttpclient2
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ipfs_remote.client
+   ipfs_remote.files
+   ipfs_remote.ipns
+   ipfs_remote.peers
+   ipfs_remote.pubsub
+   ipfs_remote.tunnels
+
+Module contents
+---------------
+
+.. automodule:: ipfs_remote
+   :members:
+   :show-inheritance:
+   :undoc-members:

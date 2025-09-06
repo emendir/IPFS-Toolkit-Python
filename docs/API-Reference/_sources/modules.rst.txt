@@ -1,0 +1,12 @@
+src
+===
+
+.. toctree::
+   :maxdepth: 4
+
+   ipfs_api
+   ipfs_cli
+   ipfs_datatransmission
+   ipfs_lns
+   ipfs_peers
+   ipfs_remote

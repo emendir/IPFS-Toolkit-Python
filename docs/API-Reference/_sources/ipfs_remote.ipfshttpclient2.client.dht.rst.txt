@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.client.dht module
+==============================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client.dht
+   :members:
+   :show-inheritance:
+   :undoc-members:

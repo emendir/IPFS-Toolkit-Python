@@ -1,0 +1,7 @@
+ipfs\_remote.peers module
+=========================
+
+.. automodule:: ipfs_remote.peers
+   :members:
+   :show-inheritance:
+   :undoc-members:

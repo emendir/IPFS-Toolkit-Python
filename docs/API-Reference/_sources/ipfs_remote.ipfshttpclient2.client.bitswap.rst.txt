@@ -1,0 +1,7 @@
+ipfs\_remote.ipfshttpclient2.client.bitswap module
+==================================================
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client.bitswap
+   :members:
+   :show-inheritance:
+   :undoc-members:

@@ -1,0 +1,35 @@
+ipfs\_remote.ipfshttpclient2.client package
+===========================================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ipfs_remote.ipfshttpclient2.client.base
+   ipfs_remote.ipfshttpclient2.client.bitswap
+   ipfs_remote.ipfshttpclient2.client.block
+   ipfs_remote.ipfshttpclient2.client.bootstrap
+   ipfs_remote.ipfshttpclient2.client.config
+   ipfs_remote.ipfshttpclient2.client.dag
+   ipfs_remote.ipfshttpclient2.client.dht
+   ipfs_remote.ipfshttpclient2.client.files
+   ipfs_remote.ipfshttpclient2.client.key
+   ipfs_remote.ipfshttpclient2.client.miscellaneous
+   ipfs_remote.ipfshttpclient2.client.name
+   ipfs_remote.ipfshttpclient2.client.p2p
+   ipfs_remote.ipfshttpclient2.client.pin
+   ipfs_remote.ipfshttpclient2.client.pubsub
+   ipfs_remote.ipfshttpclient2.client.repo
+   ipfs_remote.ipfshttpclient2.client.routing
+   ipfs_remote.ipfshttpclient2.client.swarm
+   ipfs_remote.ipfshttpclient2.client.unstable
+
+Module contents
+---------------
+
+.. automodule:: ipfs_remote.ipfshttpclient2.client
+   :members:
+   :show-inheritance:
+   :undoc-members:

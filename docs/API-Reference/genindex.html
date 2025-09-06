@@ -1,0 +1,2013 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 --><title>Index - ipfs_toolkit 0.6.0rc3 documentation</title>
+<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="README.html"><div class="brand">ipfs_toolkit 0.6.0rc3 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="README.html">
+  
+  <span class="sidebar-brand-text">ipfs_toolkit 0.6.0rc3 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_api.html">ipfs_api package</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ipfs_remote.html">ipfs_remote package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ipfs_remote package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.html">ipfs_remote.ipfshttpclient2 package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ipfs_remote.ipfshttpclient2 package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.html">ipfs_remote.ipfshttpclient2.client package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of ipfs_remote.ipfshttpclient2.client package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.base.html">ipfs_remote.ipfshttpclient2.client.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bitswap.html">ipfs_remote.ipfshttpclient2.client.bitswap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.block.html">ipfs_remote.ipfshttpclient2.client.block module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.bootstrap.html">ipfs_remote.ipfshttpclient2.client.bootstrap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.config.html">ipfs_remote.ipfshttpclient2.client.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dag.html">ipfs_remote.ipfshttpclient2.client.dag module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.dht.html">ipfs_remote.ipfshttpclient2.client.dht module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.files.html">ipfs_remote.ipfshttpclient2.client.files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.key.html">ipfs_remote.ipfshttpclient2.client.key module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html">ipfs_remote.ipfshttpclient2.client.miscellaneous module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.name.html">ipfs_remote.ipfshttpclient2.client.name module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.p2p.html">ipfs_remote.ipfshttpclient2.client.p2p module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pin.html">ipfs_remote.ipfshttpclient2.client.pin module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.pubsub.html">ipfs_remote.ipfshttpclient2.client.pubsub module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.repo.html">ipfs_remote.ipfshttpclient2.client.repo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.routing.html">ipfs_remote.ipfshttpclient2.client.routing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.swarm.html">ipfs_remote.ipfshttpclient2.client.swarm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.client.unstable.html">ipfs_remote.ipfshttpclient2.client.unstable module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.encoding.html">ipfs_remote.ipfshttpclient2.encoding module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.exceptions.html">ipfs_remote.ipfshttpclient2.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.filescanner.html">ipfs_remote.ipfshttpclient2.filescanner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http.html">ipfs_remote.ipfshttpclient2.http module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http_common.html">ipfs_remote.ipfshttpclient2.http_common module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http_httpx.html">ipfs_remote.ipfshttpclient2.http_httpx module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.http_requests.html">ipfs_remote.ipfshttpclient2.http_requests module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.multipart.html">ipfs_remote.ipfshttpclient2.multipart module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.requests_wrapper.html">ipfs_remote.ipfshttpclient2.requests_wrapper module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.utils.html">ipfs_remote.ipfshttpclient2.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipfs_remote.ipfshttpclient2.version.html">ipfs_remote.ipfshttpclient2.version module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.client.html">ipfs_remote.client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.files.html">ipfs_remote.files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.ipns.html">ipfs_remote.ipns module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.peers.html">ipfs_remote.peers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.pubsub.html">ipfs_remote.pubsub module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipfs_remote.tunnels.html">ipfs_remote.tunnels module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_datatransmission.html">ipfs_datatransmission package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ipfs_peers.html">ipfs_peers package</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          
+<section class="genindex-section">
+  <h1 id="index">Index</h1>
+  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#J"><strong>J</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#Q"><strong>Q</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#W"><strong>W</strong></a></div>
+</section>
+<section id="A" class="genindex-section">
+  <h2>A</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.DirectoryStream.abspath">abspath (ipfs_remote.ipfshttpclient2.multipart.DirectoryStream attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section.add">add() (ipfs_remote.ipfshttpclient2.client.bootstrap.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.add">(ipfs_remote.ipfshttpclient2.client.files.Base method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.add">(ipfs_remote.ipfshttpclient2.client.pin.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection.add">(ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.add_bytes">add_bytes() (ipfs_remote.ipfshttpclient2.client.Client method)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.add_contact">add_contact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.add_json">add_json() (ipfs_remote.ipfshttpclient2.client.Client method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.add_str">add_str() (ipfs_remote.ipfshttpclient2.client.Client method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.add_swarm_filter">add_swarm_filter() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers.add_swarm_filter">(ipfs_remote.peers.RemotePeers method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_lns.html#ipfs_lns.addContact">addContact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.addcontact">addcontact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.AddressError.addr">addr (ipfs_remote.ipfshttpclient2.exceptions.AddressError attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.AddressError">AddressError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.addrs">addrs() (ipfs_remote.ipfshttpclient2.client.swarm.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.apply_workarounds">apply_workarounds() (ipfs_remote.ipfshttpclient2.client.Client method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseBase.as_json">as_json() (ipfs_remote.ipfshttpclient2.client.base.ResponseBase method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.assert_version">assert_version() (in module ipfs_remote.ipfshttpclient2.client)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.auth">auth (ipfs_remote.ipfshttpclient2.client.base.CommonArgs attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="B" class="genindex-section">
+  <h2>B</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base">Base (class in ipfs_remote.ipfshttpclient2.client.files)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base">(class in ipfs_remote.ipfshttpclient2.client.miscellaneous)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.bitswap">bitswap (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.block">block (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.BytesFileStream.body">body() (ipfs_remote.ipfshttpclient2.multipart.BytesFileStream method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.StreamBase.body">(ipfs_remote.ipfshttpclient2.multipart.StreamBase method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.bootstrap">bootstrap (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http.html#ipfs_remote.ipfshttpclient2.http.build_client_sync">build_client_sync() (in module ipfs_remote.ipfshttpclient2.http)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.BytesFileStream">BytesFileStream (class in ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="C" class="genindex-section">
+  <h2>C</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.cat">cat() (ipfs_remote.ipfshttpclient2.client.files.Base method)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.Node.check_connection">check_connection() (ipfs_lns.Node method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.check_peer_connection">check_peer_connection() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.check_peer_connection">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.SectionBase.chunk_size">chunk_size (ipfs_remote.ipfshttpclient2.client.base.SectionBase property)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.StreamBase.chunk_size">(ipfs_remote.ipfshttpclient2.multipart.StreamBase attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.clean_file">clean_file() (in module ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.clean_files">clean_files() (in module ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client">Client (class in ipfs_remote.ipfshttpclient2.client)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ClientBase">ClientBase (class in ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_httpx.html#ipfs_remote.ipfshttpclient2.http_httpx.ClientSync">ClientSync (class in ipfs_remote.ipfshttpclient2.http_httpx)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_requests.html#ipfs_remote.ipfshttpclient2.http_requests.ClientSync">(class in ipfs_remote.ipfshttpclient2.http_requests)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase">ClientSyncBase (class in ipfs_remote.ipfshttpclient2.http_common)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.Closable">Closable (class in ipfs_remote.ipfshttpclient2.http_common)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseWrapIterator.close">close() (ipfs_remote.ipfshttpclient2.client.base.ResponseWrapIterator method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.close">(ipfs_remote.ipfshttpclient2.client.Client method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.close">(ipfs_remote.ipfshttpclient2.client.p2p.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel.close">(ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.walk.close">(ipfs_remote.ipfshttpclient2.filescanner.walk method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http.html#ipfs_remote.ipfshttpclient2.http.StreamDecodeIteratorSync.close">(ipfs_remote.ipfshttpclient2.http.StreamDecodeIteratorSync method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.Closable.close">(ipfs_remote.ipfshttpclient2.http_common.Closable method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ReadableStreamWrapper.close">(ipfs_remote.ipfshttpclient2.http_common.ReadableStreamWrapper method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.StreamDecodeIteratorSync.close">(ipfs_remote.ipfshttpclient2.http_common.StreamDecodeIteratorSync method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.tunnels.html#ipfs_remote.tunnels.RemoteTunnels.close_all">close_all() (ipfs_remote.tunnels.RemoteTunnels method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.close_all_tcp_connections">close_all_tcp_connections() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.close_all_tcp_connections">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.tunnels.html#ipfs_remote.tunnels.RemoteTunnels.close_listener">close_listener() (ipfs_remote.tunnels.RemoteTunnels method)</a>
+</li>
+        <li><a href="ipfs_remote.tunnels.html#ipfs_remote.tunnels.RemoteTunnels.close_sender">close_sender() (ipfs_remote.tunnels.RemoteTunnels method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase.close_session">close_session() (ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.close_tcp_listening_connection">close_tcp_listening_connection() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.close_tcp_listening_connection">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_api.html#ipfs_api.close_tcp_sending_connection">close_tcp_sending_connection() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.close_tcp_sending_connection">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs">CommonArgs (class in ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.CommunicationError">CommunicationError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.config">config (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.connect">connect() (in module ipfs_remote.ipfshttpclient2.client)</a>
+
+        <ul>
+          <li><a href="ipfs_peers.html#ipfs_peers.Peer.connect">(ipfs_peers.Peer method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.connect">(ipfs_remote.ipfshttpclient2.client.swarm.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers.connect">(ipfs_remote.peers.RemotePeers method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.connect_to_peer">connect_to_peer() (in module ipfs_api)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.connection_attempt_interval_sec">connection_attempt_interval_sec (ipfs_peers.PeerMonitor attribute)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.Node.connection_checker">connection_checker (ipfs_lns.Node attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.PoolManager.connection_from_pool_key">connection_from_pool_key() (ipfs_remote.ipfshttpclient2.requests_wrapper.PoolManager method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPConnectionPool.ConnectionCls">ConnectionCls (ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPConnectionPool attribute)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPSConnectionPool.ConnectionCls">(ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPSConnectionPool attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.ConnectionError">ConnectionError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.ConnectionOverrideMixin">ConnectionOverrideMixin (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.content_disposition_headers">content_disposition_headers() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.content_type_headers">content_type_headers() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.cookies">cookies (ipfs_remote.ipfshttpclient2.client.base.CommonArgs attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.cp">cp() (ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.create_connection">create_connection() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.create_ipns_record">create_ipns_record() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.create_ipns_record">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.create_tcp_listening_connection">create_tcp_listening_connection() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.create_tcp_listening_connection">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.create_tcp_sending_connection">create_tcp_sending_connection() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.create_tcp_sending_connection">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.VersionMismatch.current">current (ipfs_remote.ipfshttpclient2.exceptions.VersionMismatch attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="D" class="genindex-section">
+  <h2>D</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.dag">dag (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.data">data (ipfs_remote.ipfshttpclient2.client.base.CommonArgs attribute)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.BytesFileStream.data">(ipfs_remote.ipfshttpclient2.multipart.BytesFileStream attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.DecodingError">DecodingError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.delete">delete() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.dht">dht (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeType.DIRECTORY">DIRECTORY (ipfs_remote.ipfshttpclient2.filescanner.FSNodeType attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.DirectoryStream">DirectoryStream (class in ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.disconnect">disconnect() (ipfs_remote.ipfshttpclient2.client.swarm.Section method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.dns">dns() (ipfs_remote.ipfshttpclient2.client.miscellaneous.Base method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.download">download() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.download">(in module ipfs_cli)</a>
+</li>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.download">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase.download">(ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase.download_bytes">download_bytes() (ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase method)</a>
+</li>
+        <li><a href="ipfs_cli.html#ipfs_cli.download_ipfs_binary">download_ipfs_binary() (in module ipfs_cli)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.download_ipns_record">download_ipns_record() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.download_ipns_record">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Dummy">Dummy (class in ipfs_remote.ipfshttpclient2.encoding)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="E" class="genindex-section">
+  <h2>E</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.empty_gen">empty_gen() (in module ipfs_remote.ipfshttpclient2.encoding)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Dummy.encode">encode() (ipfs_remote.ipfshttpclient2.encoding.Dummy method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Encoding.encode">(ipfs_remote.ipfshttpclient2.encoding.Encoding method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Json.encode">(ipfs_remote.ipfshttpclient2.encoding.Json method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.EncodeBase64Url">EncodeBase64Url() (in module ipfs_remote.ipfshttpclient2.client.pubsub)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.EncoderError.encoder_name">encoder_name (ipfs_remote.ipfshttpclient2.exceptions.EncoderError attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.EncoderError">EncoderError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.EncoderMissingError">EncoderMissingError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Encoding">Encoding (class in ipfs_remote.ipfshttpclient2.encoding)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.EncodingError">EncodingError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.Error">Error</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.ErrorResponse">ErrorResponse</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.export">export() (ipfs_remote.ipfshttpclient2.client.dag.Section method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="F" class="genindex-section">
+  <h2>F</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.return_field.field">field (ipfs_remote.ipfshttpclient2.utils.return_field attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeType.FILE">FILE (ipfs_remote.ipfshttpclient2.filescanner.FSNodeType attribute)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.file_write_interval_sec">file_write_interval_sec (ipfs_peers.PeerMonitor attribute)</a>
+</li>
+        <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.files">files (ipfs_remote.client.IpfsRemote property)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.files">(ipfs_remote.ipfshttpclient2.client.files.Base attribute)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.FilesStream.files">(ipfs_remote.ipfshttpclient2.multipart.FilesStream attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.FilesStream">FilesStream (class in ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.filters">filters (ipfs_remote.ipfshttpclient2.client.swarm.Section attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection">FiltersSection (class in ipfs_remote.ipfshttpclient2.client.swarm)</a>
+</li>
+        <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers.find">find() (ipfs_remote.peers.RemotePeers method)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.find_all_peers">find_all_peers() (ipfs_peers.PeerMonitor method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.find_peer">find_peer() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.find_peer">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_api.html#ipfs_api.find_providers">find_providers() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.find_providers">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.findpeer">findpeer() (ipfs_remote.ipfshttpclient2.client.dht.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.findpeer">(ipfs_remote.ipfshttpclient2.client.routing.Section method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.findprovs">findprovs() (ipfs_remote.ipfshttpclient2.client.dht.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.findprovs">(ipfs_remote.ipfshttpclient2.client.routing.Section method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.DirectoryStream.follow_symlinks">follow_symlinks (ipfs_remote.ipfshttpclient2.multipart.DirectoryStream attribute)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.forget_after_hrs">forget_after_hrs (ipfs_peers.PeerMonitor attribute)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.Peer.forget_old_entries">forget_old_entries() (ipfs_peers.Peer method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.forward">forward() (ipfs_remote.ipfshttpclient2.client.p2p.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry">FSNodeEntry (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeType">FSNodeType (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="G" class="genindex-section">
+  <h2>G</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.repo.html#ipfs_remote.ipfshttpclient2.client.repo.Section.gc">gc() (ipfs_remote.ipfshttpclient2.client.repo.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.gen">gen() (ipfs_remote.ipfshttpclient2.client.key.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.get">get() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section.get">(ipfs_remote.ipfshttpclient2.client.block.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section.get">(ipfs_remote.ipfshttpclient2.client.config.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.get">(ipfs_remote.ipfshttpclient2.client.dag.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.get">(ipfs_remote.ipfshttpclient2.client.dht.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.get">(ipfs_remote.ipfshttpclient2.client.files.Base method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.get">(ipfs_remote.ipfshttpclient2.client.routing.Section method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.get_addrs">get_addrs() (ipfs_remote.client.IpfsRemote method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_lns.html#ipfs_lns.get_contact">get_contact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.get_encoding">get_encoding() (in module ipfs_remote.ipfshttpclient2.encoding)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.get_ipns_record_validity">get_ipns_record_validity() (in module ipfs_api)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.get_json">get_json() (ipfs_remote.ipfshttpclient2.client.Client method)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.get_peer_by_id">get_peer_by_id() (ipfs_peers.PeerMonitor method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.get_peer_multiaddrs">get_peer_multiaddrs() (in module ipfs_api)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.get_swarm_filters">get_swarm_filters() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers.get_swarm_filters">(ipfs_remote.peers.RemotePeers method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.tunnels.html#ipfs_remote.tunnels.RemoteTunnels.get_tunnels">get_tunnels() (ipfs_remote.tunnels.RemoteTunnels method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.GlobMatcher">GlobMatcher (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.guess_mimetype">guess_mimetype() (in module ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="H" class="genindex-section">
+  <h2>H</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.head">head() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.headers">headers (ipfs_remote.ipfshttpclient2.client.base.CommonArgs attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.StreamBase.headers">headers() (ipfs_remote.ipfshttpclient2.multipart.StreamBase method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPAdapter">HTTPAdapter (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPConnection">HTTPConnection (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPConnectionPool">HTTPConnectionPool (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPSConnection">HTTPSConnection (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPSConnectionPool">HTTPSConnectionPool (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="I" class="genindex-section">
+  <h2>I</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.id">id() (ipfs_remote.ipfshttpclient2.client.miscellaneous.Base method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ident">ident() (in module ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.imprt">imprt() (ipfs_remote.ipfshttpclient2.client.dag.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPAdapter.init_poolmanager">init_poolmanager() (ipfs_remote.ipfshttpclient2.requests_wrapper.HTTPAdapter method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section.inspect">inspect() (ipfs_remote.ipfshttpclient2.client.name.Section method)</a>
+</li>
+        <li>
+    ipfs_api
+
+        <ul>
+          <li><a href="ipfs_api.html#module-ipfs_api">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_cli
+
+        <ul>
+          <li><a href="ipfs_cli.html#module-ipfs_cli">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_datatransmission
+
+        <ul>
+          <li><a href="ipfs_datatransmission.html#module-ipfs_datatransmission">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_lns
+
+        <ul>
+          <li><a href="ipfs_lns.html#module-ipfs_lns">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_peers
+
+        <ul>
+          <li><a href="ipfs_peers.html#module-ipfs_peers">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote
+
+        <ul>
+          <li><a href="ipfs_remote.html#module-ipfs_remote">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.client
+
+        <ul>
+          <li><a href="ipfs_remote.client.html#module-ipfs_remote.client">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.files
+
+        <ul>
+          <li><a href="ipfs_remote.files.html#module-ipfs_remote.files">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.html#module-ipfs_remote.ipfshttpclient2">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.html#module-ipfs_remote.ipfshttpclient2.client">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.base
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#module-ipfs_remote.ipfshttpclient2.client.base">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.bitswap
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.bitswap.html#module-ipfs_remote.ipfshttpclient2.client.bitswap">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.block
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.block.html#module-ipfs_remote.ipfshttpclient2.client.block">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.bootstrap
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#module-ipfs_remote.ipfshttpclient2.client.bootstrap">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.config
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.config.html#module-ipfs_remote.ipfshttpclient2.client.config">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.dag
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#module-ipfs_remote.ipfshttpclient2.client.dag">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.dht
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#module-ipfs_remote.ipfshttpclient2.client.dht">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.files
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#module-ipfs_remote.ipfshttpclient2.client.files">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.key
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.key.html#module-ipfs_remote.ipfshttpclient2.client.key">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.miscellaneous
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#module-ipfs_remote.ipfshttpclient2.client.miscellaneous">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.name
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.name.html#module-ipfs_remote.ipfshttpclient2.client.name">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.p2p
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.p2p.html#module-ipfs_remote.ipfshttpclient2.client.p2p">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.pin
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#module-ipfs_remote.ipfshttpclient2.client.pin">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.pubsub
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#module-ipfs_remote.ipfshttpclient2.client.pubsub">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.repo
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.repo.html#module-ipfs_remote.ipfshttpclient2.client.repo">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.routing
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.routing.html#module-ipfs_remote.ipfshttpclient2.client.routing">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.swarm
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#module-ipfs_remote.ipfshttpclient2.client.swarm">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.client.unstable
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#module-ipfs_remote.ipfshttpclient2.client.unstable">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.encoding
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#module-ipfs_remote.ipfshttpclient2.encoding">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.exceptions
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#module-ipfs_remote.ipfshttpclient2.exceptions">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.filescanner
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#module-ipfs_remote.ipfshttpclient2.filescanner">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.http
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.http.html#module-ipfs_remote.ipfshttpclient2.http">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.http_common
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#module-ipfs_remote.ipfshttpclient2.http_common">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.http_httpx
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_httpx.html#module-ipfs_remote.ipfshttpclient2.http_httpx">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.http_requests
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_requests.html#module-ipfs_remote.ipfshttpclient2.http_requests">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.multipart
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#module-ipfs_remote.ipfshttpclient2.multipart">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.requests_wrapper
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#module-ipfs_remote.ipfshttpclient2.requests_wrapper">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.utils
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.utils.html#module-ipfs_remote.ipfshttpclient2.utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.ipfshttpclient2.version
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.version.html#module-ipfs_remote.ipfshttpclient2.version">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.peers
+
+        <ul>
+          <li><a href="ipfs_remote.peers.html#module-ipfs_remote.peers">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.pubsub
+
+        <ul>
+          <li><a href="ipfs_remote.pubsub.html#module-ipfs_remote.pubsub">module</a>
+</li>
+        </ul></li>
+        <li>
+    ipfs_remote.tunnels
+
+        <ul>
+          <li><a href="ipfs_remote.tunnels.html#module-ipfs_remote.tunnels">module</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote">IpfsRemote (class in ipfs_remote.client)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.Matcher.is_binary">is_binary (ipfs_remote.ipfshttpclient2.filescanner.Matcher attribute)</a>
+</li>
+        <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers.is_connected">is_connected() (ipfs_remote.peers.RemotePeers method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.is_ipfs_running">is_ipfs_running() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.is_ipfs_running">(in module ipfs_cli)</a>
+</li>
+          <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.is_ipfs_running">(ipfs_remote.client.IpfsRemote method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.is_peer_connected">is_peer_connected() (in module ipfs_api)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Dummy.is_stream">is_stream (ipfs_remote.ipfshttpclient2.encoding.Dummy attribute)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Encoding.is_stream">(ipfs_remote.ipfshttpclient2.encoding.Encoding attribute)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="J" class="genindex-section">
+  <h2>J</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_datatransmission.html#ipfs_datatransmission.join_conversation">join_conversation() (in module ipfs_datatransmission)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Json">Json (class in ipfs_remote.ipfshttpclient2.encoding)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.json_dict_t">json_dict_t (class in ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.json_list_t">json_list_t (class in ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="K" class="genindex-section">
+  <h2>K</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.key">key (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_lns.html#ipfs_lns.Node.known_multiaddrs">known_multiaddrs (ipfs_lns.Node attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="L" class="genindex-section">
+  <h2>L</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_peers.html#ipfs_peers.Peer.last_seen">last_seen() (ipfs_peers.Peer method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection.level">level() (ipfs_remote.ipfshttpclient2.client.unstable.LogSection method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section.list">list() (ipfs_remote.ipfshttpclient2.client.bootstrap.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.list">(ipfs_remote.ipfshttpclient2.client.key.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection.list">(ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.list_peer_multiaddrs">list_peer_multiaddrs() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.list_peer_multiaddrs">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.list_peers">list_peers() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers.list_peers">(ipfs_remote.peers.RemotePeers method)</a>
+</li>
+          <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.RemotePubSub.list_peers">(ipfs_remote.pubsub.RemotePubSub method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.list_pins">list_pins() (ipfs_remote.files.RemoteFiles method)</a>
+</li>
+        <li><a href="ipfs_cli.html#ipfs_cli.listen">listen() (in module ipfs_cli)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.PubsubListener.listen">(ipfs_cli.PubsubListener method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.listen">(ipfs_remote.ipfshttpclient2.client.p2p.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.PubsubListener.listen">(ipfs_remote.pubsub.PubsubListener method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_datatransmission.html#ipfs_datatransmission.listen_for_conversations">listen_for_conversations() (in module ipfs_datatransmission)</a>
+</li>
+        <li><a href="ipfs_datatransmission.html#ipfs_datatransmission.listen_for_file_transmissions">listen_for_file_transmissions() (in module ipfs_datatransmission)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_datatransmission.html#ipfs_datatransmission.listen_for_transmissions">listen_for_transmissions() (in module ipfs_datatransmission)</a>
+</li>
+        <li><a href="ipfs_cli.html#ipfs_cli.listenonport">listenonport() (in module ipfs_cli)</a>
+</li>
+        <li><a href="ipfs_cli.html#ipfs_cli.ListenUDP">ListenUDP() (in module ipfs_cli)</a>
+</li>
+        <li><a href="ipfs_cli.html#ipfs_cli.listenudp">listenudp() (in module ipfs_cli)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.RefsSection.local">local() (ipfs_remote.ipfshttpclient2.client.unstable.RefsSection method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.Section.log">log (ipfs_remote.ipfshttpclient2.client.unstable.Section attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection">LogSection (class in ipfs_remote.ipfshttpclient2.client.unstable)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.lookup_contact">lookup_contact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.LookupContact">LookupContact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.lookupContact">lookupContact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.lookupcontact">lookupcontact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.ls">ls() (ipfs_remote.ipfshttpclient2.client.files.Base method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.ls">(ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section.ls">(ipfs_remote.ipfshttpclient2.client.p2p.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.ls">(ipfs_remote.ipfshttpclient2.client.pin.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.ls">(ipfs_remote.ipfshttpclient2.client.pubsub.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection.ls">(ipfs_remote.ipfshttpclient2.client.unstable.LogSection method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="M" class="genindex-section">
+  <h2>M</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_httpx.html#ipfs_remote.ipfshttpclient2.http_httpx.map_args_to_httpx">map_args_to_httpx() (in module ipfs_remote.ipfshttpclient2.http_httpx)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.map_args_to_params">map_args_to_params() (in module ipfs_remote.ipfshttpclient2.http_common)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_requests.html#ipfs_remote.ipfshttpclient2.http_requests.map_args_to_requests">map_args_to_requests() (in module ipfs_remote.ipfshttpclient2.http_requests)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MatchAll">MatchAll (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.Matcher">Matcher (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.matcher_from_spec">matcher_from_spec() (in module ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.MatcherSpecInvalidError">MatcherSpecInvalidError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MatchNone">MatchNone (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.VersionMismatch.maximum">maximum (ipfs_remote.ipfshttpclient2.exceptions.VersionMismatch attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.maybe_fsencode">maybe_fsencode() (in module ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MetaMatcher">MetaMatcher (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.VersionMismatch.minimum">minimum (ipfs_remote.ipfshttpclient2.exceptions.VersionMismatch attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.mkdir">mkdir() (ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+        <li>
+    module
+
+        <ul>
+          <li><a href="ipfs_api.html#module-ipfs_api">ipfs_api</a>
+</li>
+          <li><a href="ipfs_cli.html#module-ipfs_cli">ipfs_cli</a>
+</li>
+          <li><a href="ipfs_datatransmission.html#module-ipfs_datatransmission">ipfs_datatransmission</a>
+</li>
+          <li><a href="ipfs_lns.html#module-ipfs_lns">ipfs_lns</a>
+</li>
+          <li><a href="ipfs_peers.html#module-ipfs_peers">ipfs_peers</a>
+</li>
+          <li><a href="ipfs_remote.html#module-ipfs_remote">ipfs_remote</a>
+</li>
+          <li><a href="ipfs_remote.client.html#module-ipfs_remote.client">ipfs_remote.client</a>
+</li>
+          <li><a href="ipfs_remote.files.html#module-ipfs_remote.files">ipfs_remote.files</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.html#module-ipfs_remote.ipfshttpclient2">ipfs_remote.ipfshttpclient2</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.html#module-ipfs_remote.ipfshttpclient2.client">ipfs_remote.ipfshttpclient2.client</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#module-ipfs_remote.ipfshttpclient2.client.base">ipfs_remote.ipfshttpclient2.client.base</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.bitswap.html#module-ipfs_remote.ipfshttpclient2.client.bitswap">ipfs_remote.ipfshttpclient2.client.bitswap</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.block.html#module-ipfs_remote.ipfshttpclient2.client.block">ipfs_remote.ipfshttpclient2.client.block</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#module-ipfs_remote.ipfshttpclient2.client.bootstrap">ipfs_remote.ipfshttpclient2.client.bootstrap</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.config.html#module-ipfs_remote.ipfshttpclient2.client.config">ipfs_remote.ipfshttpclient2.client.config</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#module-ipfs_remote.ipfshttpclient2.client.dag">ipfs_remote.ipfshttpclient2.client.dag</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#module-ipfs_remote.ipfshttpclient2.client.dht">ipfs_remote.ipfshttpclient2.client.dht</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#module-ipfs_remote.ipfshttpclient2.client.files">ipfs_remote.ipfshttpclient2.client.files</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.key.html#module-ipfs_remote.ipfshttpclient2.client.key">ipfs_remote.ipfshttpclient2.client.key</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#module-ipfs_remote.ipfshttpclient2.client.miscellaneous">ipfs_remote.ipfshttpclient2.client.miscellaneous</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.name.html#module-ipfs_remote.ipfshttpclient2.client.name">ipfs_remote.ipfshttpclient2.client.name</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.p2p.html#module-ipfs_remote.ipfshttpclient2.client.p2p">ipfs_remote.ipfshttpclient2.client.p2p</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#module-ipfs_remote.ipfshttpclient2.client.pin">ipfs_remote.ipfshttpclient2.client.pin</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#module-ipfs_remote.ipfshttpclient2.client.pubsub">ipfs_remote.ipfshttpclient2.client.pubsub</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.repo.html#module-ipfs_remote.ipfshttpclient2.client.repo">ipfs_remote.ipfshttpclient2.client.repo</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.routing.html#module-ipfs_remote.ipfshttpclient2.client.routing">ipfs_remote.ipfshttpclient2.client.routing</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#module-ipfs_remote.ipfshttpclient2.client.swarm">ipfs_remote.ipfshttpclient2.client.swarm</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#module-ipfs_remote.ipfshttpclient2.client.unstable">ipfs_remote.ipfshttpclient2.client.unstable</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#module-ipfs_remote.ipfshttpclient2.encoding">ipfs_remote.ipfshttpclient2.encoding</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#module-ipfs_remote.ipfshttpclient2.exceptions">ipfs_remote.ipfshttpclient2.exceptions</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#module-ipfs_remote.ipfshttpclient2.filescanner">ipfs_remote.ipfshttpclient2.filescanner</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http.html#module-ipfs_remote.ipfshttpclient2.http">ipfs_remote.ipfshttpclient2.http</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#module-ipfs_remote.ipfshttpclient2.http_common">ipfs_remote.ipfshttpclient2.http_common</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_httpx.html#module-ipfs_remote.ipfshttpclient2.http_httpx">ipfs_remote.ipfshttpclient2.http_httpx</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_requests.html#module-ipfs_remote.ipfshttpclient2.http_requests">ipfs_remote.ipfshttpclient2.http_requests</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#module-ipfs_remote.ipfshttpclient2.multipart">ipfs_remote.ipfshttpclient2.multipart</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#module-ipfs_remote.ipfshttpclient2.requests_wrapper">ipfs_remote.ipfshttpclient2.requests_wrapper</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.utils.html#module-ipfs_remote.ipfshttpclient2.utils">ipfs_remote.ipfshttpclient2.utils</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.version.html#module-ipfs_remote.ipfshttpclient2.version">ipfs_remote.ipfshttpclient2.version</a>
+</li>
+          <li><a href="ipfs_remote.peers.html#module-ipfs_remote.peers">ipfs_remote.peers</a>
+</li>
+          <li><a href="ipfs_remote.pubsub.html#module-ipfs_remote.pubsub">ipfs_remote.pubsub</a>
+</li>
+          <li><a href="ipfs_remote.tunnels.html#module-ipfs_remote.tunnels">ipfs_remote.tunnels</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.multiaddr_to_url_data">multiaddr_to_url_data() (in module ipfs_remote.ipfshttpclient2.http_common)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.Peer.multiaddrs">multiaddrs() (ipfs_peers.Peer method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.multipart_content_type_headers">multipart_content_type_headers() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.mv">mv() (ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.my_id">my_id() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.my_id">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.my_multiaddrs">my_multiaddrs() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.my_multiaddrs">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_cli.html#ipfs_cli.myid">myid() (in module ipfs_cli)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="N" class="genindex-section">
+  <h2>N</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.name">name (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Dummy.name">(ipfs_remote.ipfshttpclient2.encoding.Dummy attribute)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Json.name">(ipfs_remote.ipfshttpclient2.encoding.Json attribute)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry.name">(ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry attribute)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.StreamBase.name">(ipfs_remote.ipfshttpclient2.multipart.StreamBase attribute)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_lns.html#ipfs_lns.Node">Node (class in ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.NoRecusionAdapterMatcher">NoRecusionAdapterMatcher (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="O" class="genindex-section">
+  <h2>O</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.offline">offline (ipfs_remote.ipfshttpclient2.client.base.CommonArgs attribute)</a>
+</li>
+        <li><a href="ipfs_remote.tunnels.html#ipfs_remote.tunnels.RemoteTunnels.open_listener">open_listener() (ipfs_remote.tunnels.RemoteTunnels method)</a>
+</li>
+        <li><a href="ipfs_remote.tunnels.html#ipfs_remote.tunnels.RemoteTunnels.open_sender">open_sender() (ipfs_remote.tunnels.RemoteTunnels method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase.open_session">open_session() (ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.options">options() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.CommunicationError.original">original (ipfs_remote.ipfshttpclient2.exceptions.CommunicationError attribute)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.DecodingError.original">(ipfs_remote.ipfshttpclient2.exceptions.DecodingError attribute)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.EncodingError.original">(ipfs_remote.ipfshttpclient2.exceptions.EncodingError attribute)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.p2p">p2p (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry.parentfd">parentfd (ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Encoding.parse_finalize">parse_finalize() (ipfs_remote.ipfshttpclient2.encoding.Encoding method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Json.parse_finalize">(ipfs_remote.ipfshttpclient2.encoding.Json method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Dummy.parse_partial">parse_partial() (ipfs_remote.ipfshttpclient2.encoding.Dummy method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Encoding.parse_partial">(ipfs_remote.ipfshttpclient2.encoding.Encoding method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.encoding.html#ipfs_remote.ipfshttpclient2.encoding.Json.parse_partial">(ipfs_remote.ipfshttpclient2.encoding.Json method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.PartialErrorResponse">PartialErrorResponse</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.patch">patch() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry.path">path (ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.PathLike">PathLike (class in ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.Peer">Peer (class in ipfs_peers)</a>
+</li>
+        <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.peer_id">peer_id (ipfs_remote.client.IpfsRemote property)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.Peer.peer_id">peer_id() (ipfs_peers.Peer method)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor">PeerMonitor (class in ipfs_peers)</a>
+</li>
+        <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.peers">peers (ipfs_remote.client.IpfsRemote property)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.peers">peers() (ipfs_peers.PeerMonitor method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.peers">(ipfs_remote.ipfshttpclient2.client.pubsub.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section.peers">(ipfs_remote.ipfshttpclient2.client.swarm.Section method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.GlobMatcher.period_special">period_special (ipfs_remote.ipfshttpclient2.filescanner.GlobMatcher attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.pin">pin (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.pin">pin() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.pin">(in module ipfs_cli)</a>
+</li>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.pin">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.ping">ping() (ipfs_remote.ipfshttpclient2.client.miscellaneous.Base method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.pins">pins() (in module ipfs_api)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.PoolManager">PoolManager (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.post">post() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.predict_cid">predict_cid() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.predict_cid">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.ProtocolError">ProtocolError</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.publish">publish() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.publish">(in module ipfs_cli)</a>
+</li>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.publish">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section.publish">(ipfs_remote.ipfshttpclient2.client.name.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.publish">(ipfs_remote.ipfshttpclient2.client.pubsub.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.RemotePubSub.publish">(ipfs_remote.pubsub.RemotePubSub method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.publish_old">publish_old() (ipfs_remote.ipfshttpclient2.client.pubsub.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.pubsub">pubsub (ipfs_remote.client.IpfsRemote property)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.pubsub">(ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.pubsub_peers">pubsub_peers() (in module ipfs_api)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.pubsub_publish">pubsub_publish() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.pubsub_publish">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.pubsub_subscribe">pubsub_subscribe() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.pubsub_subscribe">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_cli.html#ipfs_cli.PubsubListener">PubsubListener (class in ipfs_cli)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.PubsubListener">(class in ipfs_remote.pubsub)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.put">put() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section.put">(ipfs_remote.ipfshttpclient2.client.block.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.put">(ipfs_remote.ipfshttpclient2.client.dag.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.put">(ipfs_remote.ipfshttpclient2.client.dht.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section.put">(ipfs_remote.ipfshttpclient2.client.routing.Section method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="Q" class="genindex-section">
+  <h2>Q</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section.query">query() (ipfs_remote.ipfshttpclient2.client.dht.Section method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="R" class="genindex-section">
+  <h2>R</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_api.html#ipfs_api.read">read() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.read">(in module ipfs_cli)</a>
+</li>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.read">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.read">(ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ReadableStreamWrapper.read">(ipfs_remote.ipfshttpclient2.http_common.ReadableStreamWrapper method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.read_ipns_record">read_ipns_record() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.read_ipns_record">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel.read_message">read_message() (ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ReadableStreamWrapper">ReadableStreamWrapper (class in ipfs_remote.ipfshttpclient2.http_common)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.Section.refs">refs (ipfs_remote.ipfshttpclient2.client.unstable.Section attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.RefsSection">RefsSection (class in ipfs_remote.ipfshttpclient2.client.unstable)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.Peer.register_contact_event">register_contact_event() (ipfs_peers.Peer method)</a>
+
+        <ul>
+          <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.register_contact_event">(ipfs_peers.PeerMonitor method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry.relpath">relpath (ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.ReMatcher">ReMatcher (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.Node.remember_multiaddrs">remember_multiaddrs() (ipfs_lns.Node method)</a>
+</li>
+        <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles">RemoteFiles (class in ipfs_remote.files)</a>
+</li>
+        <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers">RemotePeers (class in ipfs_remote.peers)</a>
+</li>
+        <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.RemotePubSub">RemotePubSub (class in ipfs_remote.pubsub)</a>
+</li>
+        <li><a href="ipfs_remote.tunnels.html#ipfs_remote.tunnels.RemoteTunnels">RemoteTunnels (class in ipfs_remote.tunnels)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.remove">remove() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.remove">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_lns.html#ipfs_lns.remove_contact">remove_contact() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.rename">rename() (ipfs_remote.ipfshttpclient2.client.key.Section method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section.replace">replace() (ipfs_remote.ipfshttpclient2.client.config.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.repo">repo (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.request">request() (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase.request">(ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.Session.request">(ipfs_remote.ipfshttpclient2.requests_wrapper.Session method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section.resolve">resolve() (ipfs_remote.ipfshttpclient2.client.dag.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.resolve">(ipfs_remote.ipfshttpclient2.client.miscellaneous.Base method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section.resolve">(ipfs_remote.ipfshttpclient2.client.name.Section method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.resolve_ipns_key">resolve_ipns_key() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.resolve_ipns_key">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseBase">ResponseBase (class in ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.ResponseWrapIterator">ResponseWrapIterator (class in ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.utils.html#ipfs_remote.ipfshttpclient2.utils.return_field">return_field (class in ipfs_remote.ipfshttpclient2.utils)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.returns_multiple_items">returns_multiple_items() (in module ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.returns_no_item">returns_no_item() (in module ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.returns_single_item">returns_single_item() (in module ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section.rm">rm() (ipfs_remote.ipfshttpclient2.client.bootstrap.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.rm">(ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section.rm">(ipfs_remote.ipfshttpclient2.client.key.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.rm">(ipfs_remote.ipfshttpclient2.client.pin.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection.rm">(ipfs_remote.ipfshttpclient2.client.swarm.FiltersSection method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.rm_swarm_filter">rm_swarm_filter() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.peers.html#ipfs_remote.peers.RemotePeers.rm_swarm_filter">(ipfs_remote.peers.RemotePeers method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.routing">routing (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+        <li><a href="ipfs_cli.html#ipfs_cli.run_command">run_command() (in module ipfs_cli)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="S" class="genindex-section">
+  <h2>S</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_cli.html#ipfs_cli.safe_tar_extract">safe_tar_extract() (in module ipfs_cli)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.save">save() (ipfs_peers.PeerMonitor method)</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.save_contacts">save_contacts() (in module ipfs_lns)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.DirectoryStream.scanner">scanner (ipfs_remote.ipfshttpclient2.multipart.DirectoryStream attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.bitswap.html#ipfs_remote.ipfshttpclient2.client.bitswap.Section">Section (class in ipfs_remote.ipfshttpclient2.client.bitswap)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section">(class in ipfs_remote.ipfshttpclient2.client.block)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.bootstrap.html#ipfs_remote.ipfshttpclient2.client.bootstrap.Section">(class in ipfs_remote.ipfshttpclient2.client.bootstrap)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section">(class in ipfs_remote.ipfshttpclient2.client.config)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dag.html#ipfs_remote.ipfshttpclient2.client.dag.Section">(class in ipfs_remote.ipfshttpclient2.client.dag)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.dht.html#ipfs_remote.ipfshttpclient2.client.dht.Section">(class in ipfs_remote.ipfshttpclient2.client.dht)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section">(class in ipfs_remote.ipfshttpclient2.client.files)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.key.html#ipfs_remote.ipfshttpclient2.client.key.Section">(class in ipfs_remote.ipfshttpclient2.client.key)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.name.html#ipfs_remote.ipfshttpclient2.client.name.Section">(class in ipfs_remote.ipfshttpclient2.client.name)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.p2p.html#ipfs_remote.ipfshttpclient2.client.p2p.Section">(class in ipfs_remote.ipfshttpclient2.client.p2p)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section">(class in ipfs_remote.ipfshttpclient2.client.pin)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section">(class in ipfs_remote.ipfshttpclient2.client.pubsub)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.repo.html#ipfs_remote.ipfshttpclient2.client.repo.Section">(class in ipfs_remote.ipfshttpclient2.client.repo)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.routing.html#ipfs_remote.ipfshttpclient2.client.routing.Section">(class in ipfs_remote.ipfshttpclient2.client.routing)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.swarm.html#ipfs_remote.ipfshttpclient2.client.swarm.Section">(class in ipfs_remote.ipfshttpclient2.client.swarm)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.Section">(class in ipfs_remote.ipfshttpclient2.client.unstable)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.SectionBase">SectionBase (class in ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.SectionProperty">SectionProperty (class in ipfs_remote.ipfshttpclient2.client.base)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.walk.send">send() (ipfs_remote.ipfshttpclient2.filescanner.walk method)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.Peer.serialise">serialise() (ipfs_peers.Peer method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.Session">Session (class in ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.requests_wrapper.html#ipfs_remote.ipfshttpclient2.requests_wrapper.session">session (in module ipfs_remote.ipfshttpclient2.requests_wrapper)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.config.html#ipfs_remote.ipfshttpclient2.client.config.Section.set">set() (ipfs_remote.ipfshttpclient2.client.config.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.GlobMatcher.should_descend">should_descend() (ipfs_remote.ipfshttpclient2.filescanner.GlobMatcher method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MatchAll.should_descend">(ipfs_remote.ipfshttpclient2.filescanner.MatchAll method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.Matcher.should_descend">(ipfs_remote.ipfshttpclient2.filescanner.Matcher method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MatchNone.should_descend">(ipfs_remote.ipfshttpclient2.filescanner.MatchNone method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MetaMatcher.should_descend">(ipfs_remote.ipfshttpclient2.filescanner.MetaMatcher method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.NoRecusionAdapterMatcher.should_descend">(ipfs_remote.ipfshttpclient2.filescanner.NoRecusionAdapterMatcher method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.ReMatcher.should_descend">(ipfs_remote.ipfshttpclient2.filescanner.ReMatcher method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.GlobMatcher.should_report">should_report() (ipfs_remote.ipfshttpclient2.filescanner.GlobMatcher method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MatchAll.should_report">(ipfs_remote.ipfshttpclient2.filescanner.MatchAll method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.Matcher.should_report">(ipfs_remote.ipfshttpclient2.filescanner.Matcher method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MatchNone.should_report">(ipfs_remote.ipfshttpclient2.filescanner.MatchNone method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.MetaMatcher.should_report">(ipfs_remote.ipfshttpclient2.filescanner.MetaMatcher method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.NoRecusionAdapterMatcher.should_report">(ipfs_remote.ipfshttpclient2.filescanner.NoRecusionAdapterMatcher method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.ReMatcher.should_report">(ipfs_remote.ipfshttpclient2.filescanner.ReMatcher method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_datatransmission.html#ipfs_datatransmission.start_conversation">start_conversation() (in module ipfs_datatransmission)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.bitswap.html#ipfs_remote.ipfshttpclient2.client.bitswap.Section.stat">stat() (ipfs_remote.ipfshttpclient2.client.bitswap.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.block.html#ipfs_remote.ipfshttpclient2.client.block.Section.stat">(ipfs_remote.ipfshttpclient2.client.block.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.stat">(ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+          <li><a href="ipfs_remote.ipfshttpclient2.client.repo.html#ipfs_remote.ipfshttpclient2.client.repo.Section.stat">(ipfs_remote.ipfshttpclient2.client.repo.Section method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.StatusError">StatusError</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.stop">stop() (ipfs_remote.ipfshttpclient2.client.miscellaneous.Base method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.stream_bytes">stream_bytes() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.stream_decode_full">stream_decode_full() (in module ipfs_remote.ipfshttpclient2.http_common)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.stream_directory">stream_directory() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.stream_files">stream_files() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.stream_filesystem_node">stream_filesystem_node() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.stream_text">stream_text() (in module ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.StreamBase">StreamBase (class in ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http.html#ipfs_remote.ipfshttpclient2.http.StreamDecodeIteratorSync">StreamDecodeIteratorSync (class in ipfs_remote.ipfshttpclient2.http)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.StreamDecodeIteratorSync">(class in ipfs_remote.ipfshttpclient2.http_common)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.multipart.html#ipfs_remote.ipfshttpclient2.multipart.StreamFileMixin">StreamFileMixin (class in ipfs_remote.ipfshttpclient2.multipart)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.string_to_time">string_to_time() (in module ipfs_peers)</a>
+</li>
+        <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.PubsubListener.sub">sub (ipfs_remote.pubsub.PubsubListener attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.SubChannel">SubChannel (class in ipfs_remote.ipfshttpclient2.client.pubsub)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.subscribe">subscribe() (ipfs_remote.ipfshttpclient2.client.pubsub.Section method)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.RemotePubSub.subscribe">(ipfs_remote.pubsub.RemotePubSub method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pubsub.html#ipfs_remote.ipfshttpclient2.client.pubsub.Section.subscribe_old">subscribe_old() (ipfs_remote.ipfshttpclient2.client.pubsub.Section method)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.successive_register_ignore_dur_sec">successive_register_ignore_dur_sec (ipfs_peers.PeerMonitor attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.swarm">swarm (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="T" class="genindex-section">
+  <h2>T</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.unstable.html#ipfs_remote.ipfshttpclient2.client.unstable.LogSection.tail">tail() (ipfs_remote.ipfshttpclient2.client.unstable.LogSection method)</a>
+</li>
+        <li><a href="ipfs_cli.html#ipfs_cli.PubsubListener.terminate">terminate() (ipfs_cli.PubsubListener method)</a>
+
+        <ul>
+          <li><a href="ipfs_peers.html#ipfs_peers.Peer.terminate">(ipfs_peers.Peer method)</a>
+</li>
+          <li><a href="ipfs_peers.html#ipfs_peers.PeerMonitor.terminate">(ipfs_peers.PeerMonitor method)</a>
+</li>
+          <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.terminate">(ipfs_remote.client.IpfsRemote method)</a>
+</li>
+          <li><a href="ipfs_remote.pubsub.html#ipfs_remote.pubsub.PubsubListener.terminate">(ipfs_remote.pubsub.PubsubListener method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.walk.throw">throw() (ipfs_remote.ipfshttpclient2.filescanner.walk method)</a>
+</li>
+        <li><a href="ipfs_peers.html#ipfs_peers.time_to_string">time_to_string() (in module ipfs_peers)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.base.html#ipfs_remote.ipfshttpclient2.client.base.CommonArgs.timeout">timeout (ipfs_remote.ipfshttpclient2.client.base.CommonArgs attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.TimeoutError">TimeoutError</a>
+</li>
+        <li><a href="ipfs_lns.html#ipfs_lns.Node.to_serial">to_serial() (ipfs_lns.Node method)</a>
+</li>
+        <li><a href="ipfs_datatransmission.html#ipfs_datatransmission.transmit_data">transmit_data() (in module ipfs_datatransmission)</a>
+</li>
+        <li><a href="ipfs_datatransmission.html#ipfs_datatransmission.transmit_file">transmit_file() (in module ipfs_datatransmission)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.try_run_ipfs">try_run_ipfs() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.try_run_ipfs">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_lns.html#ipfs_lns.Node.try_to_connect">try_to_connect() (ipfs_lns.Node method)</a>
+</li>
+        <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.tunnels">tunnels (ipfs_remote.client.IpfsRemote property)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry.type">type (ipfs_remote.ipfshttpclient2.filescanner.FSNodeEntry attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="U" class="genindex-section">
+  <h2>U</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_api.html#ipfs_api.unpin">unpin() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.unpin">(in module ipfs_cli)</a>
+</li>
+          <li><a href="ipfs_remote.files.html#ipfs_remote.files.RemoteFiles.unpin">(ipfs_remote.files.RemoteFiles method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.html#ipfs_remote.ipfshttpclient2.client.Client.unstable">unstable (ipfs_remote.ipfshttpclient2.client.Client attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.update">update() (ipfs_remote.ipfshttpclient2.client.pin.Section method)</a>
+</li>
+        <li><a href="ipfs_api.html#ipfs_api.update_ipns_record">update_ipns_record() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.update_ipns_record">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_api.html#ipfs_api.update_ipns_record_from_cid">update_ipns_record_from_cid() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_cli.html#ipfs_cli.update_ipns_record_from_cid">(in module ipfs_cli)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="V" class="genindex-section">
+  <h2>V</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.pin.html#ipfs_remote.ipfshttpclient2.client.pin.Section.verify">verify() (ipfs_remote.ipfshttpclient2.client.pin.Section method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.miscellaneous.html#ipfs_remote.ipfshttpclient2.client.miscellaneous.Base.version">version() (ipfs_remote.ipfshttpclient2.client.miscellaneous.Base method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.exceptions.html#ipfs_remote.ipfshttpclient2.exceptions.VersionMismatch">VersionMismatch</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="W" class="genindex-section">
+  <h2>W</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_api.html#ipfs_api.wait_till_ipfs_is_running">wait_till_ipfs_is_running() (in module ipfs_api)</a>
+
+        <ul>
+          <li><a href="ipfs_remote.client.html#ipfs_remote.client.IpfsRemote.wait_till_ipfs_is_running">(ipfs_remote.client.IpfsRemote method)</a>
+</li>
+        </ul></li>
+        <li><a href="ipfs_remote.ipfshttpclient2.filescanner.html#ipfs_remote.ipfshttpclient2.filescanner.walk">walk (class in ipfs_remote.ipfshttpclient2.filescanner)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.bitswap.html#ipfs_remote.ipfshttpclient2.client.bitswap.Section.wantlist">wantlist() (ipfs_remote.ipfshttpclient2.client.bitswap.Section method)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.http_common.html#ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase.workarounds">workarounds (ipfs_remote.ipfshttpclient2.http_common.ClientSyncBase attribute)</a>
+</li>
+        <li><a href="ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.write">write() (ipfs_remote.ipfshttpclient2.client.files.Section method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=6de0164e"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

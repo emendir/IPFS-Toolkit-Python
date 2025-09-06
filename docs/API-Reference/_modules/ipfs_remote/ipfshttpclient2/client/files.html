@@ -1,0 +1,828 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+        <title>ipfs_remote.ipfshttpclient2.client.files - ipfs_toolkit 0.6.0rc3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../README.html"><div class="brand">ipfs_toolkit 0.6.0rc3 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../README.html">
+  
+  <span class="sidebar-brand-text">ipfs_toolkit 0.6.0rc3 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ipfs_api.html">ipfs_api package</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../ipfs_remote.html">ipfs_remote package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ipfs_remote package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.html">ipfs_remote.ipfshttpclient2 package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ipfs_remote.ipfshttpclient2 package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.html">ipfs_remote.ipfshttpclient2.client package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of ipfs_remote.ipfshttpclient2.client package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.base.html">ipfs_remote.ipfshttpclient2.client.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.bitswap.html">ipfs_remote.ipfshttpclient2.client.bitswap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.block.html">ipfs_remote.ipfshttpclient2.client.block module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.bootstrap.html">ipfs_remote.ipfshttpclient2.client.bootstrap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.config.html">ipfs_remote.ipfshttpclient2.client.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.dag.html">ipfs_remote.ipfshttpclient2.client.dag module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.dht.html">ipfs_remote.ipfshttpclient2.client.dht module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html">ipfs_remote.ipfshttpclient2.client.files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.key.html">ipfs_remote.ipfshttpclient2.client.key module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.miscellaneous.html">ipfs_remote.ipfshttpclient2.client.miscellaneous module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.name.html">ipfs_remote.ipfshttpclient2.client.name module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.p2p.html">ipfs_remote.ipfshttpclient2.client.p2p module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.pin.html">ipfs_remote.ipfshttpclient2.client.pin module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.pubsub.html">ipfs_remote.ipfshttpclient2.client.pubsub module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.repo.html">ipfs_remote.ipfshttpclient2.client.repo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.routing.html">ipfs_remote.ipfshttpclient2.client.routing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.swarm.html">ipfs_remote.ipfshttpclient2.client.swarm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.client.unstable.html">ipfs_remote.ipfshttpclient2.client.unstable module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.encoding.html">ipfs_remote.ipfshttpclient2.encoding module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.exceptions.html">ipfs_remote.ipfshttpclient2.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.filescanner.html">ipfs_remote.ipfshttpclient2.filescanner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.http.html">ipfs_remote.ipfshttpclient2.http module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.http_common.html">ipfs_remote.ipfshttpclient2.http_common module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.http_httpx.html">ipfs_remote.ipfshttpclient2.http_httpx module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.http_requests.html">ipfs_remote.ipfshttpclient2.http_requests module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.multipart.html">ipfs_remote.ipfshttpclient2.multipart module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.requests_wrapper.html">ipfs_remote.ipfshttpclient2.requests_wrapper module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.utils.html">ipfs_remote.ipfshttpclient2.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../ipfs_remote.ipfshttpclient2.version.html">ipfs_remote.ipfshttpclient2.version module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../ipfs_remote.client.html">ipfs_remote.client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../ipfs_remote.files.html">ipfs_remote.files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../ipfs_remote.ipns.html">ipfs_remote.ipns module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../ipfs_remote.peers.html">ipfs_remote.peers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../ipfs_remote.pubsub.html">ipfs_remote.pubsub module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../ipfs_remote.tunnels.html">ipfs_remote.tunnels module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ipfs_datatransmission.html">ipfs_datatransmission package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ipfs_peers.html">ipfs_peers package</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for ipfs_remote.ipfshttpclient2.client.files</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ty</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">multipart</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+
+
+<div class="viewcode-block" id="Section">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Section</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">SectionBase</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Manage files in IPFS&#39;s virtual “Mutable File System” (MFS) file storage space&quot;&quot;&quot;</span>
+	
+<div class="viewcode-block" id="Section.cp">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.cp">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_no_item</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">cp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Creates a copy of a file within the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		Due to the nature of IPFS this will not actually involve any copying of</span>
+<span class="sd">		the file&#39;s content. Instead, a new link will be added to the directory</span>
+<span class="sd">		containing *dest* referencing the CID of *source* – this is very similar</span>
+<span class="sd">		to how hard links to read-only files work in classical filesystems.</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.ls(&quot;/&quot;)</span>
+<span class="sd">			{&#39;Entries&#39;: [</span>
+<span class="sd">				{&#39;Size&#39;: 0, &#39;Hash&#39;: &#39;&#39;, &#39;Name&#39;: &#39;Software&#39;, &#39;Type&#39;: 0},</span>
+<span class="sd">				{&#39;Size&#39;: 0, &#39;Hash&#39;: &#39;&#39;, &#39;Name&#39;: &#39;test&#39;, &#39;Type&#39;: 0}</span>
+<span class="sd">			]}</span>
+<span class="sd">			&gt;&gt;&gt; client.files.cp(&quot;/test&quot;, &quot;/bla&quot;)</span>
+<span class="sd">			&gt;&gt;&gt; client.files.ls(&quot;/&quot;)</span>
+<span class="sd">			{&#39;Entries&#39;: [</span>
+<span class="sd">				{&#39;Size&#39;: 0, &#39;Hash&#39;: &#39;&#39;, &#39;Name&#39;: &#39;Software&#39;, &#39;Type&#39;: 0},</span>
+<span class="sd">				{&#39;Size&#39;: 0, &#39;Hash&#39;: &#39;&#39;, &#39;Name&#39;: &#39;bla&#39;, &#39;Type&#39;: 0},</span>
+<span class="sd">				{&#39;Size&#39;: 0, &#39;Hash&#39;: &#39;&#39;, &#39;Name&#39;: &#39;test&#39;, &#39;Type&#39;: 0}</span>
+<span class="sd">			]}</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		source</span>
+<span class="sd">			Filepath within the MFS to copy from</span>
+<span class="sd">		dest</span>
+<span class="sd">			Destination filepath within the MFS to which the file will be</span>
+<span class="sd">			copied/linked to</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/cp&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+	<span class="c1">#TODO: Add `flush(path=&quot;/&quot;)`</span>
+
+
+<div class="viewcode-block" id="Section.ls">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.ls">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_single_item</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">ResponseBase</span><span class="p">)</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">ls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Lists contents of a directory in the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.ls(&quot;/&quot;)</span>
+<span class="sd">			{&#39;Entries&#39;: [</span>
+<span class="sd">				{&#39;Size&#39;: 0, &#39;Hash&#39;: &#39;&#39;, &#39;Name&#39;: &#39;Software&#39;, &#39;Type&#39;: 0}</span>
+<span class="sd">			]}</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		path</span>
+<span class="sd">			Filepath within the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">			dict</span>
+<span class="sd">		</span>
+<span class="sd">		+---------+------------------------------------------+</span>
+<span class="sd">		| Entries | List of files in the given MFS directory |</span>
+<span class="sd">		+---------+------------------------------------------+</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">,)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/ls&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Section.mkdir">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.mkdir">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_no_item</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Creates a directory within the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.mkdir(&quot;/test&quot;)</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		path</span>
+<span class="sd">			Filepath within the MFS</span>
+<span class="sd">		parents</span>
+<span class="sd">			Create parent directories as needed and do not raise an exception</span>
+<span class="sd">			if the requested directory already exists</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;opts&quot;</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;parents&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parents</span>
+		
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">,)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/mkdir&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Section.mv">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.mv">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_no_item</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">mv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Moves files and directories within the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.mv(&quot;/test/file&quot;, &quot;/bla/file&quot;)</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		source</span>
+<span class="sd">			Existing filepath within the MFS</span>
+<span class="sd">		dest</span>
+<span class="sd">			Destination to which the file will be moved in the MFS</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/mv&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Section.read">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.read">[docs]</a>
+	<span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+	         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Reads a file stored in the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.read(&quot;/bla/file&quot;)</span>
+<span class="sd">			b&#39;hi&#39;</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		path</span>
+<span class="sd">			Filepath within the MFS</span>
+<span class="sd">		offset</span>
+<span class="sd">			Byte offset at which to begin reading at</span>
+<span class="sd">		count</span>
+<span class="sd">			Maximum number of bytes to read (default is the entire remaining length)</span>
+<span class="sd">		</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">			bytes : MFS file contents</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">offset</span><span class="p">}</span>
+		<span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">opts</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+		<span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;opts&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+		
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">,)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/read&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Section.rm">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.rm">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_no_item</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">rm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Removes a file from the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		Note that the file&#39;s contents will not actually be removed from the IPFS</span>
+<span class="sd">		node until the next repository GC run. If it is important to have the</span>
+<span class="sd">		file&#39;s contents erased from the node this may be done manually by calling</span>
+<span class="sd">		:meth`~ipfshttpclient.Client.repo.gc` at a time of convenience.</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.rm(&quot;/bla/file&quot;)</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		path</span>
+<span class="sd">			Filepath within the MFS</span>
+<span class="sd">		recursive</span>
+<span class="sd">			Recursively remove directories?</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;opts&quot;</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;recursive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recursive</span>
+		
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">,)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/rm&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Section.stat">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.stat">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_single_item</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">ResponseBase</span><span class="p">)</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">stat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Returns basic ``stat`` information for an MFS file (including its hash)</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.stat(&quot;/test&quot;)</span>
+<span class="sd">			{&#39;Hash&#39;: &#39;QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn&#39;,</span>
+<span class="sd">			 &#39;Size&#39;: 0, &#39;CumulativeSize&#39;: 4, &#39;Type&#39;: &#39;directory&#39;, &#39;Blocks&#39;: 0}</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		path</span>
+<span class="sd">			Filepath within the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">			dict : MFS file information</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">,)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/stat&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Section.write">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Section.write">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_no_item</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">utils</span><span class="o">.</span><span class="n">clean_file_t</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+	          <span class="n">create</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">truncate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+	          <span class="n">count</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Writes a file into the MFS</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.files.write(&quot;/test/file&quot;, io.BytesIO(b&quot;hi&quot;), create=True)</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		path</span>
+<span class="sd">			Filepath within the MFS</span>
+<span class="sd">		file</span>
+<span class="sd">			IO stream object with data that should be written</span>
+<span class="sd">		offset</span>
+<span class="sd">			Byte offset at which to begin writing at</span>
+<span class="sd">		create</span>
+<span class="sd">			Create the file if it does not exist</span>
+<span class="sd">		truncate</span>
+<span class="sd">			Truncate the file to size zero before writing</span>
+<span class="sd">		count</span>
+<span class="sd">			Maximum number of bytes to read from the source ``file``</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="n">create</span><span class="p">,</span> <span class="s2">&quot;truncate&quot;</span><span class="p">:</span> <span class="n">truncate</span><span class="p">}</span>
+		<span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">opts</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+		<span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;opts&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+		
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">,)</span>
+		<span class="n">body</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">multipart</span><span class="o">.</span><span class="n">stream_files</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/files/write&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Base">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">ClientBase</span><span class="p">):</span>
+	<span class="n">files</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">SectionProperty</span><span class="p">(</span><span class="n">Section</span><span class="p">)</span>
+	
+	
+<div class="viewcode-block" id="Base.add">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.add">[docs]</a>
+	<span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">utils</span><span class="o">.</span><span class="n">clean_file_t</span><span class="p">,</span> <span class="o">*</span><span class="n">files</span><span class="p">:</span> <span class="n">utils</span><span class="o">.</span><span class="n">clean_file_t</span><span class="p">,</span>
+	        <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+	        <span class="n">pattern</span><span class="p">:</span> <span class="n">multipart</span><span class="o">.</span><span class="n">match_spec_t</span><span class="p">[</span><span class="n">ty</span><span class="o">.</span><span class="n">AnyStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+	        <span class="n">trickle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+	        <span class="n">period_special</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">only_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+	        <span class="n">wrap_with_directory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">chunker</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+	        <span class="n">pin</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">raw_leaves</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nocopy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+	        <span class="n">cid_version</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+	        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Adds a file, several files or directory of files to IPFS</span>
+<span class="sd">		</span>
+<span class="sd">		Arguments marked as “directories only” will be ignored unless *file*</span>
+<span class="sd">		refers to a directory path or file descriptor. Passing a directory file</span>
+<span class="sd">		descriptor is currently restricted to Unix (due to Python standard</span>
+<span class="sd">		library limitations on Windows) and will prevent the *nocopy* feature</span>
+<span class="sd">		from working.</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; with io.open(&#39;nurseryrhyme.txt&#39;, &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:</span>
+<span class="sd">			... 	numbytes = f.write(&#39;Mary had a little lamb&#39;)</span>
+<span class="sd">			&gt;&gt;&gt; client.add(&#39;nurseryrhyme.txt&#39;)</span>
+<span class="sd">			{&#39;Hash&#39;: &#39;QmZfF6C9j4VtoCsTp4KSrhYH47QMd3DNXVZBKaxJdhaPab&#39;,</span>
+<span class="sd">			 &#39;Name&#39;: &#39;nurseryrhyme.txt&#39;}</span>
+<span class="sd">		</span>
+<span class="sd">		Directory uploads</span>
+<span class="sd">		-----------------</span>
+<span class="sd">		</span>
+<span class="sd">		By default only regular files and directories immediately below the given</span>
+<span class="sd">		directory path/FD are uploaded to the connected IPFS node; to upload an</span>
+<span class="sd">		entire directory tree instead, *recursive* can be set to ``True``.</span>
+<span class="sd">		Symbolic links and special files (pipes, sockets, devices nodes, …) cannot</span>
+<span class="sd">		be represented by the UnixFS data structure this call creates and hence</span>
+<span class="sd">		are ignored while scanning the target directory, to include the targets</span>
+<span class="sd">		of symbolic links in the upload set *follow_symlinks* to ``True``.</span>
+<span class="sd">		</span>
+<span class="sd">		The set of files and directories included in the upload may be restricted</span>
+<span class="sd">		by passing any combination of glob matching strings, compiled regular</span>
+<span class="sd">		expression objects and custom :class:`~ipfshttpclient.filescanner.Matcher`</span>
+<span class="sd">		objects. A file or directory will be included if it matches of the</span>
+<span class="sd">		patterns provided. For regular expressions please note that as predicting</span>
+<span class="sd">		which directories are relevant to the given pattern is impossible to do</span>
+<span class="sd">		reliably if *recursive* is set to ``True`` the entire directory hierarchy</span>
+<span class="sd">		will always be scanned and compared to the given expression even if only</span>
+<span class="sd">		very few files are actually matched by the expression. To avoid this, pass</span>
+<span class="sd">		a custom matching class or use glob-patterns instead (which will only</span>
+<span class="sd">		cause a scan of the directories required to match their value).</span>
+<span class="sd">		</span>
+<span class="sd">		Note that unlike the ``ipfs add`` CLI interface this implementation will</span>
+<span class="sd">		be default include dot-files (“files that are hidden”) – any file or</span>
+<span class="sd">		directory whose name starts with a period/dot character – in the upload.</span>
+<span class="sd">		For behaviour that is similar to the CLI command set *pattern* to</span>
+<span class="sd">		``&quot;**&quot;`` – this enables the default glob behaviour of not matching</span>
+<span class="sd">		dot-files unless *period_special* is set to ``False`` or the pattern</span>
+<span class="sd">		actually starts with a period.</span>
+<span class="sd">		</span>
+<span class="sd">		Arguments</span>
+<span class="sd">		---------</span>
+<span class="sd">		file</span>
+<span class="sd">			A filepath, path-object, file descriptor or open file object the</span>
+<span class="sd">			file or directory to add</span>
+<span class="sd">		recursive</span>
+<span class="sd">			upload files in subdirectories, if *file* refers to a directory?</span>
+<span class="sd">		pattern</span>
+<span class="sd">			A :mod:`glob` pattern,</span>
+<span class="sd">			compiled regular expression object or arbitrary matcher used to limit</span>
+<span class="sd">			the files and directories included as part of adding a directory</span>
+<span class="sd">			(directories only)</span>
+<span class="sd">		trickle</span>
+<span class="sd">			Use trickle-dag format (optimized for streaming) when generating</span>
+<span class="sd">			the dag; see `the old FAQ &lt;https://github.com/ipfs/faq/issues/218&gt;`_</span>
+<span class="sd">			for more information</span>
+<span class="sd">		follow_symlinks</span>
+<span class="sd">			Follow symbolic links when recursively scanning directories? (directories only)</span>
+<span class="sd">		period_special</span>
+<span class="sd">			Treat files and directories with a leading period character (“dot-files”)</span>
+<span class="sd">			specially in glob patterns? (directories only)</span>
+<span class="sd">			</span>
+<span class="sd">			If this is set these files will only be matched by path labels whose</span>
+<span class="sd">			initial character is a period, but not by those starting with ``?``,</span>
+<span class="sd">			``*`` or ``[``.</span>
+<span class="sd">		only_hash</span>
+<span class="sd">			Only chunk and hash, but do not write to disk</span>
+<span class="sd">		wrap_with_directory</span>
+<span class="sd">			Wrap files with a directory object to preserve their filename</span>
+<span class="sd">		chunker</span>
+<span class="sd">			The chunking algorithm to use</span>
+<span class="sd">		pin</span>
+<span class="sd">			pin this object when adding</span>
+<span class="sd">		raw_leaves</span>
+<span class="sd">			Use raw blocks for leaf nodes. (experimental). (Default: ``True``</span>
+<span class="sd">			when *nocopy* is True, or ``False`` otherwise)</span>
+<span class="sd">		nocopy</span>
+<span class="sd">			Add the file using filestore. Implies raw-leaves. (experimental).</span>
+<span class="sd">		cid_version</span>
+<span class="sd">			CID version. Default value is provided by IPFS daemon. (experimental)</span>
+<span class="sd">		</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">			Union[dict, list]</span>
+<span class="sd">				File name and hash of the added file node, will return a list</span>
+<span class="sd">				of one or more items unless only a single file (not directory)</span>
+<span class="sd">				was given</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s2">&quot;trickle&quot;</span><span class="p">:</span> <span class="n">trickle</span><span class="p">,</span>
+			<span class="s2">&quot;only-hash&quot;</span><span class="p">:</span> <span class="n">only_hash</span><span class="p">,</span>
+			<span class="s2">&quot;wrap-with-directory&quot;</span><span class="p">:</span> <span class="n">wrap_with_directory</span><span class="p">,</span>
+			<span class="s2">&quot;pin&quot;</span><span class="p">:</span> <span class="n">pin</span><span class="p">,</span>
+			<span class="s2">&quot;raw-leaves&quot;</span><span class="p">:</span> <span class="n">raw_leaves</span> <span class="k">if</span> <span class="n">raw_leaves</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nocopy</span><span class="p">,</span>
+			<span class="s2">&quot;nocopy&quot;</span><span class="p">:</span> <span class="n">nocopy</span>
+		<span class="p">}</span>  <span class="c1"># type: ty.Dict[str, ty.Union[str, bool]]</span>
+		<span class="k">for</span> <span class="n">option_name</span><span class="p">,</span> <span class="n">option_value</span> <span class="ow">in</span> <span class="p">[</span>
+			<span class="p">(</span><span class="s2">&quot;chunker&quot;</span><span class="p">,</span> <span class="n">chunker</span><span class="p">),</span>
+			<span class="p">(</span><span class="s2">&quot;cid-version&quot;</span><span class="p">,</span> <span class="n">cid_version</span><span class="p">),</span>
+		<span class="p">]:</span>
+			<span class="k">if</span> <span class="n">option_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">opts</span><span class="p">[</span><span class="n">option_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">option_value</span>
+		<span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;opts&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+		
+		<span class="c1"># There may be other cases where nocopy will silently fail to work, but</span>
+		<span class="c1"># this is by far the most obvious one</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nocopy</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Passing file descriptors is incompatible with *nocopy*&quot;</span><span class="p">)</span>
+		
+		<span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span> \
+		       <span class="s2">&quot;Use `client.add(name1, name2, …)` to add several items&quot;</span>
+		<span class="n">multiple</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="n">to_send</span>  <span class="o">=</span> <span class="p">((</span><span class="n">file</span><span class="p">,)</span> <span class="o">+</span> <span class="n">files</span><span class="p">)</span> <span class="k">if</span> <span class="n">multiple</span> <span class="k">else</span> <span class="n">file</span>
+		<span class="n">body</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">is_dir</span> <span class="o">=</span> <span class="n">multipart</span><span class="o">.</span><span class="n">stream_filesystem_node</span><span class="p">(</span>
+			<span class="n">to_send</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="n">follow_symlinks</span><span class="p">,</span>
+			<span class="n">period_special</span><span class="o">=</span><span class="n">period_special</span><span class="p">,</span> <span class="n">patterns</span><span class="o">=</span><span class="n">pattern</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive</span>
+		<span class="p">)</span>
+		
+		<span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/add&#39;</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">multiple</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_dir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">wrap_with_directory</span><span class="p">:</span>
+			<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+			<span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">ResponseBase</span><span class="p">(</span><span class="n">resp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+		<span class="k">elif</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stream&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+			<span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">ResponseWrapIterator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">ResponseBase</span><span class="p">)</span>
+		<span class="k">return</span> <span class="p">[</span><span class="n">base</span><span class="o">.</span><span class="n">ResponseBase</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">resp</span><span class="p">]</span></div>
+
+	
+	
+<div class="viewcode-block" id="Base.get">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.get">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_no_item</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cid</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">cid_t</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">utils</span><span class="o">.</span><span class="n">path_t</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+	        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Downloads a file, or directory of files from IPFS</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		cid</span>
+<span class="sd">			The path to the IPFS object(s) to be outputted</span>
+<span class="sd">		target</span>
+<span class="sd">			The directory to place the downloaded files in</span>
+<span class="sd">			</span>
+<span class="sd">			Defaults to the current working directory.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cid</span><span class="p">),)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;/get&#39;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Base.cat">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.cat">[docs]</a>
+	<span class="k">def</span><span class="w"> </span><span class="nf">cat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cid</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">cid_t</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+	        <span class="n">length</span><span class="p">:</span> <span class="n">ty</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Retrieves the contents of a file identified by hash</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.cat(&#39;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#39;)</span>
+<span class="sd">			Traceback (most recent call last):</span>
+<span class="sd">			  ...</span>
+<span class="sd">			ipfsapi.exceptions.Error: this dag node is a directory</span>
+<span class="sd">			&gt;&gt;&gt; client.cat(&#39;QmeKozNssnkJ4NcyRidYgDY2jfRZqVEoRGfipkgath71bX&#39;)</span>
+<span class="sd">			b&#39;&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n\n&lt;head&gt;\n&lt;title&gt;ipfs example viewer&lt;/…&#39;</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		cid</span>
+<span class="sd">			The name or path of the IPFS object(s) to be retrieved</span>
+<span class="sd">		offset</span>
+<span class="sd">			Byte offset to begin reading from</span>
+<span class="sd">		length</span>
+<span class="sd">			Maximum number of bytes to read (defaults to reading the entire file)</span>
+<span class="sd">		</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">			bytes</span>
+<span class="sd">				The file&#39;s contents</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cid</span><span class="p">),)</span>
+		<span class="n">opts</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">if</span> <span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">opts</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offset</span>
+		<span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">opts</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+		<span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;opts&#39;</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/cat&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+	
+	
+<div class="viewcode-block" id="Base.ls">
+<a class="viewcode-back" href="../../../../ipfs_remote.ipfshttpclient2.client.files.html#ipfs_remote.ipfshttpclient2.client.files.Base.ls">[docs]</a>
+	<span class="nd">@base</span><span class="o">.</span><span class="n">returns_single_item</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">ResponseBase</span><span class="p">)</span>
+	<span class="k">def</span><span class="w"> </span><span class="nf">ls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cid</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">cid_t</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">base</span><span class="o">.</span><span class="n">CommonArgs</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Returns a list of objects linked to by the given hash</span>
+<span class="sd">		</span>
+<span class="sd">		.. code-block:: python</span>
+<span class="sd">		</span>
+<span class="sd">			&gt;&gt;&gt; client.ls(&#39;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#39;)</span>
+<span class="sd">			{&#39;Objects&#39;: [</span>
+<span class="sd">				{&#39;Hash&#39;: &#39;QmTkzDwWqPbnAh5YiV5VwcTLnGdwSNsNTn2aDxdXBFca7D&#39;,</span>
+<span class="sd">					&#39;Links&#39;: [</span>
+<span class="sd">						{&#39;Hash&#39;: &#39;Qmd2xkBfEwEs9oMTk77A6jrsgurpF3ugXSg7dtPNFkcNMV&#39;,</span>
+<span class="sd">						 &#39;Name&#39;: &#39;Makefile&#39;,          &#39;Size&#39;: 174, &#39;Type&#39;: 2},</span>
+<span class="sd">						…</span>
+<span class="sd">						{&#39;Hash&#39;: &#39;QmSY8RfVntt3VdxWppv9w5hWgNrE31uctgTiYwKir8eXJY&#39;,</span>
+<span class="sd">						 &#39;Name&#39;: &#39;published-version&#39;, &#39;Size&#39;: 55,  &#39;Type&#39;: 2}</span>
+<span class="sd">					]</span>
+<span class="sd">				}</span>
+<span class="sd">			]}</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		cid</span>
+<span class="sd">			The path to the IPFS object(s) to list links from</span>
+<span class="sd">		</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">			dict</span>
+<span class="sd">				Directory information and contents</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cid</span><span class="p">),)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/ls&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=6de0164e"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
