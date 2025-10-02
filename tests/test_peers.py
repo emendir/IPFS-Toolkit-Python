@@ -6,11 +6,12 @@ import sys
 import os
 from termcolor import colored
 from ipfs_toolkit_docker.docker_container import DockerContainer
-UTC=timezone.utc
+
+UTC = timezone.utc
 if True:
-    sys.path.insert(0, os.path.join((os.path.dirname(__file__)),"..","src"))
+    sys.path.insert(0, os.path.join((os.path.dirname(__file__)), "..", "src"))
     import ipfs_api
-    from ipfs_peers import Peer, PeerMonitor
+    from ipfs_tk_peer_monitor import Peer, PeerMonitor
 
 
 DELETE_ALL_IPFS_DOCKERS = True
@@ -18,7 +19,7 @@ REBUILD_DOCKER = True
 
 
 docker_peer = None
-peer_id = ''
+peer_id = ""
 
 peer = None
 
@@ -26,24 +27,29 @@ peer = None
 def prepare():
     if REBUILD_DOCKER:
         from ipfs_toolkit_docker.build_docker import build_docker
+
         build_docker(verbose=False)
     if DELETE_ALL_IPFS_DOCKERS:
         try:
-            os.system("docker stop $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1; docker rm $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1")
+            os.system(
+                "docker stop $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1; docker rm $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1"
+            )
         except:
             pass
     global docker_peer
     global peer_id
     docker_peer = DockerContainer("IPFS-Toolkit-Test")
-    python_code="""import ipfs_api
+    python_code = """import ipfs_api
 ipfs_api.client.terminate()
 ipfs_api.client=ipfs_api.IpfsNode('/tmp/IpfsToolkitTest')
 from time import sleep
 sleep(300)
 """.replace("\n", ";")
-    command=f"docker exec {docker_peer.container_id} python -c \"{python_code}\"&"
+    command = (
+        f'docker exec {docker_peer.container_id} python -c "{python_code}"&'
+    )
     os.system(command)
-    
+
     peer_id = docker_peer.ipfs_id
 
 
@@ -68,10 +74,17 @@ def mark(success):
 def validate_peer_object(peer):
     """Only call this on peers who have had a contact event registered"""
     try:
-        assert isinstance(peer.last_seen(), datetime), "Peer Object Validation: last_seen"
-        assert isinstance(peer.peer_id(), str), "Peer Object Validation: peer_id"
-        assert isinstance(peer.multiaddrs(), list) and isinstance(peer.multiaddrs()[0][0], str) and isinstance(
-            peer.multiaddrs()[0][1], datetime), "Peer Object Validation: multiaddrs"
+        assert isinstance(peer.last_seen(), datetime), (
+            "Peer Object Validation: last_seen"
+        )
+        assert isinstance(peer.peer_id(), str), (
+            "Peer Object Validation: peer_id"
+        )
+        assert (
+            isinstance(peer.multiaddrs(), list)
+            and isinstance(peer.multiaddrs()[0][0], str)
+            and isinstance(peer.multiaddrs()[0][1], datetime)
+        ), "Peer Object Validation: multiaddrs"
         return True
     except Exception as error:
         print("Peer validation error:")
@@ -81,7 +94,7 @@ def validate_peer_object(peer):
 
 def test_peer_creation():
     global peer
-    peer = Peer(peer_id)
+    peer = Peer(ipfs_api.client, peer_id)
     peer.register_contact_event()
     print(mark(validate_peer_object(peer)), "Peer Creation")
 
@@ -92,7 +105,7 @@ def test_peer_connection():
 
 def test_serialisation():
     global peer
-    peer2 = Peer(serial=peer.serialise())
+    peer2 = Peer(ipfs_api.client, serial=peer.serialise())
     serialisation_success = validate_peer_object(peer)
 
     equality_success = peer.serialise() == peer2.serialise()
@@ -111,7 +124,7 @@ def test_create_peer_monitor():
     if os.path.exists(monitor1_config_path):
         os.remove(monitor1_config_path)
     global monitor
-    monitor = PeerMonitor(monitor1_config_path)
+    monitor = PeerMonitor(ipfs_api.client, monitor1_config_path)
     monitor.register_contact_event(peer_id)
 
     print(mark(validate_peer_object(monitor.peers()[0])), "Create PeerMonitor")
@@ -120,21 +133,39 @@ def test_create_peer_monitor():
 def test_load_peer_monitor():
     global monitor2
     monitor.save()
-    time.sleep(6)   # wait so that the test_autoconnect can be sure of its result
+    # wait so that the test_autoconnect can be sure of its result
+    time.sleep(6)
     if os.path.exists(monitor2_config_path):
         os.remove(monitor2_config_path)
     shutil.copy(monitor1_config_path, monitor2_config_path)
-    forget_after_hrs = 0.0025    # 9s
+    forget_after_hrs = 0.0025  # 9s
     connection_attempt_interval_sec = 5
-    monitor2 = PeerMonitor(monitor2_config_path, forget_after_hrs=forget_after_hrs,
-                           connection_attempt_interval_sec=connection_attempt_interval_sec)
-    print(mark(monitor.peers() and monitor.peers()[0].serialise() ==
-          monitor2.peers()[0].serialise()), "Load PeerMonitor")
+    monitor2 = PeerMonitor(
+        ipfs_api.client,
+        monitor2_config_path,
+        forget_after_hrs=forget_after_hrs,
+        connection_attempt_interval_sec=connection_attempt_interval_sec,
+    )
+    print(
+        mark(
+            monitor.peers()
+            and monitor.peers()[0].serialise()
+            == monitor2.peers()[0].serialise()
+        ),
+        "Load PeerMonitor",
+    )
 
 
 def test_autoconnect():
-    print(mark((monitor2.peers()[0].multiaddrs()[0][1] -
-          datetime.now(UTC)).total_seconds() < 1), "Autoconnection")
+    print(
+        mark(
+            (
+                monitor2.peers()[0].multiaddrs()[0][1] - datetime.now(UTC)
+            ).total_seconds()
+            < 1
+        ),
+        "Autoconnection",
+    )
 
 
 def test_find_all_peers():
@@ -152,8 +183,15 @@ def test_entry_deletion():
     time.sleep(6)
     print(mark(len(monitor2.peers()) == 1), "Forget peer not malfunctioning")
     # do another autoconnect test, making sure the mutltiaddr date was updated
-    print(mark((monitor2.peers()[0].multiaddrs()[0][1] -
-          datetime.now(UTC)).total_seconds() < 3), "Autoconnection still working")
+    print(
+        mark(
+            (
+                monitor2.peers()[0].multiaddrs()[0][1] - datetime.now(UTC)
+            ).total_seconds()
+            < 3
+        ),
+        "Autoconnection still working",
+    )
     # take peer offline, then wait some cycles and enough time for the IPFS
     # daemon to realise the connection loss and check if peer was forgoten
     docker_peer.stop()

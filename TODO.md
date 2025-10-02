@@ -1,3 +1,4 @@
+
 ## Docs
 - how to specify custom address for IPFS daemon interface
   - `PY_IPFS_HTTP_CLIENT_DEFAULT_ADDR=/dns/ipfs/tcp/5001/http`, 
@@ -6,6 +7,9 @@
 ## API
 - make parameter names more consistent, e.g. `timeout` & `timeout_sec`
 - make ipfs_api.read() empty file work
+
+## libkubo
+- IPNS
 
 ## ipfs_api
 - caching for read and publish

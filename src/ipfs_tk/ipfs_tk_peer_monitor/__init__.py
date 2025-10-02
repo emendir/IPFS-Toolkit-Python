@@ -1,6 +1,4 @@
-
 """"""
-
 
 from threading import Event
 import threading
@@ -11,7 +9,7 @@ import json
 from datetime import datetime, timezone, timedelta
 from ipfs_tk_generics import IpfsClient
 
-UTC=timezone.utc
+UTC = timezone.utc
 # default values for various settings, can all be overridden
 FORGET_AFTER_HOURS = 200
 SUCCESSIVE_REGISTER_IGNORE_DUR_SEC = 60
@@ -22,8 +20,9 @@ FILE_WRITE_INTERVAL_SEC = 1
 class Peer:
     """Object for representing an IPFS peer and contact information collected
     from it."""
+
     __peer_id = None
-    __multiaddrs = []     # list((multiaddr, datetime))
+    __multiaddrs = []  # list((multiaddr, datetime))
     __last_seen = None  # datetime
 
     __multi_addrs_lock = Lock()
@@ -40,53 +39,73 @@ class Peer:
                 data = serial
             if not isinstance(serial, dict):
                 raise TypeError(
-                    f"Parameter serial must be of type dict or str, not {type(serial)}")
+                    "Parameter serial must be of type dict or str, not "
+                    f"{type(serial)}"
+                )
 
-            self.__peer_id = data['peer_id']
-            self.__last_seen = string_to_time(data['last_seen'])
-            self.__multiaddrs = [(addr, string_to_time(t))
-                                 for addr, t in data['multiaddrs']]
+            self.__peer_id = data["peer_id"]
+            self.__last_seen = string_to_time(data["last_seen"])
+            self.__multiaddrs = [
+                (addr, string_to_time(t)) for addr, t in data["multiaddrs"]
+            ]
         else:
             raise ValueError(
-                "You must specify exactly one parameter to this constructor: peer_id OR serial")
+                "You must specify exactly one parameter to this constructor: peer_id OR serial"
+            )
 
-    def register_contact_event(self, successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC):
+    def register_contact_event(
+        self,
+        successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC,
+    ):
         """
         Returns:
             bool: whether or not the event was registered
         """
         # skip registering if last register wasn't very long ago
-        if self.last_seen() and (datetime.now(UTC) - self.last_seen()).total_seconds() < successive_register_ignore_dur_sec:
+        if (
+            self.last_seen()
+            and (datetime.now(UTC) - self.last_seen()).total_seconds()
+            < successive_register_ignore_dur_sec
+        ):
             return False
-        with self.__multi_addrs_lock:
-            multiaddrs = self.ipfs_client.peers.find(self.__peer_id)
-            if not self.ipfs_client.peers.is_connected(self.__peer_id):
-                return False
-            now = datetime.now(UTC)
-            if multiaddrs:
-                self.__last_seen = now
-            else:
-                return False
+        multiaddrs = self.ipfs_client.peers.find(self.__peer_id)
+        if not self.ipfs_client.peers.is_connected(self.__peer_id):
+            return False
+        now = datetime.now(UTC)
+        if multiaddrs:
+            self.__last_seen = now
+        else:
+            return False
+        self.add_multi_addrs(multiaddrs, update_timestamps=True)
+        return True
 
+    def add_multi_addrs(
+        self, multiaddrs: list[str], update_timestamps: bool
+    ) -> None:
+        with self.__multi_addrs_lock:
+            now = datetime.now(UTC)
             # update last_seen dates of known multiaddrs, removing them from
             # the local multiaddrs list
             for i, (multiaddr, last_seen) in enumerate(self.__multiaddrs):
                 if multiaddr in multiaddrs:
-                    self.__multiaddrs[i] = (multiaddr, now)
+                    if update_timestamps:
+                        self.__multiaddrs[i] = (multiaddr, now)
                     multiaddrs.remove(multiaddr)
 
             # add new multiaddrs to known multiaddrs
             for multiaddr in multiaddrs:
                 self.__multiaddrs.append((multiaddr, now))
-            return True
 
     def forget_old_entries(self, date):
         with self.__multi_addrs_lock:
             indeces_to_delete = []
 
-            # redefine self.__multiaddrs, selecting only those old entries that have the correct date
-            self.__multiaddrs = [(multiaddr, last_seen)
-                                 for multiaddr, last_seen in self.__multiaddrs if last_seen > date]
+            # remove old entries
+            self.__multiaddrs = [
+                (multiaddr, last_seen)
+                for multiaddr, last_seen in self.__multiaddrs
+                if last_seen > date
+            ]
 
     def last_seen(self):
         """Returns the date at which this peer was last seen.
@@ -95,7 +114,10 @@ class Peer:
         """
         return self.__last_seen
 
-    def connect(self, successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC):
+    def connect(
+        self,
+        successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC,
+    ):
         """Tries to connect to this peer.
         Returns:
             bool: whether or not we managed to connect to this peer
@@ -104,7 +126,8 @@ class Peer:
             if self.__terminate:
                 return False
             success = self.ipfs_client.peers.connect(
-                f"{multiaddr}/p2p/{self.__peer_id}")
+                f"{multiaddr}/p2p/{self.__peer_id}"
+            )
             if success and self.ipfs_client.peers.is_connected(self.__peer_id):
                 self.register_contact_event(successive_register_ignore_dur_sec)
 
@@ -112,7 +135,9 @@ class Peer:
             if self.__terminate:
                 return False
         # if none of the known multiaddresses worked, try a general findpeer
-        if self.ipfs_client.peers.find(self.__peer_id) and self.ipfs_client.peers.is_connected(self.__peer_id):
+        if self.ipfs_client.peers.find(
+            self.__peer_id
+        ) and self.ipfs_client.peers.is_connected(self.__peer_id):
             self.register_contact_event(successive_register_ignore_dur_sec)
             return True
         return False
@@ -127,9 +152,11 @@ class Peer:
         last_seen = None
         last_seen = time_to_string(self.__last_seen)
         data = {
-            'peer_id': self.__peer_id,
-            'last_seen': last_seen,
-            'multiaddrs': [[addr, time_to_string(t)] for addr, t in self.__multiaddrs],
+            "peer_id": self.__peer_id,
+            "last_seen": last_seen,
+            "multiaddrs": [
+                [addr, time_to_string(t)] for addr, t in self.__multiaddrs
+            ],
         }
         return data
 
@@ -150,6 +177,7 @@ class PeerMonitor:
         successive_register_ignore_dur_sec (int): minimum duration between
                 successive registrations of the same peer
     """
+
     forget_after_hrs = FORGET_AFTER_HOURS
     connection_attempt_interval_sec = CONNECTION_ATTEMPT_INTERVAL_SEC
     successive_register_ignore_dur_sec = SUCCESSIVE_REGISTER_IGNORE_DUR_SEC
@@ -158,57 +186,78 @@ class PeerMonitor:
     __peers = []  # list(Peer)
     __terminate = False
     __save_lock = Lock()
-    __file_manager_thread = None    # Thread
+    __file_manager_thread = None  # Thread
     __save_event = Event()
-    __peers_lock = Lock()   # for adding & removing peers
+    __peers_lock = Lock()  # for adding & removing peers
 
-    def __init__(self,
-        ipfs_client:IpfsClient,
-                 filepath,
-                 forget_after_hrs=FORGET_AFTER_HOURS,
-                 connection_attempt_interval_sec=CONNECTION_ATTEMPT_INTERVAL_SEC,
-                 successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC):
+    def __init__(
+        self,
+        ipfs_client: IpfsClient,
+        filepath,
+        forget_after_hrs=FORGET_AFTER_HOURS,
+        connection_attempt_interval_sec=CONNECTION_ATTEMPT_INTERVAL_SEC,
+        successive_register_ignore_dur_sec=SUCCESSIVE_REGISTER_IGNORE_DUR_SEC,
+    ):
         self.ipfs_client = ipfs_client
         self.__filepath = filepath
         self.forget_after_hrs = forget_after_hrs
         self.connection_attempt_interval_sec = connection_attempt_interval_sec
-        self.successive_register_ignore_dur_sec = successive_register_ignore_dur_sec
+        self.successive_register_ignore_dur_sec = (
+            successive_register_ignore_dur_sec
+        )
 
         if os.path.exists(filepath):
-            with open(filepath, 'r') as file:
+            with open(filepath, "r") as file:
                 data = file.read()
-            if data.strip("\n"):    # if file isn't empty
+            if data.strip("\n"):  # if file isn't empty
                 data = json.loads(data)
-                peers = data['peers']
+                peers = data["peers"]
                 for peer_data in peers:
-                    if self.get_peer_by_id(peer_data['peer_id']):
+                    if self.get_peer_by_id(peer_data["peer_id"]):
                         # TODO how to warn user about duplicate entries?
                         # Function to merge peers?
                         # Ever necessary?
                         continue
-                    self.__peers.append(Peer(self.ipfs_client,serial=peer_data))
-        self.__peer_finder_thread = Thread(target=self.__connect_to_peers, args=(),
-                                           name="PeerMonitor.__connect_to_peers")
+                    self.__peers.append(
+                        Peer(self.ipfs_client, serial=peer_data)
+                    )
+        self.__peer_finder_thread = Thread(
+            target=self.__connect_to_peers,
+            args=(),
+            name="PeerMonitor.__connect_to_peers",
+        )
         self.__peer_finder_thread.start()
         self.__file_manager_thread = Thread(
-            target=self.__file_manager, args=(), name="PeerMonitor.__file_manager")
+            target=self.__file_manager,
+            args=(),
+            name="PeerMonitor.__file_manager",
+        )
         self.__file_manager_thread.start()
 
     def register_contact_event(self, peer_id):
         # get peer, create if new
+        peer = self.get_or_add_peer(peer_id)
+
+        # try register, and if data is recorded, save to file
+        if peer.register_contact_event(
+            successive_register_ignore_dur_sec=self.successive_register_ignore_dur_sec
+        ):
+            self.save()
+
+    def get_or_add_peer(
+        self, peer_id: str, multiaddrs: list[str] = []
+    ) -> Peer:
         with self.__peers_lock:
             peer = self.get_peer_by_id(peer_id, already_locked=True)
             if not peer:
-                peer = Peer(self.ipfs_client,peer_id)
+                peer = Peer(self.ipfs_client, peer_id)
                 self.__peers.append(peer)
+            peer.add_multi_addrs(multiaddrs, update_timestamps=True)
 
-        # try register, and if data is recorded, save to file
-        if peer.register_contact_event(successive_register_ignore_dur_sec=self.successive_register_ignore_dur_sec):
-            self.save()
+        return peer
 
     def get_peer_by_id(self, peer_id, already_locked=False):
         if not already_locked:
-
             self.__peers_lock.acquire()
 
         found_peer = None
@@ -223,6 +272,7 @@ class PeerMonitor:
 
     def peers(self):
         return self.__peers
+
     __save = False
 
     def __file_manager(self):
@@ -243,9 +293,9 @@ class PeerMonitor:
     def _save(self):
         with self.__save_lock:
             try:
-                with open(self.__filepath, 'w+') as file:
+                with open(self.__filepath, "w+") as file:
                     data = {
-                        'peers': [peer.serialise() for peer in self.__peers]
+                        "peers": [peer.serialise() for peer in self.__peers]
                     }
                     file.write(json.dumps(data))
             except OSError as e:
@@ -272,13 +322,16 @@ class PeerMonitor:
                     time.sleep(1)
 
             # make peers forget old multiaddresses
-            threshhold_time = datetime.now(UTC) - timedelta(hours=self.forget_after_hrs)
+            threshhold_time = datetime.now(UTC) - timedelta(
+                hours=self.forget_after_hrs
+            )
             for peer in self.__peers:
                 peer.forget_old_entries(threshhold_time)
             # forget old peers
             with self.__peers_lock:
                 self.__peers = [
-                    peer for peer in self.__peers if peer.multiaddrs()]
+                    peer for peer in self.__peers if peer.multiaddrs()
+                ]
 
             time.sleep(1)
             self.save()
@@ -288,7 +341,10 @@ class PeerMonitor:
         Blocks until all connection attempts have been finished."""
         threads = []
         for peer in self.__peers:
-            thread = Thread(target=peer.connect, args=(self.successive_register_ignore_dur_sec,))
+            thread = Thread(
+                target=peer.connect,
+                args=(self.successive_register_ignore_dur_sec,),
+            )
             threads.append(thread)
             thread.start()
         # wait for all threads to finish
@@ -310,7 +366,7 @@ class PeerMonitor:
         self.__file_manager_thread.join()
 
 
-TIME_FORMAT = '%Y.%m.%d_%H.%M.%S'
+TIME_FORMAT = "%Y.%m.%d_%H.%M.%S"
 
 
 def time_to_string(_time: datetime):
