@@ -19,8 +19,12 @@ def __add_integritybyte_to_buffer(buffer: bytes) -> bytearray:
     sum = 0
     for byte in buffer:
         sum += byte
-        if sum > 65000:  # if the sum is reaching the upper limit of an unsigned 16-bit integer
-            sum = sum % 256   # reduce the sum to its modulus256 so that the calculation above doesn't take too much processing power in later iterations of this for loop
+        if (
+            sum > 65000
+        ):  # if the sum is reaching the upper limit of an unsigned 16-bit integer
+            sum = (
+                sum % 256
+            )  # reduce the sum to its modulus256 so that the calculation above doesn't take too much processing power in later iterations of this for loop
     # adding the integrity byte to the start of the buffer
     return bytearray([sum % 256]) + buffer
 
@@ -28,7 +32,7 @@ def __add_integritybyte_to_buffer(buffer: bytes) -> bytearray:
 # turns a base 10 integer into a base 255 integer in  the form of an array of bytes where each byte represents a digit, and where no byte has the value 0
 def _to_b255_no_0s(number: int) -> bytearray:
     array = bytearray([])
-    while (number > 0):
+    while number > 0:
         # modulus + 1 in order to get a range of possible values from 1-256 instead of 0-255
         array.insert(0, int(number % 255 + 1))
         number -= number % 255
@@ -41,7 +45,7 @@ def _from_b255_no_0s(array):
     order = 1
     # for loop backwards through th ebytes in array
     i = len(array) - 1  # th eindex of the last byte in the array
-    while (i >= 0):
+    while i >= 0:
         # byte - 1 to change the range from 1-266 to 0-255
         number = number + (array[i] - 1) * order
         order = order * 255
@@ -95,9 +99,9 @@ def _tcp_recv_all(sock, timeout=5):
             if data:
                 if not length:
                     if data.index(0):
-                        total_data += data[:data.index(0)]
+                        total_data += data[: data.index(0)]
                         length = _from_b255_no_0s(total_data)
-                        total_data = data[data.index(0) + 1:]
+                        total_data = data[data.index(0) + 1 :]
                     else:
                         total_data += data
                 else:
@@ -117,7 +121,9 @@ def _tcp_recv_all(sock, timeout=5):
     return total_data
 
 
-def _tcp_recv_buffer_timeout(sock: socket.socket, buffer_size: int=BUFFER_SIZE, timeout: int=5) -> bytes:
+def _tcp_recv_buffer_timeout(
+    sock: socket.socket, buffer_size: int = BUFFER_SIZE, timeout: int = 5
+) -> bytes:
     # make socket non blocking
     # sock.setblocking(0)
     sock.settimeout(timeout)
@@ -140,19 +146,23 @@ def _tcp_recv_buffer_timeout(sock: socket.socket, buffer_size: int=BUFFER_SIZE, 
 # ----------IPFS Utilities-------------------------------------------
 
 
-def _create_sending_connection(ipfs_client: BaseClient, peer_id: str, protocol: str, port: None=None) -> socket.socket:
+def _create_sending_connection(
+    ipfs_client: BaseClient, peer_id: str, protocol: str, port: None = None
+) -> socket.socket:
     # _close_sending_connection(
     #     peer_id=peer_id, name=protocol)
     if port:
         _close_sending_connection(ipfs_client, port=port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if port == None:
-        for prt in sending_ports:   # trying ports until we find a free one
+        for prt in sending_ports:  # trying ports until we find a free one
             try:
                 ipfs_client.tunnels.open_sender(protocol, prt, peer_id)
                 sock.connect((ipfs_client._ipfs_host_ip(), prt))
                 return sock
-            except Exception as e:   # ignore errors caused by port already in use
+            except (
+                Exception
+            ) as e:  # ignore errors caused by port already in use
                 if "bind: address already in use" not in str(e):
                     raise IPFS_Error(str(e))
                 pass
@@ -166,7 +176,9 @@ def _create_sending_connection(ipfs_client: BaseClient, peer_id: str, protocol: 
             raise IPFS_Error(str(e))
 
 
-def _create_listening_connection(ipfs_client: BaseClient, protocol, port, force=True):
+def _create_listening_connection(
+    ipfs_client: BaseClient, protocol, port, force=True
+):
     """
     Args:
         bool force: whether or not already existing conflicting connections should be closed.
@@ -174,7 +186,7 @@ def _create_listening_connection(ipfs_client: BaseClient, protocol, port, force=
     try:
         ipfs_client.tunnels.open_listener(protocol, port)
         if PRINT_LOG_CONNECTIONS:
-            print(f"listening fas \"{protocol}\" on {port}")
+            print(f'listening fas "{protocol}" on {port}')
     except:
         if force:
             _close_listening_connection(ipfs_client, name=protocol)
@@ -182,7 +194,7 @@ def _create_listening_connection(ipfs_client: BaseClient, protocol, port, force=
             time.sleep(0.1)
             ipfs_client.tunnels.open_listener(protocol, port)
             if PRINT_LOG_CONNECTIONS:
-                print(f"listening as \"{protocol}\" on {port}")
+                print(f'listening as "{protocol}" on {port}')
         except:
             raise IPFS_Error(
                 "Error registering listening connection to IPFS: "
@@ -192,17 +204,28 @@ def _create_listening_connection(ipfs_client: BaseClient, protocol, port, force=
     return port
 
 
-def _close_sending_connection(ipfs_client: BaseClient, peer_id: str|None=None, name: str|None=None, port: None=None):
+def _close_sending_connection(
+    ipfs_client: BaseClient,
+    peer_id: str | None = None,
+    name: str | None = None,
+    port: None = None,
+):
     try:
-        ipfs_client.tunnels.close_sender(
-            peer_id=peer_id, name=name, port=port)
+        ipfs_client.tunnels.close_sender(peer_id=peer_id, name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))
 
 
-def _close_listening_connection(ipfs_client: BaseClient, name: str|None=None, port: int|None=None):
+def _close_listening_connection(
+    ipfs_client: BaseClient, name: str | None = None, port: int | None = None
+):
     try:
-        ipfs_client.tunnels.close_listener(
-            name=name, port=port)
+        ipfs_client.tunnels.close_listener(name=name, port=port)
     except Exception as e:
         raise IPFS_Error(str(e))
+
+
+def disprepend_bytearray_segment(data: bytearray, separator: int):
+    part_1 = data[: data.index(separator)]
+    part_2 = data[data.index(separator) + 1 :]
+    return part_1, part_2

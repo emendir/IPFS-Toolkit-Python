@@ -1,0 +1,2 @@
+Download the correct version of go from:
+https://www.microsoft.com/en-US/download/details.aspx?id=40784

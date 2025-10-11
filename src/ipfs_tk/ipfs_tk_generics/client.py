@@ -6,25 +6,24 @@ from ipfs_tk_transmission import (
     FileTransmitter,
     start_conversation,
     join_conversation,
-    listen_for_conversations
-
+    listen_for_conversations,
 )
 from ipfs_tk_transmission.config import (
     TRANSM_SEND_TIMEOUT_SEC,
     TRANSM_REQ_MAX_RETRIES,
-    BLOCK_SIZE
+    BLOCK_SIZE,
 )
 
 
 class IpfsClient(BaseClient):
-
     def transmit_data(
-            self,
-            data: bytes,
-            peer_id: str,
-            req_lis_name: str,
-            timeout_sec: int = TRANSM_SEND_TIMEOUT_SEC,
-            max_retries: int = TRANSM_REQ_MAX_RETRIES):
+        self,
+        data: bytes,
+        peer_id: str,
+        req_lis_name: str,
+        timeout_sec: int = TRANSM_SEND_TIMEOUT_SEC,
+        max_retries: int = TRANSM_REQ_MAX_RETRIES,
+    ):
         """
         Transmits the input data (a bytearray of any length) to the computer with the specified IPFS peer ID.
         Args:
@@ -36,13 +35,14 @@ class IpfsClient(BaseClient):
         Returns:
             bool: whether or not the transmission succeeded
         """
-        return transmit_data(self,
-                             data=data,
-                             peer_id=peer_id,
-                             req_lis_name=req_lis_name,
-                             timeout_sec=timeout_sec,
-                             max_retries=max_retries,
-                             )
+        return transmit_data(
+            self,
+            data=data,
+            peer_id=peer_id,
+            req_lis_name=req_lis_name,
+            timeout_sec=timeout_sec,
+            max_retries=max_retries,
+        )
 
     def listen_for_transmissions(self, listener_name, eventhandler):
         """
@@ -74,7 +74,7 @@ class IpfsClient(BaseClient):
         encryption_callbacks=None,
         block_size=BLOCK_SIZE,
         transm_send_timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-        transm_req_max_retries=TRANSM_REQ_MAX_RETRIES
+        transm_req_max_retries=TRANSM_REQ_MAX_RETRIES,
     ):
         """Transmits the provided file to the specified peer.
         Args:
@@ -116,15 +116,17 @@ class IpfsClient(BaseClient):
             encryption_callbacks=encryption_callbacks,
             block_size=block_size,
             transm_send_timeout_sec=transm_send_timeout_sec,
-            transm_req_max_retries=transm_req_max_retries
+            transm_req_max_retries=transm_req_max_retries,
         )
 
-    def listen_for_file_transmissions(self,
-                                      listener_name,
-                                      eventhandler,
-                                      progress_handler=None,
-                                      dir=".",
-                                      encryption_callbacks=None):
+    def listen_for_file_transmissions(
+        self,
+        listener_name,
+        eventhandler,
+        progress_handler=None,
+        dir=".",
+        encryption_callbacks=None,
+    ):
         """Listens to incoming file transmission requests.
         Whenever a file is received, the specified eventhandler is called.
         Call `.terminate()` on the returned ConversationListener object when you
@@ -161,17 +163,19 @@ class IpfsClient(BaseClient):
         )
 
     def start_conversation(
-            self,
-            conv_name,
-            peer_id,
-            others_req_listener,
-            data_received_eventhandler=None,
-            file_eventhandler=None,
-            file_progress_callback=None,
-            encryption_callbacks=None,
-            timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
-            max_retries=TRANSM_REQ_MAX_RETRIES,
-            dir="."):
+        self,
+        conv_name,
+        peer_id,
+        others_req_listener,
+        data_received_eventhandler=None,
+        file_eventhandler=None,
+        file_progress_callback=None,
+        encryption_callbacks=None,
+        timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
+        max_retries=TRANSM_REQ_MAX_RETRIES,
+        dir=".",
+        salutation_message: bytes | None = None,
+    ):
         """Starts a conversation object with which 2 peers can repetatively make
         data transmissions to each other asynchronously and bidirectionally.
         Sends a conversation request to the other peer's conversation request
@@ -224,6 +228,7 @@ class IpfsClient(BaseClient):
             timeout_sec=timeout_sec,
             max_retries=max_retries,
             dir=dir,
+            salutation_message=salutation_message,
         )
 
     def join_conversation(
@@ -237,7 +242,7 @@ class IpfsClient(BaseClient):
         encryption_callbacks=None,
         timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
         max_retries=TRANSM_REQ_MAX_RETRIES,
-        dir="."
+        dir=".",
     ):
         """Join a conversation object started by another peer.
         Call `.terminate()` on the returned Conversation object when you
@@ -289,9 +294,7 @@ class IpfsClient(BaseClient):
             dir=dir,
         )
 
-    def listen_for_conversations(
-        self, listener_name: str, eventhandler
-    ):
+    def listen_for_conversations(self, listener_name: str, eventhandler):
         """
         Listen for incoming conversation requests.
         Whenever a new conversation request is received, the specified eventhandler
@@ -309,6 +312,4 @@ class IpfsClient(BaseClient):
             ConversationListener: an object which listens for incoming conversation
                                     requests
         """
-        return listen_for_conversations(
-            self, listener_name, eventhandler
-        )
+        return listen_for_conversations(self, listener_name, eventhandler)

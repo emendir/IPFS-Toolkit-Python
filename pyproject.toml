@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ipfs_toolkit"
 description = "A set of tools  for working with IPFS in Python: a programmer-friendly API wrapper, P2P data-transmission machinery, and accelerated connections to known peers"
-version = "0.6.0rc4"
+version = "0.6.0rc5"
 readme = {file = "ReadMe.md", content-type = "text/markdown"}
 requires-python = ">=3.6"
 authors = [
