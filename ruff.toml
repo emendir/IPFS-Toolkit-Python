@@ -1,0 +1,56 @@
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".obsidian",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".rope_project",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    "WebPublish",
+    "WebSite"
+]
+line-length = 79
+[lint]
+select = ["PL","E", "W", "D", "F", "ANN", "INP", "I", "RSE", "FA"]
+ignore = [
+"FA102",  # Missing `from __future__ import annotations`, but uses PEP 604 union
+"ANN101",  # annotation for self method
+"ANN204", # Missing return type annotation for special method `__init__`
+"PLW0603", # Using the global statement to update `update_blockchain_blocks_listener` is discouraged
+"RSE102", # Unnecessary parentheses on raised exception
+"D406", # Section name should end with a newline ("Returns")
+"D407", # Missing dashed underline after section ("Args")
+"D413", #Missing blank line after last section ("Returns")
+"INP001", # add __init__.py
+"PLR0911",# Too many return statements
+"PLR0912",# Too many branches
+"PLR0913", # Too many arguments in function definition (8 > 5)
+"PLR0915",# Too many statements
+"E722",# Do not use bare `except`
+]
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+

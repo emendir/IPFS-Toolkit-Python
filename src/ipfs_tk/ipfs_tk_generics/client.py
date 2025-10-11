@@ -243,6 +243,7 @@ class IpfsClient(BaseClient):
         timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
         max_retries=TRANSM_REQ_MAX_RETRIES,
         dir=".",
+        salutation_message: bytes | None = None,
     ):
         """Join a conversation object started by another peer.
         Call `.terminate()` on the returned Conversation object when you
@@ -292,6 +293,7 @@ class IpfsClient(BaseClient):
             timeout_sec=timeout_sec,
             max_retries=max_retries,
             dir=dir,
+            salutation_message=salutation_message,
         )
 
     def listen_for_conversations(self, listener_name: str, eventhandler):

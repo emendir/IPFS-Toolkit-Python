@@ -27,6 +27,7 @@ TRANSMISSION_NAME = "ipfs_tk_test_node_transm_simple"
 
 received_data: list[bytes] = []
 SALUTATION_MESSAGE = "G'day!".encode()
+SALUTATION_MESSAGE_JOIN = "How're you going?".encode()
 MESSAGE_1 = "Hello there!".encode("utf-8")
 REPLY_1 = "Hi!".encode()
 MESSAGE_2 = "It's working, it's working!".encode("utf-8")
@@ -60,10 +61,10 @@ TEST_FILE = __file__
 def test_messages():
     node_listener_received_messages: list[bytes] = []
 
-    def new_conv_handler(conv_name, peer_id, salutation_message):
+    def new_conv_handler(conv_name, peer_id, salutation_start):
         """Eventhandler for when we join a new conversation."""
         print("Joining a new conversation:", conv_name)
-        print(f"Salutation: {salutation_message}")
+        print(f"Salutation: {salutation_start}")
 
         def on_message_received(conversation, message):
             """Eventhandler for when the other peer says something in the conversation."""
@@ -81,13 +82,18 @@ def test_messages():
             else:
                 print(f"Received unexpected message: {message}")
 
-        if salutation_message != SALUTATION_MESSAGE:
+        if salutation_start != SALUTATION_MESSAGE:
             print(
-                f"Received unexpected salutation message: {salutation_message}"
+                f"Received unexpected salutation message: {salutation_start}"
             )
         conv = pytest.ipfs_receiver.join_conversation(
-            conv_name, peer_id, conv_name, on_message_received
+            conv_name,
+            peer_id,
+            conv_name,
+            on_message_received,
+            salutation_message=SALUTATION_MESSAGE_JOIN,
         )
+        conv.salutation_message_start = salutation_start
         print("Joined")
 
     pytest.conv_lis = pytest.ipfs_receiver.listen_for_conversations(
@@ -122,6 +128,7 @@ def test_messages():
         salutation_message=SALUTATION_MESSAGE,
     )
     print("Peer joined conversation.")
+    print(conv.salutation_message_join)
     sleep(1)
     conv.say(MESSAGE_1)
 
@@ -129,7 +136,9 @@ def test_messages():
     conv.terminate()
 
     mark(
-        MESSAGE_1 in node_listener_received_messages
+        conv.salutation_message_start == SALUTATION_MESSAGE
+        and conv.salutation_message_join == SALUTATION_MESSAGE_JOIN
+        and MESSAGE_1 in node_listener_received_messages
         and MESSAGE_2 in node_listener_received_messages
         and MESSAGE_3 in node_listener_received_messages
         and REPLY_1 in node_sender_received_messages

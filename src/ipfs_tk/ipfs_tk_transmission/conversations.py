@@ -118,6 +118,7 @@ def join_conversation(
     timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
     max_retries=TRANSM_REQ_MAX_RETRIES,
     dir=".",
+    salutation_message: bytearray | None = None,
 ):
     """Join a conversation object started by another peer.
     Call `.terminate()` on the returned Conversation object when you
@@ -167,6 +168,7 @@ def join_conversation(
         transm_send_timeout_sec=timeout_sec,
         transm_req_max_retries=max_retries,
         dir=dir,
+        salutation_message=salutation_message,
     )
     return conv
 
@@ -291,6 +293,7 @@ class Conversation(BaseConversation):
         transm_send_timeout_sec=BaseConversation._transm_send_timeout_sec,
         transm_req_max_retries=BaseConversation._transm_req_max_retries,
         dir=".",
+        salutation_message: bytes | None = None,
     ):
         """Joins a conversation which another peer started, given their peer ID
         and conversation's transmission-listener's name.
@@ -348,6 +351,7 @@ class Conversation(BaseConversation):
             transm_send_timeout_sec=transm_send_timeout_sec,
             transm_req_max_retries=transm_req_max_retries,
             dir=dir,
+            salutation_message=salutation_message,
         )
 
     def _file_received(self, peer, filepath, metadata):

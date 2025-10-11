@@ -128,6 +128,7 @@ class BaseConversation:
         self._listener = listen_for_transmissions(
             self.ipfs_client, conv_name, self._hear
         )
+        self.salutation_message_start = salutation_message
         # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
 
         data = (
@@ -184,6 +185,7 @@ class BaseConversation:
         transm_send_timeout_sec=_transm_send_timeout_sec,
         transm_req_max_retries=_transm_req_max_retries,
         dir=".",
+        salutation_message: bytes | None = None,
     ):
         """Joins a conversation which another peer started, given their peer ID
         and conversation's transmission-listener's name.
@@ -237,11 +239,20 @@ class BaseConversation:
 
         self.others_trsm_listener = others_trsm_listener
         self.peer_id = peer_id
+        self.salutation_message_join = salutation_message
         data = (
-            bytearray("I'm listening".encode("utf-8"))
+            bytearray([255])
+            # bytearray([0]) is a format specifier, providing room for
+            # future extensions
+            + bytearray([0])
+            + bytearray([255])
+            + bytearray("I'm listening".encode("utf-8"))
             + bytearray([255])
             + bytearray(conv_name.encode("utf-8"))
+            + bytearray([255])
         )
+        if salutation_message:
+            data += bytearray(salutation_message)
         self._conversation_started = True
         if PRINT_LOG_CONVERSATIONS:
             print(
@@ -273,30 +284,68 @@ class BaseConversation:
         self._last_coms_time = datetime.now(UTC)
 
         if not self._conversation_started:
-            info = _split_by_255(data)
-            if bytearray(info[0]) == bytearray(
-                "I'm listening".encode("utf-8")
-            ):
-                self.others_trsm_listener = info[1].decode("utf-8")
-                if PRINT_LOG_CONVERSATIONS:
-                    print(
-                        f"{self.conv_name}: other's proto is "
-                        f"{self.others_trsm_listener}"
-                    )
-                # self.hear_eventhandler = self._hear
-                self._conversation_started = True
-                if PRINT_LOG_CONVERSATIONS:
-                    print(
-                        self.conv_name + ": peer joined, conversation started"
-                    )
-                self.started.set()
+            if data[0] == 255:
+                data = data[1:]
+                separator_count = data.count(255)
+                if separator_count < 1:
+                    raise Exception("Received unreadable request")
+                version, data = disprepend_bytearray_segment(data, 255)
+                separator_count -= 1
 
-            elif PRINT_LOG_CONVERSATIONS:
+                match tuple(version):
+                    case (0,):
+                        if separator_count < 1:
+                            raise Exception(
+                                f"ConvLisReceived {self.conv_name}: "
+                                f"Received unreadable request in protocol version: "
+                                f"{version}"
+                            )
+                        prelude, data = disprepend_bytearray_segment(data, 255)
+                        separator_count -= 1
+                        if prelude != bytearray(
+                            "I'm listening".encode("utf-8")
+                        ):
+                            raise Exception(
+                                f"ConvLisReceived {self.conv_name}: "
+                                f"Received unreadable request in protocol version: "
+                                f"{version}"
+                            )
+                        if separator_count < 1:
+                            raise Exception(
+                                f"ConvLisReceived {self.conv_name}: "
+                                f"Received unreadable request in protocol version: "
+                                f"{version}"
+                            )
+                        _conv_name, data = disprepend_bytearray_segment(
+                            data, 255
+                        )
+                        self.others_trsm_listener = _conv_name.decode()
+                        separator_count -= 1
+                        self.salutation_message_join = data
+            else:
+                info = _split_by_255(data)
+                if bytearray(info[0]) == bytearray(
+                    "I'm listening".encode("utf-8")
+                ):
+                    self.others_trsm_listener = info[1].decode("utf-8")
+
+                elif PRINT_LOG_CONVERSATIONS:
+                    raise Exception(
+                        f"{self.conv_name}"
+                        ": received unrecognisable buffer, expected join confirmation"
+                        f"{info}"
+                    )
+
+            if PRINT_LOG_CONVERSATIONS:
                 print(
-                    self.conv_name
-                    + ": received unrecognisable buffer, expected join confirmation"
+                    f"{self.conv_name}: other's proto is "
+                    f"{self.others_trsm_listener}"
                 )
-                print(info[0])
+            # self.hear_eventhandler = self._hear
+            self._conversation_started = True
+            if PRINT_LOG_CONVERSATIONS:
+                print(self.conv_name + ": peer joined, conversation started")
+            self.started.set()
             return
         else:  # conversation has already started
             if self._decryption_callback:
@@ -472,7 +521,7 @@ class ConversationListener:
                     _conv_name, data = disprepend_bytearray_segment(data, 255)
                     conv_name = _conv_name.decode()
                     separator_count -= 1
-                    salutation_message = data
+                    self.salutation_message_start = data
                     sig = inspect.signature(self.eventhandler)
                     params = sig.parameters
                     num_params = len(params)
@@ -480,7 +529,7 @@ class ConversationListener:
                         self.eventhandler(conv_name, peer_id)
                     elif num_params > 2:
                         self.eventhandler(
-                            conv_name, peer_id, salutation_message
+                            conv_name, peer_id, self.salutation_message_start
                         )
                     else:
                         raise Exception(
