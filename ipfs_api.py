@@ -41,7 +41,28 @@ print_log = False
 # List for keeping track of subscriptions to IPFS topics, so that subscriptions can be ended
 subscriptions = list([])
 
+from cachetools import LRUCache
+import sys
 
+USE_IPFS_CONTENT_CACHE = True
+MAX_CACHE_SIZE = 400 * 1024 * 1024  # 50 MB limit
+
+# Define a custom function to measure the size of cache entries
+def _getsizeof_cache_entry(value):
+    return sys.getsizeof(value)
+
+# LRUCache with a custom size-based eviction policy
+ipfs_content_cache = LRUCache(maxsize=MAX_CACHE_SIZE, getsizeof=_getsizeof_cache_entry)
+
+def _add_cached_content(cid: str, data: bytes):
+    if not USE_IPFS_CONTENT_CACHE:
+        return
+    if sys.getsizeof(data) > MAX_CACHE_SIZE:
+        return  # Prevent adding overly large files
+    ipfs_content_cache[cid] = data  # Cache with auto-eviction based on size
+
+def _get_cached_content(cid: str) -> bytes | None:
+    return ipfs_content_cache.get(cid, None)
 def publish(path: str):
     """Upload a file or a directory to IPFS, returning its CID.
     Args:
@@ -51,9 +72,10 @@ def publish(path: str):
     """
     result = http_client.add(path, recursive=True)
     if (type(result) == list):
-        return result[-1]["Hash"]
+        hash= result[-1]["Hash"]
     else:
-        return result["Hash"]
+        hash= result["Hash"]
+    return hash
 
 
 def predict_cid(path: str):
@@ -92,14 +114,25 @@ def download(cid, path="."):
     shutil.rmtree(tempdir)
 
 
-def read(cid):
+    
+def read(cid:str, nocache:bool=not USE_IPFS_CONTENT_CACHE):
     """Returns the textual content of the specified IPFS resource.
     Args:
         cid (str): the IPFS content ID (CID) of the resource to read
     Returns:
         str: the content of the specified IPFS resource as text
     """
-    return http_client.cat(cid)
+    if not nocache:
+        cached_data = _get_cached_content(cid)
+        if cached_data:
+            # print("Returning cached data!")
+            return cached_data
+    
+    data = http_client.cat(cid)
+    if not nocache:
+        _add_cached_content(cid, data)
+    
+    return data
 
 
 def pin(cid: str):

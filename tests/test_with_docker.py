@@ -38,15 +38,16 @@ TEST_CLI = False
 # after failed tests
 DELETE_ALL_IPFS_DOCKERS = True
 REBUILD_DOCKER = True
+DEF_TEST_FILE_PATH=os.path.join(os.path.dirname(__file__), "testfile")
 
-if os.path.exists("testfile"):
-    file_path = "testfile"
+if os.path.exists(DEF_TEST_FILE_PATH):
+    file_path = DEF_TEST_FILE_PATH
 else:
     file_path = input("Enter filepath for test transmission file (~10MB): ")
 
 
 if True:
-    sys.path.insert(0, "..")
+    sys.path.insert(0, os.path.join((os.path.dirname(__file__)),".."))
     if TEST_CLI:
         import ipfs_cli as ipfs_api
     else:

@@ -6,3 +6,4 @@ idna
 httpx
 requests
 termcolor
+cachetools

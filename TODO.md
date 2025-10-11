@@ -7,6 +7,10 @@
 - make parameter names more consistent, e.g. `timeout` & `timeout_sec`
 - make ipfs_api.read() empty file work
 
+## ipfs_api
+- caching for read and publish
+- continuous monitor of pins
+
 ## IPFS Peers:
 - docs
 - take care of ipfs_lns

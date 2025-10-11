@@ -7,7 +7,7 @@ import os
 from termcolor import colored
 from docker_container import DockerContainer
 if True:
-    sys.path.insert(0, "..")
+    sys.path.insert(0, os.path.join((os.path.dirname(__file__)),".."))
     import ipfs_api
     from ipfs_peers import Peer, PeerMonitor
 
