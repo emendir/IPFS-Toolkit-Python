@@ -1,36 +1,36 @@
 """ """
 
-from queue import Queue, Empty as QueueEmpty
-
-from threading import Thread
-from datetime import datetime, timezone
-import time
-# import inspect
-
-
-from .config import (
-    PRINT_LOG,
-    PRINT_LOG_CONVERSATIONS,
-    TRANSM_REQ_MAX_RETRIES,
-    TRANSM_SEND_TIMEOUT_SEC,
-    BLOCK_SIZE,
-)
-
-from .errors import (
-    CommunicationTimeout,
-    ConvListenTimeout,
-)
-from ipfs_tk_generics.base_client import BaseClient
-from .conversation_basics import (
-    BaseConversation,
-    ConversationListener,
-)
+from typing import Callable
 from .file_transmission import (
     listen_for_file_transmissions,
     transmit_file,
     call_progress_callback,
 )
-from typing import Callable
+from .conversation_basics import (
+    BaseConversation,
+    ConversationListener,
+)
+from ipfs_tk_generics.base_client import BaseClient
+from .errors import (
+    CommunicationTimeout,
+    ConvListenTimeout,
+)
+from .config import (
+    TRANSM_REQ_MAX_RETRIES,
+    TRANSM_SEND_TIMEOUT_SEC,
+    BLOCK_SIZE,
+)
+from queue import Queue, Empty as QueueEmpty
+
+from threading import Thread
+from datetime import datetime, timezone
+import time
+
+# import inspect
+import logging
+
+logger = logging.getLogger("IPFS-TK-Conversations")
+
 
 UTC = timezone.utc
 
@@ -46,7 +46,7 @@ def start_conversation(
     encryption_callbacks: None = None,
     timeout_sec: int = TRANSM_SEND_TIMEOUT_SEC,
     max_retries: int = TRANSM_REQ_MAX_RETRIES,
-    dir: str = ".",
+    download_dir: str | None = None,
     salutation_message: bytearray | None = None,
 ):
     """Starts a conversation object with which 2 peers can repetatively make
@@ -85,7 +85,7 @@ def start_conversation(
         transm_req_max_retries (int): (low level) data transmission -
                                 how often the transmission should be
                                 reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
+        download_dir (str): the path where received files should be downloaded to
     Returns:
         Conversation: an object through which messages and files can be sent
     """
@@ -100,7 +100,7 @@ def start_conversation(
         encryption_callbacks=encryption_callbacks,
         transm_send_timeout_sec=timeout_sec,
         transm_req_max_retries=max_retries,
-        dir=dir,
+        download_dir=download_dir,
         salutation_message=salutation_message,
     )
     return conv
@@ -110,14 +110,14 @@ def join_conversation(
     ipfs_client: BaseClient,
     conv_name,
     peer_id,
-    others_req_listener,
+    others_trsm_listener,
     data_received_eventhandler=None,
     file_eventhandler=None,
     file_progress_callback=None,
     encryption_callbacks=None,
     timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
     max_retries=TRANSM_REQ_MAX_RETRIES,
-    dir=".",
+    download_dir=None,
     salutation_message: bytearray | None = None,
 ):
     """Join a conversation object started by another peer.
@@ -127,7 +127,7 @@ def join_conversation(
         conv_name (str): the name of the IPFS port forwarding connection
                                 (IPFS Libp2pStreamMounting protocol)
         peer_id (str): the IPFS peer ID of the node to communicate with
-        others_req_listener (str): the name of the ther peer's conversation
+        others_trsm_listener (str): the name of the ther peer's conversation
                                 listener object
         data_received_eventhandler (function): function to be called when we've
                                 received a data transmission
@@ -152,7 +152,7 @@ def join_conversation(
         transm_req_max_retries (int): (low level) data transmission -
                                 how often the transmission should be
                                 reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
+        download_dir (str): the path where received files should be downloaded to
     Returns:
         Conversation: an object through which messages and files can be sent
     """
@@ -160,14 +160,14 @@ def join_conversation(
     conv.join(
         conv_name,
         peer_id,
-        others_req_listener,
+        others_trsm_listener,
         data_received_eventhandler,
         file_eventhandler=file_eventhandler,
         file_progress_callback=file_progress_callback,
         encryption_callbacks=encryption_callbacks,
         transm_send_timeout_sec=timeout_sec,
         transm_req_max_retries=max_retries,
-        dir=dir,
+        download_dir=download_dir,
         salutation_message=salutation_message,
     )
     return conv
@@ -221,7 +221,7 @@ class Conversation(BaseConversation):
         encryption_callbacks: None = None,
         transm_send_timeout_sec: int = BaseConversation._transm_send_timeout_sec,
         transm_req_max_retries: int = BaseConversation._transm_req_max_retries,
-        dir: str = ".",
+        download_dir: str | None = None,
         salutation_message: bytes | None = None,
     ):
         """Initialises this conversation object so that it can be used.
@@ -256,7 +256,7 @@ class Conversation(BaseConversation):
             transm_req_max_retries (int): (low level) data
                             transmission how often the transmission should be
                             reattempted when the timeout is reached
-            dir (str): the path where received files should be downloaded to
+            download_dir (str): the path where received files should be downloaded to
         """
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
@@ -265,10 +265,10 @@ class Conversation(BaseConversation):
             f"{conv_name}:files",
             self._file_received,
             progress_handler=self._on_file_progress_received,
-            dir=dir,
+            download_dir=download_dir,
             encryption_callbacks=encryption_callbacks,
         )
-        return BaseConversation.start(
+        result = BaseConversation.start(
             self,
             conv_name=conv_name,
             peer_id=peer_id,
@@ -277,9 +277,11 @@ class Conversation(BaseConversation):
             encryption_callbacks=encryption_callbacks,
             transm_send_timeout_sec=transm_send_timeout_sec,
             transm_req_max_retries=transm_req_max_retries,
-            dir=dir,
+            download_dir=download_dir,
             salutation_message=salutation_message,
         )
+        self.setup_file_listener()
+        return result
 
     def join(
         self,
@@ -292,7 +294,7 @@ class Conversation(BaseConversation):
         encryption_callbacks=None,
         transm_send_timeout_sec=BaseConversation._transm_send_timeout_sec,
         transm_req_max_retries=BaseConversation._transm_req_max_retries,
-        dir=".",
+        download_dir=None,
         salutation_message: bytes | None = None,
     ):
         """Joins a conversation which another peer started, given their peer ID
@@ -328,20 +330,13 @@ class Conversation(BaseConversation):
             transm_req_max_retries (int): (low level) data
                             transmission how often the transmission should be
                             reattempted when the timeout is reached
-            dir (str): the path where received files should be downloaded to
+            download_dir (str): the path where received files should be downloaded to
         """
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
-        self.file_listener = listen_for_file_transmissions(
-            self.ipfs_client,
-            f"{conv_name}:files",
-            self._file_received,
-            progress_handler=self._on_file_progress_received,
-            dir=dir,
-            encryption_callbacks=encryption_callbacks,
-        )
+        self.file_listener = None
 
-        return BaseConversation.join(
+        result = BaseConversation.join(
             self,
             conv_name=conv_name,
             peer_id=peer_id,
@@ -350,16 +345,37 @@ class Conversation(BaseConversation):
             encryption_callbacks=encryption_callbacks,
             transm_send_timeout_sec=transm_send_timeout_sec,
             transm_req_max_retries=transm_req_max_retries,
-            dir=dir,
+            download_dir=download_dir,
             salutation_message=salutation_message,
         )
+        self.setup_file_listener()
+        return result
+
+    def setup_file_listener(self):
+        if self.file_listener:
+            self.file_listener.terminate()
+        self.file_listener = listen_for_file_transmissions(
+            self.ipfs_client,
+            f"{self.conv_name}:files",
+            self._file_received,
+            progress_handler=self._on_file_progress_received,
+            download_dir=self.download_dir,
+            encryption_callbacks=(
+                self._encryption_callback,
+                self._decryption_callback,
+            ),
+        )
+
+    def set_encryption_functions(self, encrypt: Callable, decrypt: Callable):
+        self._encryption_callback = encrypt
+        self._decryption_callback = decrypt
+        self.setup_file_listener()
 
     def _file_received(self, peer, filepath, metadata):
         """Receives this conversation's file transmissions."""
         self._last_coms_time = datetime.now(UTC)
 
-        if PRINT_LOG_CONVERSATIONS:
-            print(f"{self.conv_name}: Received file: ", filepath)
+        logger.debug(f"{self.conv_name}: Received file: {filepath}")
         self._file_queue.put({"filepath": filepath, "metadata": metadata})
         if self.file_eventhandler:
             Thread(
@@ -431,11 +447,10 @@ class Conversation(BaseConversation):
         if data:
             return data
         else:
-            if PRINT_LOG_CONVERSATIONS:
-                print(
-                    "Conv.FileListen: received nothign restarting Event Wait"
-                )
-            self.listen_for_file(timeout)
+            logger.debug(
+                "Conv.FileListen: received nothign restarting Event Wait"
+            )
+            return self.listen_for_file(timeout)
 
     def _on_file_progress_received(
         self, peer_id: str, filename: str, filesize: str, progress
@@ -477,15 +492,11 @@ class Conversation(BaseConversation):
 
         """
         while not self._conversation_started:
-            if PRINT_LOG:
-                print(
-                    "Wanted to say something but conversation was not yet started"
-                )
-            time.sleep(0.01)
-        if PRINT_LOG_CONVERSATIONS:
-            print(
-                "Transmitting file to ", f"{self.others_trsm_listener}:files"
+            logger.debug(
+                "Wanted to say something but conversation was not yet started"
             )
+            time.sleep(0.01)
+        logger.debug(f"Transmitting file to {self.others_trsm_listener}:files")
 
         def _progress_handler(
             peer_id: str, filename: str, filesize: str, progress

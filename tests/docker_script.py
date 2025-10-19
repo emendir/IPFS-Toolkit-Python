@@ -1,11 +1,12 @@
 import time
+
 if True:
-    import ipfs_api
-    # ipfs_api.client.terminate()
-    # ipfs_api.client=ipfs_api.IpfsNode("/tmp/IpfsToolkitTest")
-    import ipfs_datatransmission
-    ipfs_api.wait_till_ipfs_is_running()
-    print(ipfs_api.my_id())
+    from ipfs_remote import IpfsRemote
+
+    ipfs = IpfsRemote()
+
+    ipfs.wait_till_ipfs_is_running()
+    print(ipfs.peer_id)
 """
 This script demonstrates, together with Demo-Conversation-Full-Starter,
 the advanced usage of the ipfs_datatransmission.Conversation class.
@@ -19,6 +20,8 @@ and of course make sure IPFS is running on both computers first.
 # ipfs_datatransmission.print_log_conversations = True
 # ipfs_datatransmission.print_log_files = True
 
+WAIT_DUR = 15
+
 
 def new_conv_handler(conv_name, peerID):
     """Eventhandler for when we join a new conversation."""
@@ -26,35 +29,50 @@ def new_conv_handler(conv_name, peerID):
 
     def on_message_received(conversation, message):
         """Eventhandler for when the other peer says something in the conversation."""
-        print(f"Received message on {conversation.conv_name}:", message.decode(
-            "utf-8"))
+        print(
+            f"Received message on {conversation.conv_name}:",
+            message.decode("utf-8"),
+        )
         if message.decode("utf-8") == "Bye!":
             conversation.terminate()
+
     def on_file_received(conversation, filepath, metadata):
         print("Received file", filepath)
+
     def progress_handler(progress):
-        print(str(round(progress*100))+"%")
-    conv = ipfs_datatransmission.join_conversation(conv_name, peerID, conv_name, on_message_received,
-              on_file_received, file_progress_callback=progress_handler, dir="/opt")
+        print(str(round(progress * 100)) + "%")
+
+    conv = ipfs.join_conversation(
+        conv_name,
+        peerID,
+        conv_name,
+        on_message_received,
+        on_file_received,
+        file_progress_callback=progress_handler,
+        download_dir="/opt",
+    )
     print("Waiting for file...")
     data = conv.listen_for_file(200)
     if data:
-        file = data['filepath']
-        metadata = data['metadata']
+        file = data["filepath"]
+        metadata = data["metadata"]
     print("Received file:", file, metadata)
     data = conv.listen()
     print("Peer said:", data)
     conv.say("Hi back".encode("utf-8"))
     data = conv.listen()
     print("Received data: ", data)
+    for i in range(WAIT_DUR):
+        # endless loop to stop program from terminating
+        time.sleep(1)
+    conv.terminate()
 
 
-conv_lis = ipfs_datatransmission.listen_for_conversations(
-    "general_listener", new_conv_handler)
+conv_lis = ipfs.listen_for_conversations("general_listener", new_conv_handler)
 print("Set up listener")
-print(ipfs_api.client.tunnels.get_tunnels())
+# print(ipfs_api.client.tunnels.get_tunnels())
 # input()
-while True:
+for i in range(WAIT_DUR):
     # endless loop to stop program from terminating
     time.sleep(1)
 

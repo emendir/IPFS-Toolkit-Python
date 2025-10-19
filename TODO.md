@@ -1,8 +1,8 @@
 
 ## Docs
 - how to specify custom address for IPFS daemon interface
-  - `PY_IPFS_HTTP_CLIENT_DEFAULT_ADDR=/dns/ipfs/tcp/5001/http`, 
-  - `ipfs_api.ipfshttpclient.client.Client(addr="/dns/ipfs/tcp/5001/http")`
+  - `PY_IPFS_HTTP_CLIENT_DEFAULT_ADDR=/dns/localhost/tcp/5001/http`, 
+  - `ipfs_api.ipfshttpclient.client.Client(addr="/dns/localhost/tcp/5001/http")`
 
 ## API
 - make parameter names more consistent, e.g. `timeout` & `timeout_sec`

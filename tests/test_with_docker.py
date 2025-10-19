@@ -1,4 +1,4 @@
-""" DON'T FORGET TO REBUILD DOCKER CONTAINER
+"""DON'T FORGET TO REBUILD DOCKER CONTAINER
 This script runs a docker container with which it tests various forms of
 communication.
 
@@ -20,6 +20,8 @@ run the following commands to stop and remove the unterminated container:
 ```
 """
 
+from threading import Thread
+from time import sleep
 import time
 import sys
 from termcolor import colored
@@ -27,7 +29,6 @@ from ipfs_toolkit_docker.docker_container import DockerContainer
 from brenthy_docker import BrenthyDocker
 import os
 import threading
-
 
 
 # time in seconds to wait for file to transmit before calling test a failure
@@ -41,7 +42,7 @@ TEST_CLI = False
 # after failed tests
 DELETE_ALL_IPFS_DOCKERS = True
 REBUILD_DOCKER = True
-DEF_TEST_FILE_PATH=os.path.join(os.path.dirname(__file__), "testfile")
+DEF_TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), "testfile")
 
 if os.path.exists(DEF_TEST_FILE_PATH):
     file_path = DEF_TEST_FILE_PATH
@@ -50,13 +51,10 @@ else:
 
 
 if True:
-    sys.path.insert(0, os.path.join((os.path.dirname(__file__)),"..","src"))
-    if TEST_CLI:
-        import ipfs_cli as ipfs_api
-    else:
-        import ipfs_api
-    import ipfs_datatransmission
+    sys.path.insert(0, os.path.join((os.path.dirname(__file__)), "..", "src"))
+    from ipfs_remote import IpfsRemote
 
+    ipfs = IpfsRemote("/dns/localhost/tcp/5001/http")
 docker_peer = None
 
 
@@ -64,20 +62,34 @@ def prepare():
     global docker_peer
     if DELETE_ALL_IPFS_DOCKERS:
         try:
-            os.system("docker stop $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1; docker rm $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1")
+            os.system(
+                "docker stop $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1; docker rm $(docker ps --filter 'ancestor=emendir/ipfs-toolkit' -aq)  >/dev/null 2>&1"
+            )
         except:
             pass
 
     if REBUILD_DOCKER:
         from ipfs_toolkit_docker.build_docker import build_docker
+
         build_docker(verbose=False)
 
     # docker_peer = DockerContainer("IPFS-Toolkit-Test")
-    docker_peer = BrenthyDocker(container_name="IPFS-Toolkit-Test", image="emendir/ipfs-toolkit",await_brenthy=False, await_ipfs=True)
+    docker_peer = BrenthyDocker(
+        container_name="IPFS-Toolkit-Test",
+        image="emendir/ipfs-toolkit",
+        await_brenthy=False,
+        await_ipfs=True,
+    )
     # run test script on docker container
     command = "python3 /opt/IPFS-Toolkit/docker_script.py"
     # os.system(f"docker exec {docker_peer.container_id} {command}&")
-    print(f"docker exec {docker_peer.container_id} {command}&")
+
+    def docker_run_cmd():
+        docker_peer.run_shell_command(command, print_output=True)
+
+    print("Running docker_script on docker...")
+    Thread(target=docker_run_cmd).start()
+    # print(f"docker exec {docker_peer.container_id} {command}&")
     time.sleep(1)
 
 
@@ -115,12 +127,12 @@ def test_find_peer():
     # ipfs_api.connect_to_peer(docker_peer.mutltiaddr)
     success = False
     for i in range(10):
-        success = ipfs_api.find_peer(docker_peer.ipfs_id)
+        success = ipfs.peers.find(docker_peer.ipfs_id)
         if success:
             print(success)
             break
         sleep(1)
-            
+
     print(mark(success), "ipfs_api.find_peer")
 
 
@@ -133,8 +145,14 @@ def progress_handler(progress):
 def test_create_conv():
     global conv
     # print("Setting up conversation...")
-    conv = ipfs_datatransmission.start_conversation("test-con", docker_peer.ipfs_id, "general_listener", on_message_received)
+    conv = ipfs.start_conversation(
+        "test-con",
+        docker_peer.ipfs_id,
+        "general_listener",
+        on_message_received,
+    )
     conv.say("Hello there!!".encode())
+
     success = conv != None
 
     print(mark(success), "ipfs_datatransmission.start_conversation")
@@ -142,32 +160,38 @@ def test_create_conv():
 
 def test_send_file():
     # print("Sending file_path...")
-    conv.transmit_file(file_path, "testfile".encode(),
-                       progress_handler=progress_handler)
+    conv.transmit_file(
+        file_path, "testfile".encode(), progress_handler=progress_handler
+    )
 
     for i in range(FILE_SEND_TIMEOUT):
         time.sleep(1)
         if file_progress == 100:
             break
     filesize = docker_peer.run_python_code(
-        f"import os;print(os.path.getsize('/opt/{os.path.basename(file_path)}'))")
+        f"import os;print(os.path.getsize('/opt/{
+            os.path.basename(file_path)
+        }'))"
+    )
     # print("Result", filesize, str(os.path.getsize(file_path)))
     success = filesize.strip("\n") == str(os.path.getsize(file_path))
     print(mark(success), "ipfs_datatransmission.transmit_file")
 
-    success = (file_progress == 100)
-    print(mark(success), "ipfs_datatransmission.transmit_file - progress_handler")
+    success = file_progress == 100
+    print(
+        mark(success), "ipfs_datatransmission.transmit_file - progress_handler"
+    )
 
 
 def _test_listen():
-    conv.say("Hello there!".encode('utf-8'))
+    conv.say("Hello there!".encode("utf-8"))
     print("Listening for reply...")
     data = conv.listen()
     print("Peer replied: ", data)
 
 
 def test_terminate():
-    conv.say("Bye!".encode('utf-8'))
+    conv.say("Bye!".encode("utf-8"))
     data = conv.listen(timeout=10)
     # if data:
     #     print("Received data: ", data)
@@ -181,11 +205,11 @@ def test_thread_cleanup():
     Shuts down the docker container and
     tests that no unterminated threads remain running.
     """
-    docker_peer.terminate()
+    docker_peer.delete()
     success = len(threading.enumerate()) == 1
     print(mark(success), "thread cleanup")
 
-from time import sleep
+
 def run_tests():
     print("\nStarting tests for IPFS-DataTransmission...")
     prepare()

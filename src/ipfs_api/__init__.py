@@ -25,15 +25,20 @@ import base64
 import ipfs_remote.ipfshttpclient2 as ipfshttpclient
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from ipfs_remote import IpfsRemote
+
 if True:
     from ipfs_remote.files import USE_IPFS_CONTENT_CACHE
     from ipfs_remote.pubsub import PubsubListener
-    client = IpfsRemote("127.0.0.1:5001")
+
+    client = IpfsRemote("/dns/localhost/tcp/5001/http")
 else:
     from ipfs_node import IpfsNode
+
     USE_IPFS_CONTENT_CACHE = False
     from ipfs_node.ipfs_pubsub import IPFSSubscription as PubsubListener
+
     client = IpfsNode("/tmp/IpfsToolkitTest")
+
 
 def publish(path: str):
     return client.files.publish(path)
@@ -71,12 +76,24 @@ def create_ipns_record(name: str, type: str = "rsa", size: int = 2048):
     return client.ipns.create_ipns_record(name, type=type, size=size)
 
 
-def update_ipns_record_from_cid(record_name: str, cid: str, ttl: str = "24h", lifetime: str = "24h", ** kwargs: ipfshttpclient.client.base.CommonArgs):
-    return client.ipns.update_ipns_record_from_cid(record_name, cid, ttl=ttl, lifetime=lifetime, **kwargs)
+def update_ipns_record_from_cid(
+    record_name: str,
+    cid: str,
+    ttl: str = "24h",
+    lifetime: str = "24h",
+    **kwargs: ipfshttpclient.client.base.CommonArgs,
+):
+    return client.ipns.update_ipns_record_from_cid(
+        record_name, cid, ttl=ttl, lifetime=lifetime, **kwargs
+    )
 
 
-def update_ipns_record(name: str, path, ttl: str = "24h", lifetime: str = "24h"):
-    return client.ipns.update_ipns_record(name, path, ttl=ttl, lifetime=lifetime)
+def update_ipns_record(
+    name: str, path, ttl: str = "24h", lifetime: str = "24h"
+):
+    return client.ipns.update_ipns_record(
+        name, path, ttl=ttl, lifetime=lifetime
+    )
 
 
 def resolve_ipns_key(ipns_key, nocache=False):
@@ -84,7 +101,9 @@ def resolve_ipns_key(ipns_key, nocache=False):
 
 
 def download_ipns_record(ipns_key, path="", nocache=False):
-    return client.ipns.download_ipns_record(ipns_key, path=path, nocache=nocache)
+    return client.ipns.download_ipns_record(
+        ipns_key, path=path, nocache=nocache
+    )
 
 
 def read_ipns_record(ipns_key, nocache=False):
@@ -147,7 +166,9 @@ def close_all_tcp_connections(listeners_only=False):
     return client.tunnels.close_all(listeners_only=False)
 
 
-def close_tcp_sending_connection(name: str = None, port: str = None, peer_id: str = None):
+def close_tcp_sending_connection(
+    name: str = None, port: str = None, peer_id: str = None
+):
     return client.tunnels.close_sender(name=name, port=port, peer_id=peer_id)
 
 
@@ -172,8 +193,7 @@ def pubsub_publish(topic, data):
 
 
 def pubsub_subscribe(topic, eventhandler):
-    return client.pubsub.subscribe(topic,eventhandler)
-
+    return client.pubsub.subscribe(topic, eventhandler)
 
 
 def pubsub_peers(topic: str):
@@ -198,12 +218,16 @@ def wait_till_ipfs_is_running(timeout_sec=None):
     else:
         return
 
+
 def _ipfs_host_ip():
     return "127.0.0.1"
     return client._ipfs_host_ip()
+
+
 def try_run_ipfs():
     """Tries to use the IPFS CLI to run the local IPFS daemon with PubSub,
     like manually executing `ipfs daemon --enable-pubsub-experiment`
     """
     from ipfs_cli import try_run_ipfs as _try_run_ipfs
+
     _try_run_ipfs()

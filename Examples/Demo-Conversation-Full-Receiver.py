@@ -33,7 +33,7 @@ def new_conv_handler(conv_name, peer_id):
         on_message_received,
         on_file_received,
         file_progress_callback=progress_handler,
-        dir="/home/ubuntu-vm/Desktop"
+        download_dir="/home/ubuntu-vm/Desktop"
     )
     print("Waiting for file...")
     data = conv.listen_for_file(200)

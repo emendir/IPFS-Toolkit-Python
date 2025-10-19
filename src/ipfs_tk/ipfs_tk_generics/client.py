@@ -124,7 +124,7 @@ class IpfsClient(BaseClient):
         listener_name,
         eventhandler,
         progress_handler=None,
-        dir=".",
+        download_dir:str|None=None,
         encryption_callbacks=None,
     ):
         """Listens to incoming file transmission requests.
@@ -141,7 +141,7 @@ class IpfsClient(BaseClient):
                                 progress is a value between 0 and 1
                                 Parameters:
                                     (peer_id:str, filesize:int, progress:float)
-            dir (str): the directory in which received files should be written
+            download_dir (str): the directory in which received files should be written
             encryption_callbacks (tuple): encryption and decryption functions
                                 Tuple Contents: two functions which each take a
                                 a bytearray as a parameter and return a bytearray
@@ -158,7 +158,7 @@ class IpfsClient(BaseClient):
             listener_name=listener_name,
             eventhandler=eventhandler,
             progress_handler=progress_handler,
-            dir=dir,
+            download_dir=download_dir,
             encryption_callbacks=encryption_callbacks,
         )
 
@@ -173,7 +173,7 @@ class IpfsClient(BaseClient):
         encryption_callbacks=None,
         timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
         max_retries=TRANSM_REQ_MAX_RETRIES,
-        dir=".",
+        download_dir:str|None=None,
         salutation_message: bytes | None = None,
     ):
         """Starts a conversation object with which 2 peers can repetatively make
@@ -212,7 +212,7 @@ class IpfsClient(BaseClient):
             transm_req_max_retries (int): (low level) data transmission -
                                     how often the transmission should be
                                     reattempted when the timeout is reached
-            dir (str): the path where received files should be downloaded to
+            download_dir (str): the path where received files should be downloaded to
         Returns:
             Conversation: an object through which messages and files can be sent
         """
@@ -227,7 +227,7 @@ class IpfsClient(BaseClient):
             encryption_callbacks=encryption_callbacks,
             timeout_sec=timeout_sec,
             max_retries=max_retries,
-            dir=dir,
+            download_dir=download_dir,
             salutation_message=salutation_message,
         )
 
@@ -235,14 +235,14 @@ class IpfsClient(BaseClient):
         self,
         conv_name,
         peer_id,
-        others_req_listener,
+        others_trsm_listener,
         data_received_eventhandler=None,
         file_eventhandler=None,
         file_progress_callback=None,
         encryption_callbacks=None,
         timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
         max_retries=TRANSM_REQ_MAX_RETRIES,
-        dir=".",
+        download_dir:str|None=None,
         salutation_message: bytes | None = None,
     ):
         """Join a conversation object started by another peer.
@@ -252,7 +252,7 @@ class IpfsClient(BaseClient):
             conv_name (str): the name of the IPFS port forwarding connection
                                     (IPFS Libp2pStreamMounting protocol)
             peer_id (str): the IPFS peer ID of the node to communicate with
-            others_req_listener (str): the name of the ther peer's conversation
+            others_trsm_listener (str): the name of the ther peer's conversation
                                     listener object
             data_received_eventhandler (function): function to be called when we've
                                     received a data transmission
@@ -277,7 +277,7 @@ class IpfsClient(BaseClient):
             transm_req_max_retries (int): (low level) data transmission -
                                     how often the transmission should be
                                     reattempted when the timeout is reached
-            dir (str): the path where received files should be downloaded to
+            download_dir (str): the path where received files should be downloaded to
         Returns:
             Conversation: an object through which messages and files can be sent
         """
@@ -285,14 +285,14 @@ class IpfsClient(BaseClient):
             self,
             conv_name=conv_name,
             peer_id=peer_id,
-            others_req_listener=others_req_listener,
+            others_trsm_listener=others_trsm_listener,
             data_received_eventhandler=data_received_eventhandler,
             file_eventhandler=file_eventhandler,
             file_progress_callback=file_progress_callback,
             encryption_callbacks=encryption_callbacks,
             timeout_sec=timeout_sec,
             max_retries=max_retries,
-            dir=dir,
+            download_dir=download_dir,
             salutation_message=salutation_message,
         )
 

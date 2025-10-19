@@ -110,7 +110,7 @@ for n in range(N_REPETITIONS):
             data[b][n] = test_transmission_speed(buffer_size)
         except:
             print("Restarting docker container")
-            docker_peer.terminate()
+            docker_peer.delete()
             docker_peer.run()
 
             data[b][n] = test_transmission_speed(buffer_size)

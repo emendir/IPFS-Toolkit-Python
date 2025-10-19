@@ -1,5 +1,5 @@
 import os
-from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.client import IpfsClient
 from ipfs_tk_generics.pubsub import  BasePubSub, BasePubsubListener
 
 from io import BytesIO

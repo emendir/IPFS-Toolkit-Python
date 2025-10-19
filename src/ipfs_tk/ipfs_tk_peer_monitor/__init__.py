@@ -7,7 +7,7 @@ from threading import Thread, Lock
 import os
 import json
 from datetime import datetime, timezone, timedelta
-from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.client import IpfsClient
 
 UTC = timezone.utc
 # default values for various settings, can all be overridden

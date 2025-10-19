@@ -1,4 +1,4 @@
-from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.client import IpfsClient
 from ipfs_tk_generics.ipns import BaseIpns
 from . import ipfshttpclient2 as ipfshttpclient
 from datetime import datetime

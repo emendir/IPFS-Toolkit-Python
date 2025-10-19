@@ -5,7 +5,7 @@ import os
 import tempfile
 import shutil
 from datetime import datetime, timezone
-from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.client import IpfsClient
 from ipfs_tk_generics.files import BaseFiles
 
 

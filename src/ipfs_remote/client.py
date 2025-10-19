@@ -1,5 +1,5 @@
 from time import sleep
-from ipfs_tk_generics import IpfsClient
+from ipfs_tk_generics.client import IpfsClient
 from .files import RemoteFiles
 from .pubsub import RemotePubSub
 from .tunnels import RemoteTunnels
@@ -9,34 +9,41 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 import socket
 from urllib.parse import ParseResult
 from urllib.parse import urlparse
+
+
 class IpfsRemote(IpfsClient):
-    def __init__(self, address:str|None):
-        self._http_client = ipfshttpclient.client.Client()
-        
+    def __init__(self, *args, **kwargs):
+        self._http_client = ipfshttpclient.client.Client(*args, **kwargs)
+
         self._pubsub = RemotePubSub(self)
         self._tunnels = RemoteTunnels(self)
         self._files = RemoteFiles(self)
         self._peers = RemotePeers(self)
+
     @property
-    def tunnels(self)->RemoteTunnels:
+    def tunnels(self) -> RemoteTunnels:
         return self._tunnels
+
     @property
-    def pubsub(self)->RemotePubSub:
+    def pubsub(self) -> RemotePubSub:
         return self._pubsub
+
     @property
-    def files(self)->RemoteFiles:
+    def files(self) -> RemoteFiles:
         return self._files
+
     @property
-    def peers (self)->RemotePeers:
+    def peers(self) -> RemotePeers:
         return self._peers
+
     def _ipfs_api_url(self) -> ParseResult:
         url = self._http_client._client._base_url
         return urlparse(url)
 
-
     def _ipfs_host_ip(self) -> str:
         ip_address = socket.gethostbyname(self._ipfs_api_url().hostname)
         return ip_address
+
     @property
     def peer_id(self):
         """Returns this IPFS node's peer ID.
@@ -45,14 +52,12 @@ class IpfsRemote(IpfsClient):
         """
         return self._http_client.id()["ID"]
 
-
     def is_ipfs_running(self):
         """Checks whether or not the IPFS daemon is currently running.
         Returns:
             bool: whether or not the IPFS daemon is currently running
         """
         return len(self.get_addrs()) > 0
-
 
     def get_addrs(self):
         """Returns this IPFS node's peer ID.
@@ -78,5 +83,6 @@ class IpfsRemote(IpfsClient):
             count += 1
             if timeout_sec and count == timeout_sec:
                 raise TimeoutError()
+
     def terminate(self):
         pass

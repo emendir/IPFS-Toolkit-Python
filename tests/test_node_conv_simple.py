@@ -11,6 +11,17 @@ from _testing_utils import mark
 import ipfs_tk_transmission
 import ipfs_tk_generics
 import ipfs_tk_transmission.config
+import logging
+import ipfs_tk_transmission.conversations
+
+print(ipfs_tk_transmission.conversations.__file__)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+logger = logging.getLogger("IPFS-TK-Conversations")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(console_handler)
+logger.debug("HELLO THERE")
 
 ipfs_tk_transmission.config.PRINT_LOG_CONVERSATIONS = True
 
@@ -93,7 +104,7 @@ def test_messages():
             on_message_received,
             salutation_message=SALUTATION_MESSAGE_JOIN,
         )
-        conv.salutation_message_start = salutation_start
+        conv.salutation_start = salutation_start
         print("Joined")
 
     pytest.conv_lis = pytest.ipfs_receiver.listen_for_conversations(
@@ -128,16 +139,17 @@ def test_messages():
         salutation_message=SALUTATION_MESSAGE,
     )
     print("Peer joined conversation.")
-    print(conv.salutation_message_join)
+    print(conv.salutation_join)
     sleep(1)
     conv.say(MESSAGE_1)
 
     sleep(30)
     conv.terminate()
 
+    pytest.conv_lis.terminate()
     mark(
-        conv.salutation_message_start == SALUTATION_MESSAGE
-        and conv.salutation_message_join == SALUTATION_MESSAGE_JOIN
+        conv.salutation_start == SALUTATION_MESSAGE
+        and conv.salutation_join == SALUTATION_MESSAGE_JOIN
         and MESSAGE_1 in node_listener_received_messages
         and MESSAGE_2 in node_listener_received_messages
         and MESSAGE_3 in node_listener_received_messages
@@ -211,6 +223,7 @@ def test_files():
         and read_file(received_files[0]["filepath"]) == read_file(TEST_FILE),
         "Conversation File Transmission",
     )
+    pytest.conv_lis.terminate()
 
 
 def read_file(filepath: str) -> bytes | None:
@@ -225,15 +238,18 @@ def cleanup():
     # when you no longer need to listen for incoming conversations, clean up resources:
     pytest.conv_lis.terminate()
 
+    print("terminating receiver...")
     pytest.ipfs_receiver.terminate()
+    print("terminating sender...")
     pytest.ipfs_sender.terminate()
+    print("Finished cleaning up!")
 
 
 def run_tests():
     prepare()
     test_find_peer()
-    test_messages()
-    # test_files()
+    # test_messages()
+    test_files()
     cleanup()
 
 

@@ -120,7 +120,7 @@ def listen_for_file_transmissions(
                                   listener_name,
                                   eventhandler,
                                   progress_handler=None,
-                                  dir=".",
+                                  download_dir:str|None=None,
                                   encryption_callbacks=None):
     """Listens to incoming file transmission requests.
     Whenever a file is received, the specified eventhandler is called.
@@ -136,7 +136,7 @@ def listen_for_file_transmissions(
                             progress is a value between 0 and 1
                             Parameters:
                                 (peer_id:str, filesize:int, progress:float)
-        dir (str): the directory in which received files should be written
+        download_dir (str): the directory in which received files should be written
         encryption_callbacks (tuple): encryption and decryption functions
                             Tuple Contents: two functions which each take a
                             a bytearray as a parameter and return a bytearray
@@ -152,7 +152,7 @@ def listen_for_file_transmissions(
         listener_name=listener_name,
         eventhandler=eventhandler,
         progress_handler=progress_handler,
-        dir=dir,
+        download_dir=download_dir,
         encryption_callbacks=encryption_callbacks,
     )
 
@@ -167,7 +167,7 @@ def start_conversation(
         encryption_callbacks=None,
         timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
         max_retries=TRANSM_REQ_MAX_RETRIES,
-        dir="."):
+        download_dir:str|None=None):
     """Starts a conversation object with which 2 peers can repetatively make
     data transmissions to each other asynchronously and bidirectionally.
     Sends a conversation request to the other peer's conversation request
@@ -204,7 +204,7 @@ def start_conversation(
         transm_req_max_retries (int): (low level) data transmission -
                                 how often the transmission should be
                                 reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
+        download_dir (str): the path where received files should be downloaded to
     Returns:
         Conversation: an object through which messages and files can be sent
     """
@@ -218,7 +218,7 @@ def start_conversation(
         encryption_callbacks=encryption_callbacks,
         timeout_sec=timeout_sec,
         max_retries=max_retries,
-        dir=dir,
+        download_dir=download_dir,
     )
 
 
@@ -232,7 +232,7 @@ def join_conversation(
     encryption_callbacks=None,
     timeout_sec=TRANSM_SEND_TIMEOUT_SEC,
     max_retries=TRANSM_REQ_MAX_RETRIES,
-    dir="."
+    download_dir:str|None=None
 ):
     """Join a conversation object started by another peer.
     Call `.terminate()` on the returned Conversation object when you
@@ -266,7 +266,7 @@ def join_conversation(
         transm_req_max_retries (int): (low level) data transmission -
                                 how often the transmission should be
                                 reattempted when the timeout is reached
-        dir (str): the path where received files should be downloaded to
+        download_dir (str): the path where received files should be downloaded to
     Returns:
         Conversation: an object through which messages and files can be sent
     """
@@ -280,7 +280,7 @@ def join_conversation(
         encryption_callbacks=encryption_callbacks,
         timeout_sec=timeout_sec,
         max_retries=max_retries,
-        dir=dir,
+        download_dir=download_dir,
     )
 
 

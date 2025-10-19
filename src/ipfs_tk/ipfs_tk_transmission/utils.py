@@ -184,22 +184,15 @@ def _create_listening_connection(
         bool force: whether or not already existing conflicting connections should be closed.
     """
     try:
+        _close_listening_connection(ipfs_client, name=protocol)
         ipfs_client.tunnels.open_listener(protocol, port)
         if PRINT_LOG_CONNECTIONS:
-            print(f'listening fas "{protocol}" on {port}')
+            print(f'listening as "{protocol}" on {port}')
     except:
-        if force:
-            _close_listening_connection(ipfs_client, name=protocol)
-        try:
-            time.sleep(0.1)
-            ipfs_client.tunnels.open_listener(protocol, port)
-            if PRINT_LOG_CONNECTIONS:
-                print(f'listening as "{protocol}" on {port}')
-        except:
-            raise IPFS_Error(
-                "Error registering listening connection to IPFS: "
-                f"/x/{protocol}/ip4/{ipfs_client._ipfs_host_ip()}/udp/{port}"
-            )
+        raise IPFS_Error(
+            "Error registering listening connection to IPFS: "
+            f"/x/{protocol}/ip4/{ipfs_client._ipfs_host_ip()}/udp/{port}"
+        )
 
     return port
 
