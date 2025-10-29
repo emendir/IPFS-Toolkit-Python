@@ -17,11 +17,11 @@ def get_option(option):
         sys.exit()
 
 
-class DockerContainer():
+class DockerContainer:
     def __init__(self, container_name, auto_run=True):
         self.container_name = container_name
         self.ipfs_id = ""
-        self.mutltiaddr=""
+        self.mutltiaddr = ""
         if auto_run:
             self.run()
 
@@ -35,46 +35,55 @@ class DockerContainer():
             shell=True,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         self.container_id = result.stdout.strip("\n")
 
         self.ipfs_id = ""
-        self.mutltiaddr=""
+        self.mutltiaddr = ""
         # wait till IPFS is running and till we can reach it
-        print("IPFS-Docker: Waiting for container's IPFS to come online...")
+        # print("IPFS-Docker: Waiting for container's IPFS to come online...")
         while not self.ipfs_id:
             time.sleep(1)
             # command=f"docker exec -it {self.container_id} python3 -c 'import ipfs_api;ipfs_api.client.terminate();ipfs_api.client=ipfs_api.IpfsNode(\"/tmp/IpfsToolkitTest\");ipfs_id=ipfs_api.my_id();ipfs_api.client.terminate();print(\"PeerID:\", ipfs_id)' 2>/dev/null"
-            command=(
+            command = (
                 f"docker exec -it {self.container_id} python3 -c "
-            "'import ipfs_api;ipfs_id=ipfs_api.my_id();addrs=ipfs_api.my_multiaddrs();print(\"MutliAddr:\", f\"{addrs[0]}/p2p/{ipfs_id}\");print(\"PeerID:\", ipfs_id)' 2>/dev/null"
+                '\'import ipfs_api;ipfs_id=ipfs_api.my_id();addrs=ipfs_api.my_multiaddrs();print("MutliAddr:", f"{addrs[0]}/p2p/{ipfs_id}");print("PeerID:", ipfs_id)\' 2>/dev/null'
             )
-            print(command)
+            # print(command)
             result = subprocess.run(
                 command,
                 shell=True,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             ).stdout
-            print(result)    
+            # print(result)
             if result:
-                match = [line for line in result.split("\n") if line.startswith("PeerID:")]
+                match = [
+                    line
+                    for line in result.split("\n")
+                    if line.startswith("PeerID:")
+                ]
                 if match:
                     # print(match)
-                    parts= match[-1].strip().split(" ")
+                    parts = match[-1].strip().split(" ")
                     if len(parts) == 2:
                         self.ipfs_id = parts[-1]
-                    match = [line for line in result.split("\n") if line.startswith("MutliAddr:")]
-                    parts= match[-1].strip().split(" ")
-                    self.mutltiaddr= parts[-1]
-                    
+                    match = [
+                        line
+                        for line in result.split("\n")
+                        if line.startswith("MutliAddr:")
+                    ]
+                    parts = match[-1].strip().split(" ")
+                    self.mutltiaddr = parts[-1]
+
         print("IPFS-Docker: IPFS is online!")
-        
 
     def run_python_code(self, python_code):
-        command = f"docker exec {self.container_id} /usr/bin/python3 -c \"{python_code}\""
+        command = f'docker exec {self.container_id} /usr/bin/python3 -c "{
+            python_code
+        }"'
         result = subprocess.run(
             command,
             shell=True,
@@ -105,11 +114,11 @@ class DockerContainer():
         os.system(f"docker restart {self.container_id}  >/dev/null 2>&1")
         # wait till IPFS is running
         while not subprocess.run(
-            f"docker exec -it {self.container_id} ipfs id -f=\"<id>\" 2>/dev/null",
+            f'docker exec -it {self.container_id} ipfs id -f="<id>" 2>/dev/null',
             shell=True,
             capture_output=True,
             text=True,
-            check=False
+            check=False,
         ).stdout:
             time.sleep(1)
         # wait till we can connect to docker via IPFS
@@ -118,6 +127,7 @@ class DockerContainer():
 
     def login(self):
         import pyperclip
+
         command = f"docker exec -it {self.container_id} /bin/bash"
         pyperclip.copy(command)
         print(command)
@@ -135,7 +145,10 @@ class DockerContainer():
         # docker run emendir/ipfs-toolkit
 
         os.system(
-            f"docker run --name {self.container_name} --cap-add SYS_ADMIN --privileged emendir/ipfs-toolkit")
+            f"docker run --name {
+                self.container_name
+            } --cap-add SYS_ADMIN --privileged emendir/ipfs-toolkit"
+        )
 
 
 if __name__ == "__main__":

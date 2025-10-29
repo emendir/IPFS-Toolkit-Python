@@ -138,19 +138,28 @@ class BaseConversation:
         self.salutation_start = salutation_message
         # self._listener = listen_for_transmissions(conv_name, self.hear_eventhandler)
 
-        data = (
-            bytearray([255])
-            # bytearray([0]) is a format specifier, providing room for
-            # future extensions
-            + bytearray([0])
-            + bytearray([255])
-            + bytearray("I want to start a conversation".encode("utf-8"))
-            + bytearray([255])
-            + bytearray(conv_name.encode("utf-8"))
-            + bytearray([255])
-        )
-        if salutation_message:
-            data += bytearray(salutation_message)
+        # BACKWARD COMPATIBILITY
+        use_unversioned_protocol = not salutation_message
+        if use_unversioned_protocol:
+            data = (
+                bytearray("I want to start a conversation".encode("utf-8"))
+                + bytearray([255])
+                + bytearray(conv_name.encode("utf-8"))
+            )
+        else:
+            data = (
+                bytearray([255])
+                # bytearray([0]) is a format specifier, providing room for
+                # future extensions
+                + bytearray([0])
+                + bytearray([255])
+                + bytearray("I want to start a conversation".encode("utf-8"))
+                + bytearray([255])
+                + bytearray(conv_name.encode("utf-8"))
+                + bytearray([255])
+            )
+            if salutation_message:
+                data += bytearray(salutation_message)
         try:
             transmit_data(
                 self.ipfs_client,
@@ -251,19 +260,30 @@ class BaseConversation:
         self.others_trsm_listener = others_trsm_listener
         self.peer_id = peer_id
         self.salutation_join = salutation_message
-        data = (
-            bytearray([255])
-            # bytearray([0]) is a format specifier, providing room for
-            # future extensions
-            + bytearray([0])
-            + bytearray([255])
-            + bytearray("I'm listening".encode("utf-8"))
-            + bytearray([255])
-            + bytearray(conv_name.encode("utf-8"))
-            + bytearray([255])
-        )
-        if salutation_message:
-            data += bytearray(salutation_message)
+
+        # BACKWARD COMPATIBILITY
+        use_unversioned_protocol = not salutation_message
+        if use_unversioned_protocol:
+            data = (
+                bytearray("I'm listening".encode("utf-8"))
+                + bytearray([255])
+                + bytearray(conv_name.encode("utf-8"))
+            )
+        else:
+            # new, version-controlled format
+            data = (
+                bytearray([255])
+                # bytearray([0]) is a format specifier, providing room for
+                # future extensions
+                + bytearray([0])
+                + bytearray([255])
+                + bytearray("I'm listening".encode("utf-8"))
+                + bytearray([255])
+                + bytearray(conv_name.encode("utf-8"))
+                + bytearray([255])
+            )
+            if salutation_message:
+                data += bytearray(salutation_message)
         self._conversation_started = True
         logger.debug(
             f"{conv_name}: Sending join-response to {others_trsm_listener}"

@@ -30,19 +30,18 @@ from ipfs_toolkit_docker.docker_container import DockerContainer
 from brenthy_docker import BrenthyDocker
 import os
 import threading
-
+from emtest import env_vars
 
 # time in seconds to wait for file to transmit before calling test a failure
 FILE_SEND_TIMEOUT = 20
 
 TEST_CLI = False
 
-
 # if you do not have any other important brenthydrive docker containers,
 # you can set this to true to automatically remove unpurged docker containers
 # after failed tests
 DELETE_ALL_IPFS_DOCKERS = True
-REBUILD_DOCKER = True
+REBUILD_DOCKER = env_vars.bool("REBUILD_DOCKER", default=True)
 DEF_TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), "testfile")
 
 if os.path.exists(DEF_TEST_FILE_PATH):
@@ -86,7 +85,7 @@ def prepare():
     # os.system(f"docker exec {docker_peer.container_id} {command}&")
 
     def docker_run_cmd() -> None:
-        docker_peer.run_shell_command(command, print_output=True)
+        docker_peer.run_shell_command(command, print_output=False)
 
     print("Running docker_script on docker...")
     Thread(target=docker_run_cmd).start()
@@ -130,7 +129,7 @@ def test_find_peer():
     for i in range(10):
         success = ipfs.peers.find(docker_peer.ipfs_id)
         if success:
-            print(success)
+            # print(success)
             break
         sleep(1)
 

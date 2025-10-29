@@ -1,3 +1,4 @@
+from emtest import await_thread_cleanup
 import shutil
 import time
 import threading
@@ -39,16 +40,16 @@ def prepare():
     global docker_peer
     global peer_id
     docker_peer = DockerContainer("IPFS-Toolkit-Test")
-    python_code = """import ipfs_api
-ipfs_api.client.terminate()
-ipfs_api.client=ipfs_api.IpfsNode('/tmp/IpfsToolkitTest')
-from time import sleep
-sleep(300)
-""".replace("\n", ";")
-    command = (
-        f'docker exec {docker_peer.container_id} python -c "{python_code}"&'
-    )
-    os.system(command)
+    #     python_code = """import ipfs_api
+    # ipfs_api.client.terminate()
+    # ipfs_api.client=ipfs_api.IpfsNode('/tmp/IpfsToolkitTest')
+    # from time import sleep
+    # sleep(300)
+    # """.replace("\n", ";")
+    #     command = (
+    #         f'docker exec {docker_peer.container_id} python -c "{python_code}"&'
+    #     )
+    #     os.system(command)
 
     peer_id = docker_peer.ipfs_id
 
@@ -214,8 +215,7 @@ def test_thread_cleanup():
     """
     tests that no unterminated threads remain running.
     """
-    time.sleep(2)
-    success = len(threading.enumerate()) == 1
+    success = await_thread_cleanup(15)
     print(mark(success), "thread cleanup")
 
 
