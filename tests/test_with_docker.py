@@ -20,6 +20,7 @@ run the following commands to stop and remove the unterminated container:
 ```
 """
 
+import emtest
 from threading import Thread
 from time import sleep
 import time
@@ -81,10 +82,10 @@ def prepare():
         await_ipfs=True,
     )
     # run test script on docker container
-    command = "python3 /opt/IPFS-Toolkit/docker_script.py"
+    command = "/bin/python3 /opt/IPFS-Toolkit/docker_script.py"
     # os.system(f"docker exec {docker_peer.container_id} {command}&")
 
-    def docker_run_cmd():
+    def docker_run_cmd() -> None:
         docker_peer.run_shell_command(command, print_output=True)
 
     print("Running docker_script on docker...")
@@ -93,9 +94,9 @@ def prepare():
     time.sleep(1)
 
 
-def mark(success):
-    """
-    Returns a check or cross character depending on the input success.
+def mark(success: bool) -> None:
+    """Get a check or cross character depending on the input success.
+
     If this script is run in pytest, this function runs an assert statement
     on the input success to signal failure to pytest, cancelling the execution
     of the rest of the calling function.
@@ -205,9 +206,8 @@ def test_thread_cleanup():
     Shuts down the docker container and
     tests that no unterminated threads remain running.
     """
+    emtest.await_thread_cleanup(15)
     docker_peer.delete()
-    success = len(threading.enumerate()) == 1
-    print(mark(success), "thread cleanup")
 
 
 def run_tests():

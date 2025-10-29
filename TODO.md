@@ -8,6 +8,10 @@
 - make parameter names more consistent, e.g. `timeout` & `timeout_sec`
 - make ipfs_api.read() empty file work
 
+## General
+- improve logging everywhere
+- remove unnecessary sleeps
+
 ## libkubo
 - IPNS
 
