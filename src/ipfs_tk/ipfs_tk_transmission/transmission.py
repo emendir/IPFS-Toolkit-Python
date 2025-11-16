@@ -113,9 +113,9 @@ def transmit_data(
                             )
                         return their_trsm_port
                     else:
-                        raise UnreadableReply()
+                        raise UnreadableReply(reply)
                 except:
-                    raise UnreadableReply()
+                    raise UnreadableReply(reply)
             else:
                 if PRINT_LOG_TRANSMISSIONS:
                     print(
@@ -147,7 +147,7 @@ def transmit_data(
     else:
         if PRINT_LOG_TRANSMISSIONS:
             print("Received unrecognised response:", response)
-        raise UnreadableReply()
+        raise UnreadableReply(response)
     # sock.close()
     # _close_sending_connection(peer_id, their_trsm_port)
 

@@ -421,7 +421,7 @@ class FileTransmissionReceiver:
                 self.finish()
             elif self.writtenbytes > self.filesize:
                 self.writer.close()
-                raise UnreadableReply(
+                raise Exception(
                     "Something weird happened, filesize is larger than expected."
                 )
 
