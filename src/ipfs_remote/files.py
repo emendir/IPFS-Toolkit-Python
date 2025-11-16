@@ -11,11 +11,12 @@ from ipfs_tk_generics.files import BaseFiles
 
 from cachetools import LRUCache
 import sys
-UTC=timezone.utc
 
-def _is_pypy()->bool:
-    return hasattr(sys, 'pypy_version_info')
+UTC = timezone.utc
 
+
+def _is_pypy() -> bool:
+    return hasattr(sys, "pypy_version_info")
 
 
 # we sometime get an error when using pypy instead of cpython
@@ -30,13 +31,13 @@ def _getsizeof_cache_entry(value):
 
 
 class RemoteFiles(BaseFiles):
-
-    def __init__(self, node:IpfsClient):
+    def __init__(self, node: IpfsClient):
         self._node = node
         self._http_client = self._node._http_client
         # LRUCache with a custom size-based eviction policy
         self.ipfs_content_cache = LRUCache(
-            maxsize=MAX_CACHE_SIZE, getsizeof=_getsizeof_cache_entry)
+            maxsize=MAX_CACHE_SIZE, getsizeof=_getsizeof_cache_entry
+        )
         self.__pins_cache = {}
 
     def _add_cached_content(self, cid: str, data: bytes):
@@ -58,7 +59,7 @@ class RemoteFiles(BaseFiles):
             str: the IPFS content ID (CID) of the published file/directory
         """
         result = self._http_client.add(path, recursive=True)
-        if (type(result) == list):
+        if type(result) == list:
             hash = result[-1]["Hash"]
         else:
             hash = result["Hash"]
@@ -74,7 +75,7 @@ class RemoteFiles(BaseFiles):
                     if published
         """
         result = self._http_client.add(path, recursive=True, only_hash=True)
-        if (type(result) == list):
+        if type(result) == list:
             return result[-1]["Hash"]
         else:
             return result["Hash"]
@@ -140,7 +141,9 @@ class RemoteFiles(BaseFiles):
         self.unpin(cid)
         self._http_client.repo.gc()
 
-    def list_pins(self, cids_only: bool = False, cache_age_s: int|None = None):
+    def list_pins(
+        self, cids_only: bool = False, cache_age_s: int | None = None
+    ):
         """Get the CIDs of files we have pinned on IPFS
         Args:
             cids_only (bool): if True, returns a plain list of IPFS CIDs
@@ -154,14 +157,16 @@ class RemoteFiles(BaseFiles):
             list(): a list of the CIDs of pinned objects. The list element type
                 depends on the cids_only parameter (see above)
         """
-        if self.__pins_cache and cache_age_s and (datetime.now(UTC) - self.__pins_cache['date']).total_seconds() < cache_age_s:
-            data = self.__pins_cache['data']
+        if (
+            self.__pins_cache
+            and cache_age_s
+            and (datetime.now(UTC) - self.__pins_cache["date"]).total_seconds()
+            < cache_age_s
+        ):
+            data = self.__pins_cache["data"]
         else:
-            data = self._http_client.pin.ls()['Keys'].as_json()
-            self.__pins_cache = {
-                "date": datetime.now(UTC),
-                "data": data
-            }
+            data = self._http_client.pin.ls(timeout=500)["Keys"].as_json()
+            self.__pins_cache = {"date": datetime.now(UTC), "data": data}
         if cids_only:
             return list(data.keys())
         else:
@@ -181,10 +186,12 @@ class RemoteFiles(BaseFiles):
         responses = self._http_client.routing.findprovs(cid)
         peers = []
         for response in responses:
-            if not isinstance(response, ipfshttpclient.client.base.ResponseBase):
+            if not isinstance(
+                response, ipfshttpclient.client.base.ResponseBase
+            ):
                 continue
-            if response['Type'] == 4:
-                for resp in response['Responses']:
-                    if resp['ID'] and resp['ID'] not in peers:
-                        peers.append(resp['ID'])
+            if response["Type"] == 4:
+                for resp in response["Responses"]:
+                    if resp["ID"] and resp["ID"] not in peers:
+                        peers.append(resp["ID"])
         return peers

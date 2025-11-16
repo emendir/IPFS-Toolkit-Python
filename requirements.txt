@@ -7,5 +7,5 @@ httpx
 requests
 termcolor
 cachetools
-ipfs_tk
+ipfs_tk>=0.1.9
 ipfs_node

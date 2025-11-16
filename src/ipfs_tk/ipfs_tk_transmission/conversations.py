@@ -260,14 +260,6 @@ class Conversation(BaseConversation):
         """
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
-        self.file_listener = listen_for_file_transmissions(
-            self.ipfs_client,
-            f"{conv_name}:files",
-            self._file_received,
-            progress_handler=self._on_file_progress_received,
-            download_dir=download_dir,
-            encryption_callbacks=encryption_callbacks,
-        )
         result = BaseConversation.start(
             self,
             conv_name=conv_name,
@@ -334,7 +326,6 @@ class Conversation(BaseConversation):
         """
         self.file_eventhandler = file_eventhandler
         self.file_progress_callback = file_progress_callback
-        self.file_listener = None
 
         result = BaseConversation.join(
             self,
