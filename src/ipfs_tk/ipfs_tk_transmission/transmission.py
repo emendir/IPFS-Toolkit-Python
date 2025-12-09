@@ -205,6 +205,22 @@ class TransmissionListener:
         self._listener_name = listener_name
         self.eventhandler = eventhandler
         self.port = 0  # not yet set
+
+        if PRINT_LOG_TRANSMISSIONS:
+            print("Creating Listener")
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.bind((self.ipfs_client._ipfs_host_ip(), 0))
+        self.port = self.socket.getsockname()[1]
+        _create_listening_connection(
+            self.ipfs_client, self._listener_name, self.port
+        )
+
+        if PRINT_LOG_TRANSMISSIONS:
+            print(
+                self._listener_name
+                + ": Listening for transmission requests as "
+                + self._listener_name
+            )
         self._listener = Thread(
             target=self._listen,
             args=(),
@@ -212,11 +228,13 @@ class TransmissionListener:
         )
         self._listener.start()
 
-    def __receive_transmission_requests(self, data):
+    def __receive_transmission_requests(self, data: bytearray | bytes):
         if PRINT_LOG_TRANSMISSIONS:
             print(self._listener_name + ": processing transmission request...")
         # decoding the transission request buffer
         try:
+            if not data:
+                raise ValueError("Received empty data")
             # Performing buffer integrity check
             integrity_byte = data[0]
             data = data[1:]
@@ -300,21 +318,6 @@ class TransmissionListener:
         sock.close()
 
     def _listen(self):
-        if PRINT_LOG_TRANSMISSIONS:
-            print("Creating Listener")
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((self.ipfs_client._ipfs_host_ip(), 0))
-        self.port = self.socket.getsockname()[1]
-        _create_listening_connection(
-            self.ipfs_client, self._listener_name, self.port
-        )
-
-        if PRINT_LOG_TRANSMISSIONS:
-            print(
-                self._listener_name
-                + ": Listening for transmission requests as "
-                + self._listener_name
-            )
         self.socket.listen()
         while True:
             conn, addr = self.socket.accept()

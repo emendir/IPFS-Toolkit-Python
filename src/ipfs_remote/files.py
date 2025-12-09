@@ -165,8 +165,13 @@ class RemoteFiles(BaseFiles):
         ):
             data = self.__pins_cache["data"]
         else:
-            data = self._http_client.pin.ls(timeout=500)["Keys"].as_json()
-            self.__pins_cache = {"date": datetime.now(UTC), "data": data}
+            data = self._http_client.pin.ls(timeout=500).get("Keys")
+            if not data:
+                return []
+            self.__pins_cache = {
+                "date": datetime.now(UTC),
+                "data": data.as_json(),
+            }
         if cids_only:
             return list(data.keys())
         else:

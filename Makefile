@@ -85,12 +85,12 @@ docs: ## Build Sphinx documentation
 # # ----------------------------
 # # Release Helpers
 # # ----------------------------
-# .PHONY: dist upload
+# .PHONY: dist publish
 #
 # dist: build ## List built distributions
 # 	ls -lh $(DIST_DIR)
 #
-# upload: build ## Upload package to PyPI (requires twine)
+# publish: build ## Upload package to PyPI (requires twine)
 # 	twine upload $(DIST_DIR)/*
 
 # ----------------------------
