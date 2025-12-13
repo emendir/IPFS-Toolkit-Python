@@ -78,7 +78,7 @@ class UnreadableReply(Exception):
         self.reply = reply
 
     def __str__(self):
-        return f"Received data that we couldn't read.{self.reply}"
+        return f"Received data that we couldn't read: {self.reply}"
 
 
 class IPFS_Error(Exception):

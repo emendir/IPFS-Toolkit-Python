@@ -29,7 +29,7 @@ import time
 # import inspect
 import logging
 
-logger = logging.getLogger("IPFS-TK-Conversations")
+from .log import logger_conv as logger
 
 
 UTC = timezone.utc

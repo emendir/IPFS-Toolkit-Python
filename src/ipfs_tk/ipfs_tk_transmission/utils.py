@@ -2,7 +2,6 @@ import socket
 import time
 from ipfs_tk_generics.base_client import BaseClient
 from .config import (
-    PRINT_LOG_CONNECTIONS,
     BUFFER_SIZE,
     sending_ports,
 )
@@ -97,6 +96,7 @@ def _tcp_recv_all(sock, timeout=5):
         try:
             data = sock.recv(BUFFER_SIZE)
             if data:
+                # decode transmission length from beginning of packet
                 if not length:
                     if data.index(0):
                         total_data += data[: data.index(0)]
@@ -116,7 +116,10 @@ def _tcp_recv_all(sock, timeout=5):
                     begin = time.time()
         except:
             pass
-    print("Timeout reached")
+    raise TimeoutError(
+        f"Timeout reached in _tcp_recv_all. Received data: "
+        f"{len(total_data)}/{length}bytes"
+    )
     # print("RECEIVED", type(total_data), total_data)
     return total_data
 
@@ -177,21 +180,19 @@ def _create_sending_connection(
 
 
 def _create_listening_connection(
-    ipfs_client: BaseClient, protocol, port, force=True
+    ipfs_client: BaseClient,
+    protocol,
+    port,
 ):
-    """
-    Args:
-        bool force: whether or not already existing conflicting connections should be closed.
-    """
+    """"""
     try:
         _close_listening_connection(ipfs_client, name=protocol)
         ipfs_client.tunnels.open_listener(protocol, port)
-        if PRINT_LOG_CONNECTIONS:
-            print(f'listening as "{protocol}" on {port}')
-    except:
+    except Exception as e:
         raise IPFS_Error(
             "Error registering listening connection to IPFS: "
-            f"/x/{protocol}/ip4/{ipfs_client._ipfs_host_ip()}/udp/{port}"
+            f"/x/{protocol}/ip4/{ipfs_client._ipfs_host_ip()}/udp/{port} "
+            f"{e}"
         )
 
     return port

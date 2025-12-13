@@ -13,9 +13,6 @@ from .errors import (
     UnreadableReply,
 )
 from .config import (
-    PRINT_LOG,
-    PRINT_LOG_CONNECTIONS,
-    PRINT_LOG_TRANSMISSIONS,
     TRANSM_REQ_MAX_RETRIES,
     TRANSM_SEND_TIMEOUT_SEC,
     TRANSM_RECV_TIMEOUT_SEC,
@@ -34,6 +31,7 @@ from .utils import (
 )
 from typing import Callable
 
+from .log import logger_transm as logger
 
 UTC = timezone.utc
 
@@ -73,16 +71,16 @@ def transmit_data(
 
         # repeatedly try to send transmission request to recipient until a reply is received
         while max_retries == -1 or tries < max_retries:
-            if PRINT_LOG_TRANSMISSIONS:
-                print("Sending transmission request to " + str(req_lis_name))
+            logger.debug(
+                "Sending transmission request to " + str(req_lis_name)
+            )
             sock = _create_sending_connection(
                 ipfs_client, peer_id, req_lis_name
             )
             # sock.sendall(request_data)
             sock.settimeout(timeout_sec)
             _tcp_send_all(sock, request_data)
-            if PRINT_LOG_TRANSMISSIONS:
-                print("Sent transmission request to " + str(req_lis_name))
+            logger.debug("Sent transmission request to " + str(req_lis_name))
 
             try:
                 # reply = sock.recv(BUFFER_SIZE)
@@ -96,8 +94,6 @@ def transmit_data(
                     "Received no response from peer while sending transmission request."
                 )
 
-            # reply = _tcp_recv_all(sock, timeout_sec)
-            # _tcp_recv_all
             sock.close()
             del sock
             _close_sending_connection(ipfs_client, peer_id, req_lis_name)
@@ -105,24 +101,28 @@ def transmit_data(
                 try:
                     their_trsm_port = reply[30:].decode()  # signal success
                     if their_trsm_port:
-                        if PRINT_LOG_TRANSMISSIONS:
-                            print(
-                                "Transmission request to "
-                                + str(req_lis_name)
-                                + "was received."
-                            )
+                        logger.debug(
+                            "Transmission request to "
+                            + str(req_lis_name)
+                            + "was received."
+                        )
                         return their_trsm_port
                     else:
+                        logger.error(
+                            "Failed to read port from trans-req-response."
+                        )
                         raise UnreadableReply(reply)
                 except:
+                    logger.error(
+                        "Failed to decode trans-req-response: {reply}"
+                    )
                     raise UnreadableReply(reply)
             else:
-                if PRINT_LOG_TRANSMISSIONS:
-                    print(
-                        "Transmission request send "
-                        + str(req_lis_name)
-                        + "timeout_sec reached."
-                    )
+                logger.debug(
+                    "Transmission request send "
+                    + str(req_lis_name)
+                    + "timeout_sec reached."
+                )
             tries += 1
         _close_sending_connection(ipfs_client, peer_id, req_lis_name)
         raise CommunicationTimeout(
@@ -134,19 +134,16 @@ def transmit_data(
     sock.settimeout(timeout_sec)
     # sock.sendall(data)  # transmit Data
     _tcp_send_all(sock, data)
-    if PRINT_LOG_TRANSMISSIONS:
-        print("Sent Transmission Data", data)
+    logger.debug("Sent Transmission Data")
     response = sock.recv(BUFFER_SIZE)
     if response and response == b"Finished!":
         # conn.close()
         sock.close()
         _close_sending_connection(ipfs_client, peer_id, their_trsm_port)
-        if PRINT_LOG_TRANSMISSIONS:
-            print(": Finished transmission.")
+        logger.debug("Finished transmission.")
         return True  # signal success
     else:
-        if PRINT_LOG_TRANSMISSIONS:
-            print("Received unrecognised response:", response)
+        logger.error("Received unrecognised response:" + str(response))
         raise UnreadableReply(response)
     # sock.close()
     # _close_sending_connection(peer_id, their_trsm_port)
@@ -206,8 +203,7 @@ class TransmissionListener:
         self.eventhandler = eventhandler
         self.port = 0  # not yet set
 
-        if PRINT_LOG_TRANSMISSIONS:
-            print("Creating Listener")
+        logger.debug("Creating Listener")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.ipfs_client._ipfs_host_ip(), 0))
         self.port = self.socket.getsockname()[1]
@@ -215,12 +211,9 @@ class TransmissionListener:
             self.ipfs_client, self._listener_name, self.port
         )
 
-        if PRINT_LOG_TRANSMISSIONS:
-            print(
-                self._listener_name
-                + ": Listening for transmission requests as "
-                + self._listener_name
-            )
+        logger.debug(
+            self._listener_name + ": Listening for transmission requests as "
+        )
         self._listener = Thread(
             target=self._listen,
             args=(),
@@ -229,8 +222,9 @@ class TransmissionListener:
         self._listener.start()
 
     def __receive_transmission_requests(self, data: bytearray | bytes):
-        if PRINT_LOG_TRANSMISSIONS:
-            print(self._listener_name + ": processing transmission request...")
+        logger.debug(
+            self._listener_name + ": processing transmission request..."
+        )
         # decoding the transission request buffer
         try:
             if not data:
@@ -249,17 +243,17 @@ class TransmissionListener:
                     )  # reduce the sum to its modulus256 so that the calculation above doesn't take too much processing power in later iterations of this for loop
             # if the integrity byte doesn't match the buffer, exit the function ignoring the buffer
             if sum % 256 != integrity_byte:
-                if PRINT_LOG:
-                    print(
-                        self._listener_name
-                        + ": Received a buffer with a non-matching integrity buffer"
-                    )
+                logger.debug(
+                    self._listener_name
+                    + ": Received a buffer with a non-matching integrity buffer"
+                )
                 return
 
             peer_id = data.decode()
 
-            if PRINT_LOG_TRANSMISSIONS:
-                print(self._listener_name + ": Received transmission request.")
+            logger.debug(
+                self._listener_name + ": Received transmission request."
+            )
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.bind((self.ipfs_client._ipfs_host_ip(), 0))
             our_port = sock.getsockname()[1]
@@ -277,36 +271,25 @@ class TransmissionListener:
             return our_port
 
         except Exception as e:
-            print("")
-            print(
-                self._listener_name
-                + ": Exception in NetTerm.ReceiveTransmissions.__receive_transmission_requests()"
+            logger.error(
+                "Exception in ReceiveTransmissions.__receive_transmission_requests() "
+                + str(e)
             )
-            print("----------------------------------------------------")
-            traceback.print_exc()  # printing stack trace
-            print("----------------------------------------------------")
-            print("")
-            print(e)
-            print(
-                self._listener_name
-                + ": Could not decode transmission request."
-            )
+            logger.error((traceback.format_exc()))
+            logger.error("Could not decode transmission request.")
 
     def _receive_transmission(self, peer_id, sock, our_port, eventhandler):
         #
         # sock = _create_sending_connection(peer_id, str(sender_port))
         #
-        # if PRINT_LOG_TRANSMISSIONS:
-        #     print("Ready to receive transmission.")
         #
         # sock.sendall(b"start transmission")
-        if PRINT_LOG_TRANSMISSIONS:
-            print("waiting to receive actual transmission")
+        logger.debug("waiting to receive actual transmission")
         conn, addr = sock.accept()
-        if PRINT_LOG_TRANSMISSIONS:
-            print("received connection response fro actual transmission")
+        logger.debug("received connection response fro actual transmission")
 
         data = _tcp_recv_all(conn, timeout=TRANSM_RECV_TIMEOUT_SEC)
+        sleep(1)
         conn.send("Finished!".encode())
         # conn.close()
         Thread(
@@ -314,14 +297,21 @@ class TransmissionListener:
             args=(data, peer_id),
             name="TransmissionListener.ReceivedTransmission",
         ).start()
-        _close_listening_connection(self.ipfs_client, str(our_port), our_port)
+        sleep(1)
         sock.close()
+        _close_listening_connection(self.ipfs_client, str(our_port), our_port)
 
     def _listen(self):
         self.socket.listen()
         while True:
             conn, addr = self.socket.accept()
             data = _tcp_recv_all(conn, timeout=TRANSM_RECV_TIMEOUT_SEC)
+            if not data:
+                conn.close()
+                logger.warning(
+                    "Received empty data on transmission request listener."
+                )
+                continue
             if self._terminate:
                 # conn.sendall(b"Righto.")
                 conn.close()
@@ -356,11 +346,10 @@ class TransmissionListener:
                 # sock.sendall("close".encode())
                 _tcp_send_all(sock, "close".encode())
 
-                # _tcp_recv_all(sock)
                 sock.close()
                 del sock
             except Exception as e:
-                print("Error closing listener:", e)
+                logger.error("Error closing listener: " + str(e))
                 pass
             sleep(0.1)
 
@@ -501,8 +490,7 @@ class _ListenerTCP(threading.Thread):
 
         self.start()
 
-        if PRINT_LOG_CONNECTIONS:
-            print("Created listener.")
+        logger.debug("Created listener.")
 
     def run(self):
         self.sock.listen(1)
@@ -512,12 +500,10 @@ class _ListenerTCP(threading.Thread):
             data = conn.recv(self.buffer_size)
             self.last_time_recv = datetime.now(UTC)
             if self._terminate == True:
-                if PRINT_LOG_CONNECTIONS:
-                    print("listener terminated")
+                logger.debug("listener terminated")
                 break
             if not data:
-                if PRINT_LOG_CONNECTIONS:
-                    print("received null data")
+                logger.debug("received null data")
                 # break
             if len(data) > 0:
                 if self.eventhandlers_on_new_threads:
@@ -531,8 +517,7 @@ class _ListenerTCP(threading.Thread):
                     self.eventhandler(data)
         conn.close()
         self.sock.close()
-        if PRINT_LOG_CONNECTIONS:
-            print("Closed listener.")
+        logger.debug("Closed listener.")
 
     def status_monitor(self):
         while True:
@@ -555,8 +540,7 @@ class _ListenerTCP(threading.Thread):
     def terminate(self):
         if self._terminate:
             return
-        if PRINT_LOG_CONNECTIONS:
-            print("terminating listener")
+        logger.debug("terminating listener")
         self._terminate = True  # marking the terminate flag as true
         self.sock.close()
 

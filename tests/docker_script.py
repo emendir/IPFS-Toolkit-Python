@@ -16,9 +16,6 @@ after reading the instructions in that script,
 and of course make sure IPFS is running on both computers first.
 """
 
-# ipfs_datatransmission.print_log = True
-# ipfs_datatransmission.print_log_conversations = True
-# ipfs_datatransmission.print_log_files = True
 
 WAIT_DUR = 15
 

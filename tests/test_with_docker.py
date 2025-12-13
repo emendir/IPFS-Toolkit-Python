@@ -168,6 +168,7 @@ def test_send_file():
         time.sleep(1)
         if file_progress == 100:
             break
+    sleep(1)
     filesize = docker_peer.run_python_code(
         f"import os;print(os.path.getsize('/opt/{
             os.path.basename(file_path)

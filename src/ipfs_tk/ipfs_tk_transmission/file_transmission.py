@@ -24,7 +24,7 @@ from .errors import InvalidPeer, UnreadableReply
 from ipfs_tk_transmission.conversation_basics import ConversationListener
 from typing import Callable
 
-logger = logging.getLogger("IPFS-TK-Conversations")
+from .log import logger_file as logger
 
 
 def transmit_file(

@@ -26,12 +26,11 @@ from inspect import signature
 
 import logging
 from .config import (
-    PRINT_LOG,
     TRANSM_REQ_MAX_RETRIES,
     TRANSM_SEND_TIMEOUT_SEC,
 )
 
-logger = logging.getLogger("IPFS-TK-Conversations")
+from .log import logger_conv as logger
 
 UTC = timezone.utc
 

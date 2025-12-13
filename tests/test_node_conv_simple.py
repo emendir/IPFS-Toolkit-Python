@@ -23,7 +23,6 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(console_handler)
 logger.debug("HELLO THERE")
 
-ipfs_tk_transmission.config.PRINT_LOG_CONVERSATIONS = True
 
 _testing_utils.assert_is_loaded_from_source(
     source_dir=os.path.dirname(os.path.dirname(__file__)),
