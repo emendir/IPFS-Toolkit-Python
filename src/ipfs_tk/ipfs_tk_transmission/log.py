@@ -40,3 +40,9 @@ logger_file = logging.getLogger("IPFS_TK.File")
 logger_file.setLevel(logging.INFO)
 # logger_file.addHandler(file_handler)
 logger_file.addHandler(console_handler)
+
+
+disabled_loggers = ["urllib3.connectionpool"]
+for logger_name in disabled_loggers:
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.WARNING)

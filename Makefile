@@ -91,7 +91,7 @@ docs: ## Build Sphinx documentation
 # 	ls -lh $(DIST_DIR)
 #
 # publish: build ## Upload package to PyPI (requires twine)
-# 	twine upload $(DIST_DIR)/*
+# 	$(PYTHON) -m twine upload $(DIST_DIR)/*
 
 # ----------------------------
 # Help
