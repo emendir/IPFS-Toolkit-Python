@@ -108,15 +108,19 @@ def transmit_data(
                         )
                         return their_trsm_port
                     else:
+                        e = UnreadableReply(response)
                         logger.error(
-                            "Failed to read port from trans-req-response."
+                            "Transmission-Request Response: Failed to read "
+                            f"port. {str(e)}"
                         )
-                        raise UnreadableReply(reply)
+                        raise e
                 except:
+                    e = UnreadableReply(response)
                     logger.error(
-                        "Failed to decode trans-req-response: {reply}"
+                        "Transmission-Request Response: Failed to decode. "
+                        f" {str(e)}"
                     )
-                    raise UnreadableReply(reply)
+                    raise e
             else:
                 logger.debug(
                     "Transmission request send "
@@ -143,8 +147,9 @@ def transmit_data(
         logger.debug("Finished transmission.")
         return True  # signal success
     else:
-        logger.error("Received unrecognised response:" + str(response))
-        raise UnreadableReply(response)
+        e = UnreadableReply(response)
+        logger.error(f"Post-transmission response: str(e)")
+        raise e
     # sock.close()
     # _close_sending_connection(peer_id, their_trsm_port)
 

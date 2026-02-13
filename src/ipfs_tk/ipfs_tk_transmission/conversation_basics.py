@@ -424,7 +424,6 @@ class BaseConversation:
             try:
                 data = self.message_queue.get(timeout=timeout)
             except Exception as e:  # timeout reached
-                logger.error(e)
                 raise ConvListenTimeout("Didn't receive any data.") from None
 
         if data:

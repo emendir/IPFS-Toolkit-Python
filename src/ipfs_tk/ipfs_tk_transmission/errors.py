@@ -25,12 +25,14 @@ class PeerNotFound(Exception):
 
     def __init__(
         self,
+        peer_id: str,
         message: str = "Could not find the specified peer on the IPFS network. Perhaps try again.",
     ):
         self.message = message
+        self.peer_id = peer_id
 
     def __str__(self):
-        return self.message
+        return f"{self.message} {self.peer_id}"
 
 
 class InvalidPeer(Exception):
