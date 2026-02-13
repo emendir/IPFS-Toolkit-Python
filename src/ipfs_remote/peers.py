@@ -9,18 +9,37 @@ class RemotePeers(BasePeers):
         self._node = node
         self._http_client = self._node._http_client
 
-    def list_peers(self, ):
+    def list_peers(
+        self,
+    ):
         """Returns a list of the IPFS multiaddresses of the other nodes
         this node is connected to.
         Returns:
             list(str): a list of the IPFS multiaddresses of the other nodes
             this node is connected to
         """
+        http_resonse = self._http_client.swarm.peers()
+        if not http_resonse:
+            return []
+        http_resonse_peers = http_resonse.get("Peers", None)
+        if not http_resonse_peers:
+            return []
         return [
-            peer['Addr'] + "/" + peer['Peer']
-            for peer in self._http_client.swarm.peers()["Peers"]
+            peer["Addr"] + "/p2p/" + peer["Peer"]
+            for peer in http_resonse_peers
         ]
 
+    def disconnect(self, multiaddrs):
+        """Try to disconnect to peers given their multiaddress.
+        Returns:
+            bool: success
+        """
+        if isinstance(multiaddrs, str):
+            multiaddrs = [multiaddrs]
+        try:
+            response = self._http_client.swarm.disconnect(multiaddrs)
+        except Exception as e:
+            print(e)
 
     def connect(self, multiaddr):
         """Tries to connect to a peer given its multiaddress.
@@ -44,7 +63,11 @@ class RemotePeers(BasePeers):
         """
         try:
             response = self._http_client.routing.findpeer(peer_id)
-            if (response and len(response["Responses"]) > 0 and len(response["Responses"][0]["Addrs"]) > 0):
+            if (
+                response
+                and len(response["Responses"]) > 0
+                and len(response["Responses"][0]["Addrs"]) > 0
+            ):
                 return response["Responses"][0]["Addrs"]
         except:
             return None
@@ -58,7 +81,7 @@ class RemotePeers(BasePeers):
             bool: whether or not the peer is connected
         """
         responses = self._http_client.ping(peer_id, count=ping_count)
-        return responses[-1]['Success']
+        return responses[-1]["Success"]
 
     def add_swarm_filter(self, filter_multiaddr):
         try:
@@ -78,6 +101,8 @@ class RemotePeers(BasePeers):
         if filter_multiaddr in self.get_swarm_filters():
             raise SwarmFiltersUpdateError()
 
-    def get_swarm_filters(self, ):
-        _filters = dict(self._http_client.swarm.filters.list())['Strings']
+    def get_swarm_filters(
+        self,
+    ):
+        _filters = dict(self._http_client.swarm.filters.list())["Strings"]
         return set(_filters) if _filters is not None else set()
