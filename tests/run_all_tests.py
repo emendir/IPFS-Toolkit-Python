@@ -13,7 +13,7 @@ from ipfs_toolkit_docker.build_docker import build_docker
 from time import sleep
 
 if __name__ == "__main__":
-    # build_docker(verbose=False)
+    build_docker(verbose=False)
 
     test_peers.REBUILD_DOCKER = False
     test_with_docker.REBUILD_DOCKER = False
