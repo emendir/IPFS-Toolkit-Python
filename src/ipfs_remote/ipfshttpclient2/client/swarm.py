@@ -154,7 +154,7 @@ class Section(base.SectionBase):
         return self._client.request('/swarm/connect', args, decoder='json', **kwargs)
 
     @base.returns_single_item(base.ResponseBase)
-    def disconnect(self, address: base.multiaddr_t, *addresses: base.multiaddr_t,
+    def disconnect(self, address: list[base.multiaddr_t],
                    **kwargs: base.CommonArgs):
         """Closes any open connection to a given multiaddr
 
@@ -182,7 +182,7 @@ class Section(base.SectionBase):
                 dict
                         Textual connection status report
         """
-        args = (str(address), *(str(a) for a in address))
+        args = address
         return self._client.request('/swarm/disconnect', args, decoder='json', **kwargs)
 
     @base.returns_single_item(base.ResponseBase)
